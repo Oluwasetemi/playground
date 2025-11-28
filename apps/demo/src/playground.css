@@ -1,0 +1,201 @@
+/* CSS Variables */
+.playground {
+  --playground-bg: #ffffff;
+  --playground-surface: #f5f5f5;
+  --playground-border: #e0e0e0;
+  --playground-text: #1a1a1a;
+  --playground-text-muted: #666666;
+
+  --editor-bg: #ffffff;
+  --terminal-bg: #1e1e1e;
+  --terminal-text: #d4d4d4;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--playground-bg);
+  color: var(--playground-text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Editor */
+.playground-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--playground-border);
+  overflow: hidden;
+}
+
+.editor-container {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Preview */
+.playground-preview {
+  flex: 1;
+  border: 1px solid var(--playground-border);
+  position: relative;
+  background: var(--playground-surface);
+  overflow: hidden;
+}
+
+.playground-preview iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--playground-text-muted);
+}
+
+/* Terminal */
+.playground-terminal {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--playground-border);
+  background: var(--terminal-bg);
+  color: var(--terminal-text);
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 13px;
+  height: 100%;
+  min-height: 150px;
+}
+
+.terminal-header {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.terminal-content {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.terminal-content > div {
+  margin-bottom: 4px;
+}
+
+.terminal-output {
+  color: #d4d4d4;
+}
+
+.terminal-error {
+  color: #f48771;
+  font-weight: 500;
+}
+
+.terminal-log {
+  color: #d4d4d4;
+}
+
+.terminal-warn {
+  color: #dcdcaa;
+  font-weight: 500;
+}
+
+.terminal-info {
+  color: #75beff;
+}
+
+/* File Tree */
+.playground-file-tree {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--playground-border);
+  background: var(--playground-surface);
+  overflow: hidden;
+}
+
+.file-tree-header {
+  padding: 8px 12px;
+  background: var(--playground-bg);
+  border-bottom: 1px solid var(--playground-border);
+  font-weight: 600;
+}
+
+.file-tree-content {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.file-node,
+.directory-node summary {
+  padding: 4px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.file-node:hover,
+.directory-node summary:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.directory-children {
+  padding-left: 16px;
+}
+
+.file-icon,
+.folder-icon {
+  font-size: 14px;
+}
+
+/* Toolbar */
+.playground-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--playground-surface);
+  border-bottom: 1px solid var(--playground-border);
+}
+
+.playground-toolbar button {
+  padding: 6px 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.playground-toolbar button:hover {
+  background: #0056b3;
+}
+
+.playground-toolbar button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.status-indicator {
+  font-size: 13px;
+  color: var(--playground-text-muted);
+}
+
+.status-indicator[data-status="ready"] {
+  color: #28a745;
+}
+
+.status-indicator[data-status="error"] {
+  color: #dc3545;
+}

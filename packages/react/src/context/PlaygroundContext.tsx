@@ -1,0 +1,22 @@
+import { createContext, useContext } from 'react';
+import type { PlaygroundEngine, FileNode, PlaygroundStatus } from '@playground/core';
+
+export interface PlaygroundContextValue {
+  engine: PlaygroundEngine | null;
+  status: PlaygroundStatus;
+  files: FileNode[];
+  previewUrl: string | null;
+  updateFile: (path: string, content: string) => Promise<void>;
+  openFile: (path: string) => Promise<void>;
+  saveSnapshot: () => Promise<void>;
+}
+
+export const PlaygroundContext = createContext<PlaygroundContextValue | null>(null);
+
+export function usePlaygroundContext(): PlaygroundContextValue {
+  const context = useContext(PlaygroundContext);
+  if (!context) {
+    throw new Error('usePlaygroundContext must be used within a Playground component');
+  }
+  return context;
+}

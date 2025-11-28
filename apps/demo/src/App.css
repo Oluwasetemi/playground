@@ -1,0 +1,75 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #2c3e50;
+  color: white;
+  border-bottom: 2px solid #34495e;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.template-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.template-selector label {
+  font-weight: 500;
+}
+
+.template-selector select {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #34495e;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+.app-main {
+  flex: 1;
+  overflow: hidden;
+}
+
+.playground-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 1fr 200px;
+  gap: 8px;
+  height: calc(100vh - 120px);
+  padding: 8px;
+}
+
+.sidebar {
+  grid-row: 1 / 3;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.editor-section,
+.preview-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-section {
+  grid-column: 2;
+}
