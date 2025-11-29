@@ -1,4 +1,4 @@
-import type { Template } from './types';
+import type { Template } from './types'
 
 export const vanillaTemplate: Template = {
   id: 'vanilla-js',
@@ -20,7 +20,7 @@ export const vanillaTemplate: Template = {
             },
           },
           null,
-          2
+          2,
         ),
       },
     },
@@ -95,4 +95,4 @@ button:hover {
     dev: 'npm run dev',
   },
   entryFile: '/main.js',
-};
+}

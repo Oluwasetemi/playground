@@ -1,15 +1,15 @@
-import { useEffect, useRef } from 'react';
-import { usePlaygroundContext } from '../context/PlaygroundContext';
+import { useEffect, useRef } from 'react'
+import { usePlaygroundContext } from '../context/PlaygroundContext'
 
 export function PlaygroundPreview() {
-  const { engine, previewUrl, status } = usePlaygroundContext();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { engine, previewUrl, status } = usePlaygroundContext()
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
     if (iframeRef.current && engine && previewUrl) {
-      engine.mountPreview(iframeRef.current);
+      engine.mountPreview(iframeRef.current)
     }
-  }, [engine, previewUrl]);
+  }, [engine, previewUrl])
 
   return (
     <div className="playground-preview">
@@ -22,5 +22,5 @@ export function PlaygroundPreview() {
       )}
       {previewUrl && <iframe ref={iframeRef} title="Preview" />}
     </div>
-  );
+  )
 }

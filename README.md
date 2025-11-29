@@ -31,8 +31,8 @@ pnpm add @playground/react @playground/core @playground/templates
 ### Usage
 
 ```tsx
-import { Playground, PlaygroundEditor, PlaygroundPreview, PlaygroundTerminal } from '@playground/react';
-import { vanillaTemplate } from '@playground/templates';
+import { Playground, PlaygroundEditor, PlaygroundPreview, PlaygroundTerminal } from '@playground/react'
+import { vanillaTemplate } from '@playground/templates'
 
 function App() {
   return (
@@ -43,7 +43,7 @@ function App() {
         <PlaygroundTerminal />
       </div>
     </Playground>
-  );
+  )
 }
 ```
 
@@ -60,7 +60,7 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
   },
-});
+})
 ```
 
 ## Development

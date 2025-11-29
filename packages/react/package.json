@@ -1,17 +1,17 @@
 {
-  "name": "@playground/react",
+  "name": "@setemiojo/playground-react",
+  "type": "module",
   "version": "0.1.0",
   "description": "React components for code playground",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./styles": "./dist/style.css"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -20,12 +20,13 @@
     "build": "tsc && vite build",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@playground/core": "workspace:*"
-  },
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.2.0",
+    "react-dom": "^1.2.0"
+  },
+  "dependencies": {
+    "@nanostores/react": "^1.0.0",
+    "@setemiojo/playground-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.19.25",

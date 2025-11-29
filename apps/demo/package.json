@@ -1,8 +1,8 @@
 {
   "name": "demo",
-  "private": true,
-  "version": "0.1.0",
   "type": "module",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -10,9 +10,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@playground/core": "workspace:*",
-    "@playground/react": "workspace:*",
-    "@playground/templates": "workspace:*",
+    "@setemiojo/playground-core": "workspace:*",
+    "@setemiojo/playground-react": "workspace:*",
+    "@setemiojo/playground-templates": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

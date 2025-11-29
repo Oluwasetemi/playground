@@ -1,5 +1,5 @@
-export { vanillaTemplate } from './vanilla-js';
-export { reactTemplate } from './react';
-export { vueTemplate } from './vue';
-export { nodeTemplate } from './node';
-export type { Template } from './types';
+export { nodeTemplate } from './node'
+export { reactTemplate } from './react'
+export type { Template } from './types'
+export { vanillaTemplate } from './vanilla-js'
+export { vueTemplate } from './vue'

@@ -1,7 +1,7 @@
-import { usePlaygroundContext } from '../context/PlaygroundContext';
+import { usePlaygroundContext } from '../context/PlaygroundContext'
 
 export function PlaygroundToolbar() {
-  const { saveSnapshot, status } = usePlaygroundContext();
+  const { saveSnapshot, status } = usePlaygroundContext()
 
   return (
     <div className="playground-toolbar">
@@ -15,5 +15,5 @@ export function PlaygroundToolbar() {
         {status === 'error' && '❌ Error'}
       </div>
     </div>
-  );
+  )
 }

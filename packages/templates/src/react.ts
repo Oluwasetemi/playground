@@ -1,4 +1,4 @@
-import type { Template } from './types';
+import type { Template } from './types'
 
 export const reactTemplate: Template = {
   id: 'react',
@@ -16,18 +16,18 @@ export const reactTemplate: Template = {
               build: 'vite build',
             },
             dependencies: {
-              react: '^18.2.0',
-              'react-dom': '^18.2.0',
+              'react': '^19.2.0',
+              'react-dom': '^19.2.0',
             },
             devDependencies: {
-              '@types/react': '^18.2.0',
-              '@types/react-dom': '^18.2.0',
+              '@types/react': '^19.2.7',
+              '@types/react-dom': '^19.2.3',
               '@vitejs/plugin-react': '^5.0.0',
-              vite: '^7.0.0',
+              'vite': '^7.0.0',
             },
           },
           null,
-          2
+          2,
         ),
       },
     },
@@ -57,7 +57,7 @@ export default defineConfig({
 </html>`,
       },
     },
-    src: {
+    'src': {
       directory: {
         'main.jsx': {
           file: {
@@ -143,13 +143,13 @@ button:hover {
     },
   },
   dependencies: {
-    react: '^18.2.0',
+    'react': '^18.2.0',
     'react-dom': '^18.2.0',
     '@vitejs/plugin-react': '^5.0.0',
-    vite: '^7.0.0',
+    'vite': '^7.0.0',
   },
   commands: {
     dev: 'npm run dev',
   },
   entryFile: '/src/App.jsx',
-};
+}

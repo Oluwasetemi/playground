@@ -1,4 +1,4 @@
-import type { Template } from './types';
+import type { Template } from './types'
 
 export const nodeTemplate: Template = {
   id: 'node',
@@ -24,4 +24,4 @@ export const nodeTemplate: Template = {
   dependencies: { express: '^4.18.2' },
   commands: { dev: 'npm run dev' },
   entryFile: '/server.js',
-};
+}

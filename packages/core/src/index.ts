@@ -1,13 +1,21 @@
-export { PlaygroundEngine } from './engine/PlaygroundEngine';
-export { EventEmitter } from './engine/EventEmitter';
-
+export { EventEmitter } from './engine/EventEmitter'
+export { PlaygroundEngine } from './engine/PlaygroundEngine'
 export type {
-  Template,
-  PlaygroundOptions,
-  FileNode,
   ConsoleMessage,
-  ProcessOutput,
+  FileNode,
+  PlaygroundEvents,
+  PlaygroundOptions,
   PlaygroundSnapshot,
   PlaygroundStatus,
-  PlaygroundEvents,
-} from './engine/types';
+  ProcessOutput,
+  Template,
+} from './engine/types'
+
+export * from './state/actions'
+
+// State management (Nanostores)
+export * from './state/stores'
+export { TemplateManager } from './template/TemplateManager'
+
+export type { FileDiff } from './template/TemplateManager'
+export type { WebContainerAuthConfig } from './webcontainer/WebContainerManager'

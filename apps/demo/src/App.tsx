@@ -1,26 +1,27 @@
-import { useState } from 'react';
+import type { Template } from '@setemiojo/playground-templates'
 import {
   Playground,
   PlaygroundEditor,
+  PlaygroundFileTree,
   PlaygroundPreview,
   PlaygroundTerminal,
-  PlaygroundFileTree,
   PlaygroundToolbar,
-} from '@playground/react';
-import { vanillaTemplate, reactTemplate, vueTemplate, nodeTemplate, type Template } from '@playground/templates';
-import './playground.css';
-import './App.css';
+} from '@setemiojo/playground-react'
+import { nodeTemplate, reactTemplate, vanillaTemplate, vueTemplate } from '@setemiojo/playground-templates'
+import { useState } from 'react'
+import './playground.css'
+import './App.css'
 
 const templates: Record<string, Template> = {
   vanilla: vanillaTemplate,
   react: reactTemplate,
   vue: vueTemplate,
   node: nodeTemplate,
-};
+}
 
 export default function App() {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('vanilla');
-  const template = templates[selectedTemplate];
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('vanilla')
+  const template = templates[selectedTemplate]
 
   return (
     <div className="app">
@@ -28,7 +29,7 @@ export default function App() {
         <h1>Code Playground Demo</h1>
         <div className="template-selector">
           <label>Template: </label>
-          <select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
+          <select value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
             <option value="vanilla">Vanilla JS</option>
             <option value="react">React</option>
             <option value="vue">Vue</option>
@@ -59,5 +60,5 @@ export default function App() {
         </Playground>
       </main>
     </div>
-  );
+  )
 }

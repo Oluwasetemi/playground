@@ -1,24 +1,24 @@
-import { useEffect, useRef } from 'react';
-import { usePlaygroundContext } from '../context/PlaygroundContext';
+import { useEffect, useRef } from 'react'
+import { usePlaygroundContext } from '../context/PlaygroundContext'
 
 export function PlaygroundEditor() {
-  const { engine, status } = usePlaygroundContext();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mountedRef = useRef(false);
+  const { engine, status } = usePlaygroundContext()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mountedRef = useRef(false)
 
   useEffect(() => {
-    mountedRef.current = false;
-  }, [engine]);
+    mountedRef.current = false
+  }, [engine])
 
   useEffect(() => {
     if (containerRef.current && engine && status === 'ready' && !mountedRef.current) {
-      mountedRef.current = true;
+      mountedRef.current = true
       engine.mountEditor(containerRef.current).catch((error) => {
-        console.error('Failed to mount editor:', error);
-        mountedRef.current = false;
-      });
+        console.error('Failed to mount editor:', error)
+        mountedRef.current = false
+      })
     }
-  }, [engine, status]);
+  }, [engine, status])
 
   return (
     <div className="playground-editor">
@@ -26,5 +26,5 @@ export function PlaygroundEditor() {
       {status === 'installing' && <div className="loading">Installing dependencies...</div>}
       <div ref={containerRef} className="editor-container" />
     </div>
-  );
+  )
 }

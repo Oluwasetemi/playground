@@ -1,4 +1,4 @@
-import type { Template } from './types';
+import type { Template } from './types'
 
 export const vueTemplate: Template = {
   id: 'vue',
@@ -12,7 +12,7 @@ export const vueTemplate: Template = {
           type: 'module',
           scripts: { dev: 'vite', build: 'vite build' },
           dependencies: { vue: '^3.3.0' },
-          devDependencies: { '@vitejs/plugin-vue': '^4.4.0', vite: '^5.0.0' },
+          devDependencies: { '@vitejs/plugin-vue': '^4.4.0', 'vite': '^5.0.0' },
         }, null, 2),
       },
     },
@@ -26,7 +26,7 @@ export const vueTemplate: Template = {
         contents: `<!DOCTYPE html>\n<html>\n<head><title>Vue Playground</title></head>\n<body>\n<div id="app"></div>\n<script type="module" src="/src/main.js"></script>\n</body>\n</html>`,
       },
     },
-    src: {
+    'src': {
       directory: {
         'main.js': {
           file: {
@@ -41,7 +41,7 @@ export const vueTemplate: Template = {
       },
     },
   },
-  dependencies: { vue: '^3.3.0', '@vitejs/plugin-vue': '^4.4.0', vite: '^5.0.0' },
+  dependencies: { 'vue': '^3.3.0', '@vitejs/plugin-vue': '^4.4.0', 'vite': '^5.0.0' },
   commands: { dev: 'npm run dev' },
   entryFile: '/src/App.vue',
-};
+}
