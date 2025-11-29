@@ -41,7 +41,9 @@ export const vueTemplate: Template = {
       },
     },
   },
-  dependencies: { 'vue': '^3.3.0', '@vitejs/plugin-vue': '^4.4.0', 'vite': '^5.0.0' },
+  // eslint-disable-next-line style/quote-props
+  dependencies: { 'vue': '^3.3.0' },
+  devDependencies: { '@vitejs/plugin-vue': '^4.4.0', 'vite': '^7.0.0' },
   commands: { dev: 'npm run dev' },
   entryFile: '/src/App.vue',
 }

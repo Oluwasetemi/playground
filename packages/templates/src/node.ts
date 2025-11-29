@@ -22,6 +22,7 @@ export const nodeTemplate: Template = {
     },
   },
   dependencies: { express: '^4.18.2' },
+  devDependencies: {},
   commands: { dev: 'npm run dev' },
   entryFile: '/server.js',
 }

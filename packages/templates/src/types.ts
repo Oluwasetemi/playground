@@ -4,6 +4,7 @@ export interface Template {
   description: string
   files: any // Using any to avoid type conflicts with @webcontainer/api
   dependencies: Record<string, string>
+  devDependencies: Record<string, string>
   commands: {
     dev: string
     build?: string

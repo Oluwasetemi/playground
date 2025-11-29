@@ -143,8 +143,12 @@ button:hover {
     },
   },
   dependencies: {
-    'react': '^18.2.0',
-    'react-dom': '^18.2.0',
+    'react': '^19.2.0',
+    'react-dom': '^19.2.0',
+  },
+  devDependencies: {
+    '@types/react': '^19.2.7',
+    '@types/react-dom': '^19.2.3',
     '@vitejs/plugin-react': '^5.0.0',
     'vite': '^7.0.0',
   },
