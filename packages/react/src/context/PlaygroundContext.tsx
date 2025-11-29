@@ -1,4 +1,4 @@
-import type { FileNode, PlaygroundEngine, PlaygroundStatus } from '@playground/core'
+import type { FileNode, PlaygroundEngine, PlaygroundStatus } from '@setemiojo/playground-core'
 import { createContext, useContext } from 'react'
 
 export interface PlaygroundContextValue {

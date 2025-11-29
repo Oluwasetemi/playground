@@ -23,7 +23,7 @@ function FileTreeNode({ node, onFileClick }: FileTreeNodeProps) {
         <span className="folder-name">{node.name}</span>
       </summary>
       <div className="directory-children">
-        {node.children?.map(child => (
+        {node.children?.map((child: FileNode) => (
           <FileTreeNode key={child.path} node={child} onFileClick={onFileClick} />
         ))}
       </div>

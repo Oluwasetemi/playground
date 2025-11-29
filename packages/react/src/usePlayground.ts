@@ -1,4 +1,4 @@
-import type { PlaygroundOptions, Template } from '@playground/core'
+import type { PlaygroundOptions, Template } from '@setemiojo/playground-core'
 import { useStore } from '@nanostores/react'
 import {
   $files,
@@ -6,7 +6,7 @@ import {
   $previewUrl,
   PlaygroundEngine,
 
-} from '@playground/core'
+} from '@setemiojo/playground-core'
 import { useCallback, useEffect, useRef } from 'react'
 
 export function usePlayground(template: Template, options?: PlaygroundOptions) {
