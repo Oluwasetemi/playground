@@ -5,7 +5,6 @@ import {
   $playgroundStatus,
   $previewUrl,
   PlaygroundEngine,
-
 } from '@setemiojo/playground-core'
 import { useCallback, useEffect, useRef } from 'react'
 
@@ -37,7 +36,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
         .then(() => {
           initializingRef.current = false
         })
-        .catch((error) => {
+        .catch((error: Error) => {
           console.error('Failed to initialize playground:', error)
           initializingRef.current = false
         })
@@ -53,7 +52,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
 
         // CRITICAL: Save snapshot BEFORE cleanup to prevent data loss
         engine.saveSnapshot()
-          .catch((err) => {
+          .catch((err: Error) => {
             console.warn('Failed to save snapshot on cleanup:', err)
           })
           .finally(() => {
@@ -68,7 +67,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     if (previousTemplateId.current !== template.id) {
       console.warn(`Template change detected: ${previousTemplateId.current} -> ${template.id}`)
 
-      engineRef.current.switchTemplate(template).catch((error) => {
+      engineRef.current.switchTemplate(template).catch((error: Error) => {
         console.error('Failed to switch template:', error)
         // Fallback to full re-initialization
         engineRef.current?.cleanup()

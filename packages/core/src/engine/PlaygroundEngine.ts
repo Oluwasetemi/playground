@@ -145,8 +145,10 @@ export class PlaygroundEngine {
     try {
       this.setStatus('initializing')
 
-      // Step 1: Save current state
-      await this.saveSnapshot()
+      // Step 1: Kill dev server BEFORE making filesystem changes
+      // This prevents Vite from trying to reload config files before deps are installed
+      console.warn('Stopping current dev server...')
+      await this.webcontainerManager.killAll()
 
       // Step 2: Compute file diff
       const diff = await this.templateManager.computeDiff(newTemplate)
@@ -185,10 +187,8 @@ export class PlaygroundEngine {
         console.warn('Dependencies unchanged, skipping npm install')
       }
 
-      // Step 5: Always restart dev server when switching templates
-      // Even if command is the same, files have changed
-      console.warn('Restarting dev server for new template...')
-      await this.webcontainerManager.killAll()
+      // Step 5: Start dev server for new template
+      console.warn('Starting dev server for new template...')
       if (this.preview) {
         await this.preview.start(newTemplate.commands.dev)
       }
@@ -199,12 +199,20 @@ export class PlaygroundEngine {
       this.persistence = new PersistenceManager(newTemplate.id)
       this.templateManager.updateCurrentState(newTemplate)
 
-      // Step 7: Restore snapshot (don't auto-open files - editor may not be mounted)
-      await this.loadSnapshot().catch(() => false)
+      // Step 7: Clear localStorage snapshot for the new template
+      // We don't want to restore snapshots from previous sessions when switching templates
+      // The user should see the clean template, not mixed files from different templates
+      this.persistence.clearSnapshot()
 
-      // Step 8: Update file tree
-      const fileTree = await this.filesystemManager.getFileTree()
+      // Step 8: Build initial file tree
+      let fileTree = await this.filesystemManager.getFileTree()
+
+      // Step 9: Validate and clean - ensure no old template files leaked through
+      fileTree = await this.validateAndCleanFileTree(newTemplate, fileTree)
+
+      // Step 10: Emit validated file tree
       this.events.emit('files:update', fileTree)
+      playgroundActions.setFiles(fileTree)
 
       this.setStatus('ready')
 
@@ -227,7 +235,8 @@ export class PlaygroundEngine {
       throw new Error('Filesystem not initialized')
     }
 
-    await this.filesystemManager.writeFile(path, content)
+    // Use silent: true to prevent circular file:change events
+    await this.filesystemManager.writeFile(path, content, { silent: true })
   }
 
   async openFile(path: string): Promise<void> {
@@ -265,7 +274,8 @@ export class PlaygroundEngine {
 
   mountPreview(iframe: HTMLIFrameElement): void {
     if (!this.preview) {
-      throw new Error('Preview not initialized')
+      console.warn('Preview not initialized yet, skipping mount')
+      return
     }
 
     this.preview.mountIframe(iframe)
@@ -404,17 +414,18 @@ export class PlaygroundEngine {
   }
 
   private async installDependencies(): Promise<void> {
-    if (!this.currentTemplate || Object.keys(this.currentTemplate.dependencies).length === 0) {
+    if (!this.currentTemplate || (Object.keys(this.currentTemplate.dependencies).length === 0 && Object.keys(this.currentTemplate.devDependencies).length === 0)) {
       console.warn('No dependencies to install')
       return
     }
 
-    // Compute hash of current template dependencies
+    // Compute hash of current template dependencies (BOTH deps and devDeps)
     const depsHash = JSON.stringify(this.currentTemplate.dependencies)
     const devDepsHash = JSON.stringify(this.currentTemplate.devDependencies)
+    const combinedHash = depsHash + devDepsHash
 
     // Check if dependencies match what's already installed
-    if (this.installedDependenciesHash === depsHash) {
+    if (this.installedDependenciesHash === combinedHash) {
       console.warn('Dependencies unchanged from previous install, skipping npm install')
       return
     }
@@ -446,35 +457,15 @@ export class PlaygroundEngine {
           ...(templatePackageJson.dependencies || {}),
           ...this.currentTemplate.dependencies,
         },
-        devDependencies: templatePackageJson.devDependencies || {},
+        devDependencies: {
+          ...(templatePackageJson.devDependencies || {}),
+          ...this.currentTemplate.devDependencies,
+        },
       }
 
-      // Only rewrite if we actually modified it or if scripts exist
-      if (Object.keys(packageJson.scripts).length > 0 || Object.keys(this.currentTemplate.dependencies).length > 0) {
-        await webcontainer.fs.writeFile('/package.json', JSON.stringify(packageJson, null, 2))
-        console.warn('Updated package.json with merged dependencies:', packageJson)
-      }
-
-      // Check if node_modules exists and package.json matches
-      try {
-        await webcontainer.fs.readdir('/node_modules')
-
-        const existingDepsHash = JSON.stringify(packageJson.dependencies || {})
-        const existingDevDepsHash = JSON.stringify(packageJson.devDependencies || {})
-
-        if (existingDepsHash === depsHash && existingDevDepsHash === devDepsHash) {
-          console.warn('node_modules exists with correct dependencies, skipping npm install')
-          this.installedDependenciesHash = depsHash
-          return
-        }
-        else {
-          console.warn('Dependencies changed, will reinstall')
-        }
-      }
-      catch {
-        // node_modules doesn't exist, proceed with install
-        console.warn('node_modules not found or invalid, will install')
-      }
+      // Always write package.json before npm install
+      await webcontainer.fs.writeFile('/package.json', JSON.stringify(packageJson, null, 2))
+      console.warn('Updated package.json with merged dependencies:', packageJson)
 
       console.warn('Installing dependencies...', this.currentTemplate.dependencies)
       // eslint-disable-next-line no-console
@@ -518,7 +509,7 @@ export class PlaygroundEngine {
       }
 
       // Cache successful installation
-      this.installedDependenciesHash = depsHash
+      this.installedDependenciesHash = combinedHash
       console.warn('Dependencies installed successfully')
     }
     catch (error) {
@@ -564,5 +555,66 @@ export class PlaygroundEngine {
       },
       this.options.autoSaveInterval,
     )
+  }
+
+  /**
+   * Flatten file tree to array of paths
+   * Used for validation after template switching
+   */
+  private flattenFileTreePaths(nodes: FileNode[]): string[] {
+    const paths: string[] = []
+
+    const traverse = (nodeList: FileNode[]) => {
+      for (const node of nodeList) {
+        paths.push(node.path)
+        if (node.type === 'directory' && node.children) {
+          traverse(node.children)
+        }
+      }
+    }
+
+    traverse(nodes)
+    return paths
+  }
+
+  /**
+   * Validate file tree matches template and clean up unexpected files
+   */
+  private async validateAndCleanFileTree(
+    template: Template,
+    fileTree: FileNode[],
+  ): Promise<FileNode[]> {
+    const expectedPaths = this.templateManager!.getExpectedPaths(template)
+    const actualPaths = this.flattenFileTreePaths(fileTree)
+
+    // Find files that shouldn't exist
+    const unexpectedFiles = actualPaths.filter(path =>
+      !expectedPaths.has(path)
+      && path !== '/package.json'
+      && path !== '/package-lock.json'
+      && !path.startsWith('/node_modules'),
+    )
+
+    if (unexpectedFiles.length > 0) {
+      console.warn('⚠️  Found unexpected files from old template, cleaning:', unexpectedFiles)
+
+      // Remove unexpected files
+      for (const path of unexpectedFiles) {
+        try {
+          await this.filesystemManager!.removeFile(path)
+          console.warn(`✓ Removed unexpected file: ${path}`)
+        }
+        catch (error) {
+          console.warn(`Failed to remove ${path}:`, error)
+        }
+      }
+
+      // Rebuild tree after cleanup
+      const cleanTree = await this.filesystemManager!.getFileTree()
+      console.warn('✅ File tree cleaned and rebuilt')
+      return cleanTree
+    }
+
+    return fileTree
   }
 }

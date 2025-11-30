@@ -3,7 +3,7 @@ import type { Template } from './types'
 export const reactTemplate: Template = {
   id: 'react',
   name: 'React',
-  description: 'React 18 with Vite',
+  description: 'React 19 with Vite',
   files: {
     'package.json': {
       file: {

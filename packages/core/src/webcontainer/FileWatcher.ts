@@ -11,7 +11,8 @@ export class FileWatcher {
   private events: EventEmitter<PlaygroundEvents>
   private watchedPaths: Set<string> = new Set()
   private debounceMs: number
-  private debouncedEmit: (path: string, content: string) => void
+
+  private debouncers: Map<string, (content: string) => void> = new Map()
 
   constructor(
     _webcontainer: WebContainer,
@@ -20,33 +21,16 @@ export class FileWatcher {
   ) {
     this.events = events
     this.debounceMs = debounceMs
-
-    // Create debounced emit function
-    this.debouncedEmit = debounce((path: string, content: string) => {
-      this.events.emit('file:change', path, content)
-    }, this.debounceMs)
   }
 
   /**
    * Watch a file or directory for changes
    */
   async watch(path: string): Promise<void> {
-    if (this.watchedPaths.has(path)) {
+    if (this.watchedPaths.has(path))
       return
-    }
 
     this.watchedPaths.add(path)
-
-    try {
-      // Set up file watcher using WebContainer's file system events
-      // Note: WebContainer doesn't have built-in file watching,
-      // so we'll rely on manual change detection through writeFile
-      console.warn(`Watching file: ${path}`)
-    }
-    catch (error) {
-      console.error(`Failed to watch ${path}:`, error)
-      this.watchedPaths.delete(path)
-    }
   }
 
   /**
@@ -55,6 +39,7 @@ export class FileWatcher {
   unwatch(path: string): void {
     this.watchedPaths.delete(path)
     console.warn(`Stopped watching: ${path}`)
+    this.debouncers.delete(path)
   }
 
   /**
@@ -63,16 +48,33 @@ export class FileWatcher {
    */
   notifyChange(path: string, content: string): void {
     if (this.watchedPaths.has(path) || this.isInWatchedDirectory(path)) {
-      this.debouncedEmit(path, content)
+      this.getDebouncer(path)(content)
     }
+  }
+
+  /**
+   * Retrieves or create a debounced emitter specific to this file path
+   */
+  private getDebouncer(path: string): (content: string) => void {
+    if (!this.debouncers.has(path)) {
+      const debouncedFn = debounce((fileContent: string) => {
+        this.events.emit('file:change', path, fileContent)
+      }, this.debounceMs)
+
+      this.debouncers.set(path, debouncedFn)
+    }
+    return this.debouncers.get(path)!
   }
 
   /**
    * Check if a path is within any watched directory
    */
   private isInWatchedDirectory(path: string): boolean {
+    if (this.watchedPaths.size === 0)
+      return false
+
     for (const watchedPath of this.watchedPaths) {
-      if (path.startsWith(`${watchedPath}/`)) {
+      if (path.startsWith(`${watchedPath}/`) || watchedPath === '/') {
         return true
       }
     }
@@ -91,6 +93,7 @@ export class FileWatcher {
    */
   clearAll(): void {
     this.watchedPaths.clear()
+    this.debouncers.clear()
   }
 
   /**

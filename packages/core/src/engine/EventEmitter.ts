@@ -1,6 +1,8 @@
-type EventHandler<T = any> = (data: T) => void
+import type { PlaygroundEvents } from './types'
 
-export class EventEmitter<Events extends Record<string, EventHandler>> {
+type EventHandler = (...args: any[]) => void
+
+export class EventEmitter<Events extends PlaygroundEvents> {
   private listeners: Map<keyof Events, Set<EventHandler>> = new Map()
 
   on<K extends keyof Events>(event: K, handler: Events[K]): () => void {
@@ -24,13 +26,13 @@ export class EventEmitter<Events extends Record<string, EventHandler>> {
 
   emit<K extends keyof Events>(
     event: K,
-    ...args: any[]
+    ...args: Parameters<Events[K]>
   ): void {
     const handlers = this.listeners.get(event)
     if (handlers) {
       handlers.forEach((handler) => {
         try {
-          (handler as any)(...args)
+          handler(...args)
         }
         catch (error) {
           console.error(`Error in event handler for "${String(event)}":`, error)

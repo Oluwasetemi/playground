@@ -41,6 +41,8 @@ export interface ConsoleMessage {
 }
 
 export interface ProcessOutput {
+  processId: string
+  command: string
   type: 'stdout' | 'stderr'
   data: string
   timestamp: number
@@ -55,7 +57,11 @@ export interface PlaygroundSnapshot {
   templateId: string
 }
 
-export type PlaygroundStatus = 'initializing' | 'installing' | 'ready' | 'error'
+export type PlaygroundStatus
+  = | 'initializing'
+    | 'installing'
+    | 'ready'
+    | 'error'
 
 export interface PlaygroundEvents {
   'status:change': (status: PlaygroundStatus) => void

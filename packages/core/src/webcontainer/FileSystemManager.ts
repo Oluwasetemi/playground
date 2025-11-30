@@ -9,6 +9,7 @@ export class FileSystemManager {
   private events: EventEmitter<PlaygroundEvents>
   private fileCache: Map<string, { content: string, mtime: number }> = new Map()
   private fileWatcher: FileWatcher
+  private isInternalWrite = false
 
   constructor(webcontainer: WebContainer, events: EventEmitter<PlaygroundEvents>) {
     this.webcontainer = webcontainer
@@ -59,7 +60,7 @@ export class FileSystemManager {
     }
   }
 
-  async writeFile(path: string, content: string): Promise<void> {
+  async writeFile(path: string, content: string, options?: { silent?: boolean }): Promise<void> {
     try {
       const normalizedPath = this.normalizePath(path)
 
@@ -67,16 +68,31 @@ export class FileSystemManager {
         throw new Error(`Cannot write to directory: ${path}`)
       }
 
+      // Set flag to prevent circular event loop
+      const wasSilent = this.isInternalWrite
+      this.isInternalWrite = options?.silent ?? false
+
       await this.webcontainer.fs.writeFile(normalizedPath, content)
 
       this.fileCache.delete(normalizedPath)
 
-      // Use file watcher to emit debounced change event
-      this.fileWatcher.notifyChange(normalizedPath, content)
+      // Only notify file watcher if this is NOT a silent internal write
+      if (!this.isInternalWrite) {
+        this.fileWatcher.notifyChange(normalizedPath, content)
+      }
+
+      // Restore previous state
+      this.isInternalWrite = wasSilent
     }
     catch (error) {
+      this.isInternalWrite = false // Reset on error
       throw new Error(`Failed to write file ${path}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
+  }
+
+  async removeFile(path: string): Promise<void> {
+    await this.webcontainer.fs.rm(path)
+    // TODO: emit a file:delete event if necessary
   }
 
   /**

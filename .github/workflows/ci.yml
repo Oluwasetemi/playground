@@ -33,15 +33,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
+        with:
+          version: 10.24.0
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'pnpm'
 
       - name: Setup
         run: npm i -g @antfu/ni
 
       - name: Install
         run: nci
+
+      - name: Build
+        run: nr build
 
       - name: Typecheck
         run: nr typecheck

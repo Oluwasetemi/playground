@@ -4,10 +4,23 @@ import { usePlaygroundContext } from '../context/PlaygroundContext'
 export function PlaygroundPreview() {
   const { engine, previewUrl, status } = usePlaygroundContext()
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const lastUrlRef = useRef<string | null>(null)
+  const lastEngineRef = useRef<typeof engine>(null)
 
   useEffect(() => {
-    if (iframeRef.current && engine && previewUrl) {
+    // Only mount when:
+    // 1. iframe exists
+    // 2. engine exists and is different from last engine (template switch)
+    // 3. previewUrl exists and is different from last URL
+    const shouldMount = iframeRef.current
+      && engine
+      && previewUrl
+      && (previewUrl !== lastUrlRef.current || engine !== lastEngineRef.current)
+
+    if (shouldMount && iframeRef.current) {
       engine.mountPreview(iframeRef.current)
+      lastUrlRef.current = previewUrl
+      lastEngineRef.current = engine
     }
   }, [engine, previewUrl])
 
@@ -20,7 +33,11 @@ export function PlaygroundPreview() {
           {status === 'error' && 'Error loading preview'}
         </div>
       )}
-      {previewUrl && <iframe ref={iframeRef} title="Preview" />}
+      <iframe
+        ref={iframeRef}
+        title="Preview"
+        style={{ display: previewUrl ? 'block' : 'none' }}
+      />
     </div>
   )
 }

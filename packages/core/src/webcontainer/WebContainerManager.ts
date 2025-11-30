@@ -12,6 +12,7 @@ export class WebContainerManager {
   private static instance: WebContainer | null = null
   private static bootPromise: Promise<WebContainer> | null = null
   private static authInitiated = false
+
   private events: EventEmitter<PlaygroundEvents>
   private processes: Map<string, WebContainerProcess> = new Map()
 
@@ -84,26 +85,26 @@ export class WebContainerManager {
     const processId = `${command}-${Date.now()}`
     this.processes.set(processId, process)
 
+    const emitOutput = (type: 'stdout' | 'stderr', data: string) => {
+      this.events.emit('process:output', {
+        processId,
+        command,
+        type,
+        data,
+        timestamp: Date.now()
+      })
+    }
+
     process.output.pipeTo(
       new WritableStream({
-        write: (data) => {
-          this.events.emit('process:output', {
-            type: 'stdout',
-            data,
-            timestamp: Date.now(),
-          })
-        },
+        write: data => emitOutput('stdout', data)
       }),
     )
 
     process.exit.then((code) => {
       this.processes.delete(processId)
       if (code !== 0) {
-        this.events.emit('process:output', {
-          type: 'stderr',
-          data: `Process exited with code ${code}`,
-          timestamp: Date.now(),
-        })
+        emitOutput('stderr', `Process "${command}" exited with code ${code}`)
       }
     })
 
@@ -118,11 +119,14 @@ export class WebContainerManager {
     this.processes.clear()
   }
 
-  onServerReady(callback: (port: number, url: string) => void): void {
+  onServerReady(callback: (port: number, url: string) => void): () => void {
     const instance = WebContainerManager.instance
     if (instance) {
-      instance.on('server-ready', callback)
+      const unsubscribe = instance.on('server-ready', callback)
+
+      return unsubscribe
     }
+    return () => { }
   }
 
   async teardown(): Promise<void> {

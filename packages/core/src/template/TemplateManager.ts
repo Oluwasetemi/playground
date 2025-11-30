@@ -61,11 +61,15 @@ export class TemplateManager {
       try {
         await this.webcontainer.fs.rm(path, { force: true })
         this.currentFiles.delete(path)
+        console.warn(`✓ Removed: ${path}`)
       }
       catch (error) {
         console.warn(`Failed to remove ${path}:`, error)
       }
     }
+
+    // Step 1.5: Clean up empty directories
+    await this.cleanupEmptyDirectories()
 
     // Step 2: Add/update files
     const filesToWrite = [...diff.added, ...diff.modified]
@@ -81,6 +85,7 @@ export class TemplateManager {
 
           await this.webcontainer.fs.writeFile(path, content)
           this.currentFiles.set(path, content)
+          console.warn(`✓ ${diff.added.includes(path) ? 'Added' : 'Modified'}: ${path}`)
         }
         catch (error) {
           console.warn(`Failed to write ${path}:`, error)
@@ -93,9 +98,68 @@ export class TemplateManager {
    * Check if dependencies changed between templates
    */
   dependenciesChanged(current: Template, target: Template): boolean {
-    const currentDeps = JSON.stringify(current.dependencies)
-    const targetDeps = JSON.stringify(target.dependencies)
+    const currentDeps = JSON.stringify(current.dependencies) + JSON.stringify(current.devDependencies)
+    const targetDeps = JSON.stringify(target.dependencies) + JSON.stringify(target.devDependencies)
     return currentDeps !== targetDeps
+  }
+
+  /**
+   * Clean up empty directories after file removal
+   * Recursively scans the filesystem and removes any empty directories
+   */
+  private async cleanupEmptyDirectories(): Promise<void> {
+    try {
+      await this.removeEmptyDirsRecursive('/')
+    }
+    catch (error) {
+      console.warn('Failed to cleanup empty directories:', error)
+    }
+  }
+
+  /**
+   * Recursively remove empty directories
+   */
+  private async removeEmptyDirsRecursive(dirPath: string): Promise<boolean> {
+    try {
+      const entries = await this.webcontainer.fs.readdir(dirPath, { withFileTypes: true })
+
+      // Skip node_modules and hidden directories
+      const filteredEntries = entries.filter(
+        entry => entry.name !== 'node_modules' && !entry.name.startsWith('.'),
+      )
+
+      if (filteredEntries.length === 0 && dirPath !== '/') {
+        // Directory is empty, remove it
+        await this.webcontainer.fs.rm(dirPath, { recursive: true, force: true })
+        console.warn(`✓ Removed empty directory: ${dirPath}`)
+        return true
+      }
+
+      // Recursively check subdirectories
+      for (const entry of filteredEntries) {
+        if (entry.isDirectory()) {
+          const subDir = dirPath === '/' ? `/${entry.name}` : `${dirPath}/${entry.name}`
+          await this.removeEmptyDirsRecursive(subDir)
+        }
+      }
+
+      // Check again after recursion - directory might now be empty
+      const entriesAfter = await this.webcontainer.fs.readdir(dirPath, { withFileTypes: true })
+      const filteredAfter = entriesAfter.filter(
+        entry => entry.name !== 'node_modules' && !entry.name.startsWith('.'),
+      )
+
+      if (filteredAfter.length === 0 && dirPath !== '/') {
+        await this.webcontainer.fs.rm(dirPath, { recursive: true, force: true })
+        console.warn(`✓ Removed empty directory: ${dirPath}`)
+        return true
+      }
+
+      return false
+    }
+    catch {
+      return false
+    }
   }
 
   /**
@@ -136,5 +200,14 @@ export class TemplateManager {
    */
   getCurrentFileCount(): number {
     return this.currentFiles.size
+  }
+
+  /**
+   * Get set of expected file paths for a template
+   * Used for validation after template switching
+   */
+  getExpectedPaths(template: Template): Set<string> {
+    const files = this.flattenFileTree(template.files)
+    return new Set(files.keys())
   }
 }
