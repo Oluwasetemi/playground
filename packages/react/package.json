@@ -3,6 +3,16 @@
   "type": "module",
   "version": "0.1.0",
   "description": "React components for code playground",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oluwasetemi/playground",
+    "directory": "packages/react"
+  },
+  "author": "Oluwasetemi Ojo",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

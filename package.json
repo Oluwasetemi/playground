@@ -16,10 +16,12 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "clean": "turbo run clean && rm -rf node_modules",
-    "prepublishOnly": "pnpm run build",
-    "release": "bumpp"
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
     "@setemiojo/eslint-config": "^6.2.0",
     "@types/node": "^20.19.25",
     "bumpp": "^10.3.2",
