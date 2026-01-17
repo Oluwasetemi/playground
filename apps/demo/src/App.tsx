@@ -1,45 +1,54 @@
-import type { Template } from '@setemiojo/playground-templates'
+import type { Template } from "@setemiojo/playground-templates";
 import {
   Playground,
   PlaygroundEditor,
   PlaygroundFileTree,
   PlaygroundHeader,
   PlaygroundPanel,
-} from '@setemiojo/playground-react'
-import { nodeTemplate, reactTemplate, vanillaTemplate, vueTemplate } from '@setemiojo/playground-templates'
-import { useState } from 'react'
-import './playground.css'
-import './App.css'
+} from "@setemiojo/playground-react";
+import {
+  nodeTemplate,
+  reactTemplate,
+  vanillaTemplate,
+  vueTemplate,
+} from "@setemiojo/playground-templates";
+import { useState } from "react";
+import "./playground.css";
+import "./App.css";
 
 const templates: Record<string, Template> = {
   vanilla: vanillaTemplate,
   react: reactTemplate,
   vue: vueTemplate,
   node: nodeTemplate,
-}
+};
 
 export default function App() {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
-  const [showSidebar, setShowSidebar] = useState(false)
-  const template = templates[selectedTemplate]
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("react");
+  const [showSidebar, setShowSidebar] = useState(false);
+  const template = templates[selectedTemplate];
 
   const getTitle = () => {
     switch (selectedTemplate) {
-      case 'react':
-        return 'React Playground'
-      case 'vue':
-        return 'Vue Playground'
-      case 'node':
-        return 'Node.js Playground'
+      case "react":
+        return "React Playground";
+      case "vue":
+        return "Vue Playground";
+      case "node":
+        return "Node.js Playground";
       default:
-        return 'JavaScript Playground'
+        return "JavaScript Playground";
     }
-  }
+  };
 
   return (
     <div className="app">
       <div className="template-bar">
-        <select disabled value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
+        <select
+          disabled
+          value={selectedTemplate}
+          onChange={(e) => setSelectedTemplate(e.target.value)}
+        >
           <option value="vanilla">Vanilla JS</option>
           <option value="react">React</option>
           <option value="vue">Vue</option>
@@ -48,7 +57,16 @@ export default function App() {
       </div>
 
       <main className="app-main">
-        <Playground key={selectedTemplate} template={template} options={{ autoSave: true }}>
+        <Playground
+          key={selectedTemplate}
+          template={template}
+          options={{
+            autoSave: true,
+            webcontainerAuth: {
+              clientId: "wc_api_oluwasetemi_4d19cedf8f057b6f5a059cc61f376076",
+            },
+          }}
+        >
           <div className="playground">
             <PlaygroundHeader
               title={getTitle()}
@@ -74,5 +92,5 @@ export default function App() {
         </Playground>
       </main>
     </div>
-  )
+  );
 }

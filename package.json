@@ -11,7 +11,9 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "test": "turbo run test",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "turbo run lint",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
@@ -23,10 +25,16 @@
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
     "@setemiojo/eslint-config": "^6.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
     "@types/node": "^20.19.30",
+    "@vitest/coverage-v8": "^4.0.17",
     "bumpp": "^10.4.0",
     "eslint": "^9.39.2",
+    "happy-dom": "^20.3.1",
     "turbo": "^2.7.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
   }
 }
