@@ -8,7 +8,7 @@ vi.mock('../context/PlaygroundContext', () => ({
   usePlaygroundContext: vi.fn(),
 }))
 
-describe('PlaygroundHeader', () => {
+describe('playgroundHeader', () => {
   const mockContext = {
     status: 'ready' as const,
     toggleLineNumbers: vi.fn(),
