@@ -1,11 +1,14 @@
 export { PlaygroundEditor } from './components/PlaygroundEditor'
 export { PlaygroundFileTree } from './components/PlaygroundFileTree'
+export { PlaygroundHeader } from './components/PlaygroundHeader'
+export type { PlaygroundHeaderProps } from './components/PlaygroundHeader'
+export { PlaygroundPanel } from './components/PlaygroundPanel'
+export type { PlaygroundPanelProps, PanelTab } from './components/PlaygroundPanel'
 export { PlaygroundPreview } from './components/PlaygroundPreview'
-
 export { PlaygroundTerminal } from './components/PlaygroundTerminal'
 export { PlaygroundToolbar } from './components/PlaygroundToolbar'
 export { usePlaygroundContext } from './context/PlaygroundContext'
-export type { PlaygroundContextValue } from './context/PlaygroundContext'
+export type { PlaygroundContextValue, ConsoleMessage } from './context/PlaygroundContext'
 export { Playground } from './Playground'
 
 export type { PlaygroundProps } from './Playground'

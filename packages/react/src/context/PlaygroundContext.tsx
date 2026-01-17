@@ -1,5 +1,11 @@
-import type { FileNode, PlaygroundEngine, PlaygroundStatus } from '@setemiojo/playground-core'
+import type { FileNode, PlaygroundEngine, PlaygroundStatus, Template } from '@setemiojo/playground-core'
 import { createContext, useContext } from 'react'
+
+export interface ConsoleMessage {
+  type: 'log' | 'error' | 'warn' | 'info'
+  text: string
+  timestamp: number
+}
 
 export interface PlaygroundContextValue {
   engine: PlaygroundEngine | null
@@ -9,6 +15,15 @@ export interface PlaygroundContextValue {
   updateFile: (path: string, content: string) => Promise<void>
   openFile: (path: string) => Promise<void>
   saveSnapshot: () => Promise<void>
+  // New methods for enhanced toolbar
+  toggleLineNumbers: () => void
+  showLineNumbers: boolean
+  formatCode: () => Promise<void>
+  resetCode: () => Promise<void>
+  openInStackBlitz: () => Promise<void>
+  consoleMessages: ConsoleMessage[]
+  clearConsole: () => void
+  template: Template | null
 }
 
 export const PlaygroundContext = createContext<PlaygroundContextValue | null>(null)

@@ -64,6 +64,19 @@ importers:
         specifier: ^7.2.4
         version: 7.2.4(@types/node@20.19.25)(jiti@2.6.1)(yaml@2.8.1)
 
+  examples:
+    dependencies:
+      '@setemiojo/playground-core':
+        specifier: workspace:^
+        version: link:../packages/core
+      '@setemiojo/playground-templates':
+        specifier: workspace:^
+        version: link:../packages/templates
+    devDependencies:
+      vite:
+        specifier: ^7.2.4
+        version: 7.2.4(@types/node@20.19.25)(jiti@2.6.1)(yaml@2.8.1)
+
   packages/core:
     dependencies:
       '@codemirror/autocomplete':
@@ -99,6 +112,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.38.8
         version: 6.38.8
+      '@stackblitz/sdk':
+        specifier: ^1.11.0
+        version: 1.11.0
       '@webcontainer/api':
         specifier: ^1.6.1
         version: 1.6.1
@@ -907,6 +923,9 @@ packages:
   '@sindresorhus/base62@1.0.0':
     resolution: {integrity: sha512-TeheYy0ILzBEI/CO55CP6zJCSdSWeRtGnHy8U8dWSUH4I68iqTsy7HkMktR4xakThc9jotkPQUXT4ITdbV7cHA==}
     engines: {node: '>=18'}
+
+  '@stackblitz/sdk@1.11.0':
+    resolution: {integrity: sha512-DFQGANNkEZRzFk1/rDP6TcFdM82ycHE+zfl9C/M/jXlH68jiqHWHFMQURLELoD8koxvu/eW5uhg94NSAZlYrUQ==}
 
   '@stylistic/eslint-plugin@5.6.1':
     resolution: {integrity: sha512-JCs+MqoXfXrRPGbGmho/zGS/jMcn3ieKl/A8YImqib76C8kjgZwq5uUFzc30lJkMvcchuRn6/v8IApLxli3Jyw==}
@@ -3472,6 +3491,8 @@ snapshots:
       - vitest
 
   '@sindresorhus/base62@1.0.0': {}
+
+  '@stackblitz/sdk@1.11.0': {}
 
   '@stylistic/eslint-plugin@5.6.1(eslint@9.39.1(jiti@2.6.1))':
     dependencies:

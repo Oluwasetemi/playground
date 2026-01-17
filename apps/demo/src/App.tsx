@@ -3,9 +3,8 @@ import {
   Playground,
   PlaygroundEditor,
   PlaygroundFileTree,
-  PlaygroundPreview,
-  PlaygroundTerminal,
-  PlaygroundToolbar,
+  PlaygroundHeader,
+  PlaygroundPanel,
 } from '@setemiojo/playground-react'
 import { nodeTemplate, reactTemplate, vanillaTemplate, vueTemplate } from '@setemiojo/playground-templates'
 import { useState } from 'react'
@@ -20,41 +19,56 @@ const templates: Record<string, Template> = {
 }
 
 export default function App() {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('vanilla')
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
+  const [showSidebar, setShowSidebar] = useState(false)
   const template = templates[selectedTemplate]
+
+  const getTitle = () => {
+    switch (selectedTemplate) {
+      case 'react':
+        return 'React Playground'
+      case 'vue':
+        return 'Vue Playground'
+      case 'node':
+        return 'Node.js Playground'
+      default:
+        return 'JavaScript Playground'
+    }
+  }
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Code Playground Demo</h1>
-        <div className="template-selector">
-          <label>Template: </label>
-          <select value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
-            <option value="vanilla">Vanilla JS</option>
-            <option value="react">React</option>
-            <option value="vue">Vue</option>
-            <option value="node">Node.js</option>
-          </select>
-        </div>
-      </header>
+      <div className="template-bar">
+        <select value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
+          <option value="vanilla">Vanilla JS</option>
+          <option value="react">React</option>
+          <option value="vue">Vue</option>
+          <option value="node">Node.js</option>
+        </select>
+      </div>
 
       <main className="app-main">
         <Playground key={selectedTemplate} template={template} options={{ autoSave: true }}>
-          <PlaygroundToolbar />
-          <div className="playground-layout">
-            <aside className="sidebar">
-              <PlaygroundFileTree />
-            </aside>
-            <div className="main-content">
-              <div className="editor-section">
-                <PlaygroundEditor />
+          <div className="playground">
+            <PlaygroundHeader
+              title={getTitle()}
+              onToggleSidebar={() => setShowSidebar(!showSidebar)}
+              showSidebar={showSidebar}
+            />
+            <div className="playground-content">
+              {showSidebar && (
+                <aside className="playground-sidebar">
+                  <PlaygroundFileTree />
+                </aside>
+              )}
+              <div className="playground-main">
+                <div className="playground-editor-section">
+                  <PlaygroundEditor />
+                </div>
+                <div className="playground-preview-section">
+                  <PlaygroundPanel />
+                </div>
               </div>
-              <div className="preview-section">
-                <PlaygroundPreview />
-              </div>
-            </div>
-            <div className="terminal-section">
-              <PlaygroundTerminal />
             </div>
           </div>
         </Playground>

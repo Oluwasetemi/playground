@@ -6,6 +6,7 @@ import type {
   PlaygroundStatus,
   Template,
 } from './types'
+import sdk from '@stackblitz/sdk'
 import { EditorController } from '../editor/EditorController'
 import { PersistenceManager } from '../persistence/PersistenceManager'
 import { PreviewServer } from '../preview/PreviewServer'
@@ -338,6 +339,177 @@ export class PlaygroundEngine {
 
   getStatus(): PlaygroundStatus {
     return this.status
+  }
+
+  /**
+   * Toggle line numbers in the editor
+   */
+  setLineNumbers(show: boolean): void {
+    this.editor.setLineNumbers(show)
+  }
+
+  /**
+   * Format the current file using Prettier (via WebContainer)
+   */
+  async formatCode(): Promise<void> {
+    if (!this.filesystemManager || !this.currentTemplate) {
+      return
+    }
+
+    const activeFile = this.editor.getActiveFile()
+    if (!activeFile) {
+      return
+    }
+
+    const content = this.editor.getContent()
+    const ext = activeFile.split('.').pop()?.toLowerCase()
+
+    // Simple formatting for JSX/TSX/JS/TS files
+    // This is a basic formatter - for production, use Prettier via WebContainer
+    try {
+      const formattedContent = this.basicFormat(content, ext || 'js')
+      this.editor.setContent(formattedContent)
+      await this.updateFile(activeFile, formattedContent)
+    }
+    catch (error) {
+      console.error('Failed to format code:', error)
+    }
+  }
+
+  /**
+   * Basic code formatter (indentation and spacing)
+   */
+  private basicFormat(code: string, _ext: string): string {
+    // Simple formatter: normalize indentation to 2 spaces
+    const lines = code.split('\n')
+    let indentLevel = 0
+    const formattedLines = lines.map(line => {
+      const trimmed = line.trim()
+      if (!trimmed) return ''
+
+      // Decrease indent before closing brackets
+      if (trimmed.startsWith('}') || trimmed.startsWith(')') || trimmed.startsWith(']') || trimmed.startsWith('</')) {
+        indentLevel = Math.max(0, indentLevel - 1)
+      }
+
+      const formatted = '  '.repeat(indentLevel) + trimmed
+
+      // Increase indent after opening brackets
+      const openCount = (trimmed.match(/[{(\[]/g) || []).length
+      const closeCount = (trimmed.match(/[})\]]/g) || []).length
+
+      // For JSX opening tags without self-closing
+      const jsxOpenTags = (trimmed.match(/<[a-zA-Z][^/>]*>$/g) || []).length
+      const jsxCloseTags = (trimmed.match(/<\/[a-zA-Z]+>/g) || []).length
+
+      indentLevel += openCount - closeCount + jsxOpenTags - jsxCloseTags
+      if (indentLevel < 0) indentLevel = 0
+
+      return formatted
+    })
+
+    return formattedLines.join('\n')
+  }
+
+  /**
+   * Reset to original template code
+   */
+  async resetToTemplate(template: Template): Promise<void> {
+    if (!this.filesystemManager) {
+      return
+    }
+
+    try {
+      // Remount original template files
+      await this.filesystemManager.mount(template.files)
+
+      // Refresh file tree
+      const fileTree = await this.filesystemManager.getFileTree()
+      this.events.emit('files:update', fileTree)
+      playgroundActions.setFiles(fileTree)
+
+      // Reopen entry file
+      if (template.entryFile) {
+        const content = await this.filesystemManager.readFile(template.entryFile)
+        await this.editor.openFile(template.entryFile, content)
+      }
+
+      // Clear persistence for this template (start fresh)
+      this.persistence.clearSnapshot()
+    }
+    catch (error) {
+      console.error('Failed to reset to template:', error)
+      this.events.emit('error', error as Error)
+    }
+  }
+
+  /**
+   * Open playground in StackBlitz using the official SDK
+   * Uses current filesystem state (including user edits), not the original template
+   * @see https://developer.stackblitz.com/platform/api/javascript-sdk
+   */
+  async openInStackBlitz(template: Template): Promise<void> {
+    if (!this.filesystemManager) {
+      return
+    }
+
+    // Get current files from the filesystem (includes user edits)
+    const currentFiles = await this.filesystemManager.getAllFiles()
+
+    // Remove leading slashes from file paths for StackBlitz compatibility
+    const files: Record<string, string> = {}
+    for (const [path, content] of Object.entries(currentFiles)) {
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path
+      files[cleanPath] = content
+    }
+
+    // Determine the StackBlitz template type based on the project type
+    const getStackBlitzTemplate = (): 'node' | 'javascript' | 'typescript' => {
+      // Use 'node' template for projects that need npm/WebContainers
+      // This includes React, Vue, Node.js, etc.
+      if (template.id.includes('react') || template.id.includes('vue') || template.id.includes('node')) {
+        return 'node'
+      }
+      // For vanilla JS projects without build tools
+      if (template.id.includes('vanilla')) {
+        return 'javascript'
+      }
+      // Default to node for full npm support
+      return 'node'
+    }
+
+    // Get the entry file path without leading slash
+    const entryFile = template.entryFile?.startsWith('/')
+      ? template.entryFile.slice(1)
+      : template.entryFile || 'index.js'
+
+    // Open project in StackBlitz using the SDK
+    sdk.openProject(
+      {
+        title: template.name || template.id,
+        description: template.description || `${template.name} playground`,
+        template: getStackBlitzTemplate(),
+        files,
+      },
+      {
+        newWindow: true,
+        openFile: entryFile,
+      },
+    )
+  }
+
+  /**
+   * Get current editor content
+   */
+  getEditorContent(): string {
+    return this.editor.getContent()
+  }
+
+  /**
+   * Set editor content
+   */
+  setEditorContent(content: string): void {
+    this.editor.setContent(content)
   }
 
   /**

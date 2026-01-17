@@ -3,9 +3,10 @@ import type { EventEmitter } from '../engine/EventEmitter'
 import type { PlaygroundEvents } from '../engine/types'
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
+import { javascript } from '@codemirror/lang-javascript'
 import { bracketMatching, defaultHighlightStyle, foldGutter, foldKeymap, indentOnInput, syntaxHighlighting } from '@codemirror/language'
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
-import { EditorState } from '@codemirror/state'
+import { Compartment, EditorState } from '@codemirror/state'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, highlightSpecialChars, keymap, lineNumbers } from '@codemirror/view'
 import { deferUntilIdle } from '../utils/lazyLoader'
@@ -18,9 +19,12 @@ export class EditorController {
   private theme: 'light' | 'dark' = 'dark'
   private updateTimeout: number | null = null
   private initialized: boolean = false
+  private lineNumbersCompartment: Compartment
+  private showLineNumbers: boolean = true
 
   constructor(events: EventEmitter<PlaygroundEvents>) {
     this.events = events
+    this.lineNumbersCompartment = new Compartment()
   }
 
   /**
@@ -43,10 +47,15 @@ export class EditorController {
   }
 
   private createBasicEditor(container: HTMLElement): void {
+    // Get language extension based on file
+    const getLanguageExtension = () => {
+      return javascript({ jsx: true, typescript: true })
+    }
+
     // Full extensions loaded upfront
     // CodeMirror is already well-optimized, main perf gains come from other lazy loading
     const extensions: Extension[] = [
-      lineNumbers(),
+      this.lineNumbersCompartment.of(this.showLineNumbers ? lineNumbers() : []),
       highlightActiveLineGutter(),
       highlightSpecialChars(),
       history(),
@@ -59,6 +68,7 @@ export class EditorController {
       autocompletion(),
       highlightActiveLine(),
       highlightSelectionMatches(),
+      getLanguageExtension(),
       keymap.of([
         ...closeBracketsKeymap,
         ...defaultKeymap,
@@ -119,6 +129,19 @@ export class EditorController {
     return this.view.state.doc.toString()
   }
 
+  setContent(content: string): void {
+    if (!this.view)
+      return
+
+    this.view.dispatch({
+      changes: {
+        from: 0,
+        to: this.view.state.doc.length,
+        insert: content,
+      },
+    })
+  }
+
   getActiveFile(): string {
     return this.activeFile
   }
@@ -129,6 +152,22 @@ export class EditorController {
 
   closeTab(path: string): void {
     this.openTabs.delete(path)
+  }
+
+  setLineNumbers(show: boolean): void {
+    if (!this.view)
+      return
+
+    this.showLineNumbers = show
+    this.view.dispatch({
+      effects: this.lineNumbersCompartment.reconfigure(
+        show ? lineNumbers() : []
+      ),
+    })
+  }
+
+  getLineNumbers(): boolean {
+    return this.showLineNumbers
   }
 
   destroy(): void {

@@ -1,12 +1,20 @@
 /* CSS Variables */
 .playground {
-  --playground-bg: #ffffff;
-  --playground-surface: #f5f5f5;
-  --playground-border: #e0e0e0;
-  --playground-text: #1a1a1a;
-  --playground-text-muted: #666666;
+  --playground-bg: #1e1e2e;
+  --playground-surface: #282a36;
+  --playground-border: #3b3f51;
+  --playground-text: #f8f8f2;
+  --playground-text-muted: #6272a4;
+  --playground-accent: #bd93f9;
+  --playground-header-bg: #1e1e2e;
 
-  --editor-bg: #ffffff;
+  --editor-bg: #282a36;
+  --editor-selection: #44475a;
+
+  --preview-bg: #ffffff;
+  --preview-text: #1a1a1a;
+  --preview-border: #e0e0e0;
+
   --terminal-bg: #1e1e1e;
   --terminal-text: #d4d4d4;
 
@@ -16,6 +24,60 @@
   background: var(--playground-bg);
   color: var(--playground-text);
   font-family: system-ui, -apple-system, sans-serif;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--playground-border);
+}
+
+/* Header */
+.playground-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--playground-header-bg);
+  border-bottom: 1px solid var(--playground-border);
+}
+
+.playground-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--playground-text);
+}
+
+.playground-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.playground-header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--playground-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.playground-header-btn:hover {
+  background: var(--playground-surface);
+  color: var(--playground-text);
+}
+
+.playground-header-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.playground-header-btn.active {
+  color: var(--playground-accent);
 }
 
 /* Editor */
@@ -23,8 +85,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--playground-border);
+  background: var(--editor-bg);
   overflow: hidden;
+  min-height: 200px;
 }
 
 .editor-container {
@@ -32,12 +95,221 @@
   overflow: auto;
 }
 
-/* Preview */
+.editor-container .cm-editor {
+  height: 100%;
+}
+
+.editor-container .cm-scroller {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Preview Panel */
+.playground-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--preview-bg);
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.playground-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--preview-bg);
+  border-bottom: 1px solid var(--preview-border);
+}
+
+.playground-panel-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.playground-panel-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--playground-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.playground-panel-tab:hover {
+  color: var(--preview-text);
+}
+
+.playground-panel-tab.active {
+  color: var(--preview-text);
+  border-bottom-color: var(--preview-text);
+}
+
+.console-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #dc3545;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9px;
+}
+
+.playground-panel-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.playground-panel-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--playground-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.playground-panel-action-btn:hover {
+  background: var(--preview-border);
+  color: var(--preview-text);
+}
+
+.playground-panel-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.playground-panel-result,
+.playground-panel-console {
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow: auto;
+}
+
+.playground-panel-result.active,
+.playground-panel-console.active {
+  display: block;
+}
+
+.playground-panel-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--playground-text-muted);
+  font-size: 14px;
+}
+
+.playground-panel-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+/* Console */
+.playground-panel-console {
+  background: var(--terminal-bg);
+  padding: 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--terminal-text);
+}
+
+.playground-console-empty {
+  color: var(--playground-text-muted);
+  font-style: italic;
+}
+
+.playground-console-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.playground-console-message:last-child {
+  border-bottom: none;
+}
+
+.playground-console-message .console-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.playground-console-message.log .console-icon {
+  display: none;
+}
+
+.playground-console-message.error .console-icon {
+  background: #f48771;
+  color: white;
+}
+
+.playground-console-message.warn .console-icon {
+  background: #dcdcaa;
+  color: #1e1e1e;
+}
+
+.playground-console-message.info .console-icon {
+  background: #75beff;
+  color: white;
+}
+
+.playground-console-message .console-text {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.playground-console-message.error {
+  color: #f48771;
+}
+
+.playground-console-message.warn {
+  color: #dcdcaa;
+}
+
+.playground-console-message.info {
+  color: #75beff;
+}
+
+/* Legacy Preview (keep for compatibility) */
 .playground-preview {
   flex: 1;
   border: 1px solid var(--playground-border);
   position: relative;
-  background: var(--playground-surface);
+  background: var(--preview-bg);
   overflow: hidden;
 }
 
@@ -62,7 +334,7 @@
   border: 1px solid var(--playground-border);
   background: var(--terminal-bg);
   color: var(--terminal-text);
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', monospace;
   font-size: 13px;
   height: 100%;
   min-height: 150px;
@@ -115,16 +387,19 @@
 .playground-file-tree {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--playground-border);
   background: var(--playground-surface);
   overflow: hidden;
 }
 
 .file-tree-header {
-  padding: 8px 12px;
+  padding: 12px 16px;
   background: var(--playground-bg);
   border-bottom: 1px solid var(--playground-border);
   font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--playground-text-muted);
 }
 
 .file-tree-content {
@@ -135,18 +410,20 @@
 
 .file-node,
 .directory-node summary {
-  padding: 4px 8px;
+  padding: 6px 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  border-radius: 4px;
+  gap: 8px;
+  border-radius: 6px;
   user-select: none;
+  font-size: 13px;
+  color: var(--playground-text);
 }
 
 .file-node:hover,
 .directory-node summary:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--editor-selection);
 }
 
 .directory-children {
@@ -158,7 +435,7 @@
   font-size: 14px;
 }
 
-/* Toolbar */
+/* Legacy Toolbar (keep for compatibility) */
 .playground-toolbar {
   display: flex;
   align-items: center;
@@ -170,20 +447,22 @@
 
 .playground-toolbar button {
   padding: 6px 12px;
-  background: #007bff;
+  background: var(--playground-accent);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s ease;
 }
 
 .playground-toolbar button:hover {
-  background: #0056b3;
+  opacity: 0.9;
 }
 
 .playground-toolbar button:disabled {
-  background: #cccccc;
+  background: var(--playground-border);
   cursor: not-allowed;
 }
 
@@ -193,9 +472,9 @@
 }
 
 .status-indicator[data-status="ready"] {
-  color: #28a745;
+  color: #50fa7b;
 }
 
 .status-indicator[data-status="error"] {
-  color: #dc3545;
+  color: #ff5555;
 }

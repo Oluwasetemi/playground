@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playground Core - Vanilla JS Example</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin: 0 0 20px 0;
+    }
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .content {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+      min-height: 0;
+    }
+    .left-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .panel-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #f8f8f8;
+      border-radius: 4px;
+    }
+    .log {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .log-entry {
+      margin: 5px 0;
+    }
+    .log-error { color: #f48771; }
+    .log-success { color: #89d185; }
+    .log-info { color: #75beff; }
+    .preview-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    #preview {
+      flex: 1;
+      border: none;
+      background: white;
+    }
+    .preview-placeholder {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Playground Core - Vanilla JS Example</h1>
+
+  <div class="status">
+    Status: <strong id="status">Not initialized</strong>
+  </div>
+
+  <div class="controls">
+    <button id="init-vanilla">Initialize Vanilla</button>
+    <button id="init-react">Initialize React</button>
+    <button id="switch-react">Switch to React</button>
+    <button id="switch-vanilla">Switch to Vanilla</button>
+    <button id="read-file">Read File</button>
+    <button id="update-file">Update File</button>
+    <button id="clear-log">Clear Log</button>
+  </div>
+
+  <div class="content">
+    <div class="left-panel">
+      <div class="panel-title">Console Log</div>
+      <div class="log" id="log"></div>
+    </div>
+
+    <div class="right-panel">
+      <div class="panel-title">Preview</div>
+      <div class="preview-container">
+        <iframe id="preview" title="Preview"></iframe>
+        <div class="preview-placeholder" id="preview-placeholder">
+          Preview will appear here once initialized
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./main.js" type="module">
+  </script>
+</body>
+</html>
