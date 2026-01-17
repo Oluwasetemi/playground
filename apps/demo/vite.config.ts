@@ -9,4 +9,26 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
   },
+  resolve: {
+    // Deduplicate React to ensure only one instance is used
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    // Include workspace packages for proper dependency optimization
+    include: [
+      '@setemiojo/playground-core',
+      '@setemiojo/playground-react',
+      '@setemiojo/playground-templates',
+    ],
+  },
+  build: {
+    // Ensure proper chunking to avoid duplicate React
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+        },
+      },
+    },
+  },
 })

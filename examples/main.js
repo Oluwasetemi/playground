@@ -69,7 +69,8 @@ async function initializeEngine(template) {
     await engine.initialize(template)
     currentTemplate = template
     log(`✓ ${template.name} initialized successfully!`, 'success')
-  } catch (error) {
+  }
+  catch (error) {
     log(`✗ Initialization failed: ${error.message}`, 'error')
   }
 }
@@ -88,7 +89,8 @@ async function switchTemplate(template) {
     // Re-mount preview after template switch
     showPreview()
     engine.mountPreview(previewIframe)
-  } catch (error) {
+  }
+  catch (error) {
     log(`✗ Switch failed: ${error.message}`, 'error')
   }
 }
@@ -121,11 +123,11 @@ async function readFile() {
         {
           description: 'Text Files',
           accept: {
-            'text/*': ['.txt', '.js', '.jsx', '.ts', '.tsx', '.css', '.html', '.json', '.md']
-          }
-        }
+            'text/*': ['.txt', '.js', '.jsx', '.ts', '.tsx', '.css', '.html', '.json', '.md'],
+          },
+        },
       ],
-      multiple: false
+      multiple: false,
     })
 
     const file = await fileHandle.getFile()
@@ -147,10 +149,12 @@ async function readFile() {
     await engine.openFile(targetPath)
 
     log(`✓ File added to template and opened in editor`, 'success')
-  } catch (error) {
+  }
+  catch (error) {
     if (error.name === 'AbortError') {
       log('File selection cancelled', 'info')
-    } else {
+    }
+    else {
       log(`✗ Read failed: ${error.message}`, 'error')
     }
   }
@@ -188,7 +192,8 @@ export default App;`
     log(`Updating ${path}...`, 'info')
     await engine.updateFile(path, newContent)
     log(`✓ Updated ${path}`, 'success')
-  } catch (error) {
+  }
+  catch (error) {
     log(`✗ Update failed: ${error.message}`, 'error')
   }
 }

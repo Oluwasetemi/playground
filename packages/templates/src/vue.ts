@@ -11,8 +11,8 @@ export const vueTemplate: Template = {
           name: 'vue-playground',
           type: 'module',
           scripts: { dev: 'vite', build: 'vite build' },
-          dependencies: { vue: '^3.5.0' },
-          devDependencies: { '@vitejs/plugin-vue': '^6.0.2', 'vite': '^7.0.0' },
+          dependencies: { vue: '^3.5.26' },
+          devDependencies: { '@vitejs/plugin-vue': '^6.0.3', 'vite': '^7.3.1' },
         }, null, 2),
       },
     },
@@ -41,9 +41,8 @@ export const vueTemplate: Template = {
       },
     },
   },
-  // eslint-disable-next-line style/quote-props
-  dependencies: { 'vue': '^3.3.0' },
-  devDependencies: { '@vitejs/plugin-vue': '^4.4.0', 'vite': '^7.0.0' },
+  dependencies: { vue: '^3.5.26' },
+  devDependencies: { '@vitejs/plugin-vue': '^6.0.3', 'vite': '^7.3.1' },
   commands: { dev: 'npm run dev' },
   entryFile: '/src/App.vue',
 }

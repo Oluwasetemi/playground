@@ -383,9 +383,10 @@ export class PlaygroundEngine {
     // Simple formatter: normalize indentation to 2 spaces
     const lines = code.split('\n')
     let indentLevel = 0
-    const formattedLines = lines.map(line => {
+    const formattedLines = lines.map((line) => {
       const trimmed = line.trim()
-      if (!trimmed) return ''
+      if (!trimmed)
+        return ''
 
       // Decrease indent before closing brackets
       if (trimmed.startsWith('}') || trimmed.startsWith(')') || trimmed.startsWith(']') || trimmed.startsWith('</')) {
@@ -395,15 +396,16 @@ export class PlaygroundEngine {
       const formatted = '  '.repeat(indentLevel) + trimmed
 
       // Increase indent after opening brackets
-      const openCount = (trimmed.match(/[{(\[]/g) || []).length
+      const openCount = (trimmed.match(/[{([]/g) || []).length
       const closeCount = (trimmed.match(/[})\]]/g) || []).length
 
       // For JSX opening tags without self-closing
-      const jsxOpenTags = (trimmed.match(/<[a-zA-Z][^/>]*>$/g) || []).length
-      const jsxCloseTags = (trimmed.match(/<\/[a-zA-Z]+>/g) || []).length
+      const jsxOpenTags = (trimmed.match(/<[a-z][^/>]*>$/gi) || []).length
+      const jsxCloseTags = (trimmed.match(/<\/[a-z]+>/gi) || []).length
 
       indentLevel += openCount - closeCount + jsxOpenTags - jsxCloseTags
-      if (indentLevel < 0) indentLevel = 0
+      if (indentLevel < 0)
+        indentLevel = 0
 
       return formatted
     })

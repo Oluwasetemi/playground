@@ -46,11 +46,11 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
       })
 
       // Subscribe to console messages
-      const unsubscribeConsole = engine.on('console:message', (message: { type: string; args: any[] }) => {
+      const unsubscribeConsole = engine.on('console:message', (message: { type: string, args: any[] }) => {
         setConsoleMessages(prev => [...prev, {
           type: message.type as 'log' | 'error' | 'warn' | 'info',
           text: message.args.map(arg =>
-            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg),
           ).join(' '),
           timestamp: Date.now(),
         }])
@@ -130,7 +130,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
   }, [])
 
   const toggleLineNumbers = useCallback(() => {
-    setShowLineNumbers(prev => {
+    setShowLineNumbers((prev) => {
       const newValue = !prev
       if (engineRef.current) {
         engineRef.current.setLineNumbers(newValue)

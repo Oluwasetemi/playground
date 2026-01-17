@@ -30,9 +30,9 @@
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "@types/node": "^20.19.25",
+    "@types/node": "^22.15.30",
     "typescript": "^5.9.3",
-    "vite": "^7.2.4",
+    "vite": "^7.3.1",
     "vite-plugin-dts": "^4.5.4"
   }
 }

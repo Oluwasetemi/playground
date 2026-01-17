@@ -39,7 +39,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="template-bar">
-        <select value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
+        <select disabled value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
           <option value="vanilla">Vanilla JS</option>
           <option value="react">React</option>
           <option value="vue">Vue</option>

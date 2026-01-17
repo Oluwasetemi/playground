@@ -16,7 +16,7 @@ export const vanillaTemplate: Template = {
               build: 'vite build',
             },
             devDependencies: {
-              vite: '^7.0.0',
+              vite: '^7.3.1',
             },
           },
           null,
@@ -89,8 +89,9 @@ button:hover {
     },
   },
   dependencies: {},
+  // Synced with package.json
   devDependencies: {
-    vite: '^5.0.0',
+    vite: '^7.3.1',
   },
   commands: {
     dev: 'npm run dev',
