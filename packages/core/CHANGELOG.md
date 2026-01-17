@@ -1,5 +1,11 @@
 # @setemiojo/playground-core
 
+## 0.2.0
+
+### Minor Changes
+
+- e2063e4: update packages
+
 ## 0.1.1
 
 ### Patch Changes
