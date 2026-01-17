@@ -1,6 +1,6 @@
 {
   "name": "code-playground",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "packageManager": "pnpm@10.28.0",
   "description": "A robust code playground using WebContainers API",
