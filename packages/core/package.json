@@ -43,7 +43,8 @@
     "@codemirror/view": "^6.39.11",
     "@stackblitz/sdk": "^1.11.0",
     "@webcontainer/api": "^1.6.1",
-    "nanostores": "^1.1.0"
+    "nanostores": "^1.1.0",
+    "prettier": "^3.8.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",

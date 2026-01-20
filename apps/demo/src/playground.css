@@ -478,3 +478,181 @@
 .status-indicator[data-status="error"] {
   color: #ff5555;
 }
+
+/* Resizable Panel */
+.resizable-panel {
+  position: relative;
+}
+
+.resizable-panel-resizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--playground-border);
+  transition: background 0.15s ease;
+}
+
+.resizable-panel-resizer:hover,
+.resizable-panel[data-dragging="true"] .resizable-panel-resizer {
+  background: var(--playground-accent);
+}
+
+.resizable-panel-resizer-line {
+  position: absolute;
+  background: transparent;
+  border-radius: 2px;
+  transition: background 0.15s ease;
+}
+
+.resizable-panel[data-direction="horizontal"] .resizable-panel-resizer-line {
+  width: 4px;
+  height: 40px;
+}
+
+.resizable-panel[data-direction="vertical"] .resizable-panel-resizer-line {
+  width: 40px;
+  height: 4px;
+}
+
+.resizable-panel-resizer:hover .resizable-panel-resizer-line,
+.resizable-panel[data-dragging="true"] .resizable-panel-resizer-line {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Disable text selection and pointer events during resize */
+.resizable-panel[data-dragging="true"] {
+  user-select: none;
+}
+
+.resizable-panel[data-dragging="true"] .resizable-panel-first,
+.resizable-panel[data-dragging="true"] .resizable-panel-second {
+  pointer-events: none;
+}
+
+/* Resizer focus styles for accessibility */
+.resizable-panel-resizer:focus {
+  outline: none;
+  background: var(--playground-accent);
+}
+
+.resizable-panel-resizer:focus .resizable-panel-resizer-line {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Header adjustments */
+  .playground-header {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .playground-header-title {
+    font-size: 13px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .playground-header-actions {
+    gap: 2px;
+  }
+
+  .playground-header-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Hide some buttons on very small screens */
+  .playground-header-btn[title="Toggle Sidebar"] {
+    display: none;
+  }
+
+  /* Panel header adjustments */
+  .playground-panel-header {
+    padding: 0 8px;
+  }
+
+  .playground-panel-tab {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  /* Console adjustments */
+  .playground-panel-console {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  /* Editor adjustments */
+  .editor-container .cm-scroller {
+    font-size: 13px;
+  }
+
+  /* Resizable panel mobile styles */
+  .resizable-panel[data-direction="vertical"] .resizable-panel-resizer {
+    height: 12px;
+    cursor: row-resize;
+  }
+
+  .resizable-panel[data-direction="vertical"] .resizable-panel-resizer-line {
+    width: 60px;
+    height: 4px;
+  }
+
+  /* File tree mobile styles */
+  .playground-file-tree {
+    font-size: 12px;
+  }
+
+  .file-node,
+  .directory-node summary {
+    padding: 8px 10px;
+  }
+
+  /* Terminal mobile styles */
+  .playground-terminal {
+    min-height: 120px;
+    font-size: 12px;
+  }
+
+  .terminal-content {
+    padding: 8px;
+  }
+}
+
+/* Extra small screens (phones) */
+@media (max-width: 480px) {
+  .playground-header-title {
+    font-size: 12px;
+  }
+
+  .playground-header-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Hide more buttons on very small screens */
+  .playground-header-btn[title="Toggle Line Numbers"],
+  .playground-header-btn[title="Open in StackBlitz"] {
+    display: none;
+  }
+
+  .playground-panel-tab {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .console-badge {
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+}

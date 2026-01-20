@@ -7,6 +7,10 @@ import type {
   Template,
 } from './types'
 import sdk from '@stackblitz/sdk'
+import * as prettier from 'prettier'
+import prettierBabelPlugin from 'prettier/plugins/babel'
+import prettierEstreePlugin from 'prettier/plugins/estree'
+import prettierTypescriptPlugin from 'prettier/plugins/typescript'
 import { EditorController } from '../editor/EditorController'
 import { PersistenceManager } from '../persistence/PersistenceManager'
 import { PreviewServer } from '../preview/PreviewServer'
@@ -349,7 +353,8 @@ export class PlaygroundEngine {
   }
 
   /**
-   * Format the current file using Prettier (via WebContainer)
+   * Format the current file using Prettier
+   * @see https://prettier.io/docs/en/browser
    */
   async formatCode(): Promise<void> {
     if (!this.filesystemManager || !this.currentTemplate) {
@@ -364,53 +369,43 @@ export class PlaygroundEngine {
     const content = this.editor.getContent()
     const ext = activeFile.split('.').pop()?.toLowerCase()
 
-    // Simple formatting for JSX/TSX/JS/TS files
-    // This is a basic formatter - for production, use Prettier via WebContainer
+    // Map file extensions to Prettier parsers
+    const parserMap: Record<string, string> = {
+      js: 'babel',
+      jsx: 'babel',
+      mjs: 'babel',
+      cjs: 'babel',
+      ts: 'typescript',
+      tsx: 'typescript',
+    }
+
+    const parser = ext ? parserMap[ext] : undefined
+    if (!parser) {
+      console.warn(`File type .${ext} is not supported for formatting`)
+      return
+    }
+
     try {
-      const formattedContent = this.basicFormat(content, ext || 'js')
-      this.editor.setContent(formattedContent)
-      await this.updateFile(activeFile, formattedContent)
+      // Use Prettier to format the code (browser-compatible)
+      const formattedCode = await prettier.format(content, {
+        parser,
+        plugins: [prettierBabelPlugin, prettierEstreePlugin, prettierTypescriptPlugin],
+        tabWidth: 2,
+        useTabs: false,
+        semi: true,
+        singleQuote: true,
+        trailingComma: 'es5',
+        printWidth: 80,
+      })
+
+      this.editor.setContent(formattedCode)
+      await this.updateFile(activeFile, formattedCode)
     }
     catch (error) {
-      console.error('Failed to format code:', error)
+      console.error('Failed to format code with Prettier:', error)
+      // Emit error event so UI can show feedback
+      this.events.emit('error', new Error(`Format failed: ${error instanceof Error ? error.message : 'Unknown error'}`))
     }
-  }
-
-  /**
-   * Basic code formatter (indentation and spacing)
-   */
-  private basicFormat(code: string, _ext: string): string {
-    // Simple formatter: normalize indentation to 2 spaces
-    const lines = code.split('\n')
-    let indentLevel = 0
-    const formattedLines = lines.map((line) => {
-      const trimmed = line.trim()
-      if (!trimmed)
-        return ''
-
-      // Decrease indent before closing brackets
-      if (trimmed.startsWith('}') || trimmed.startsWith(')') || trimmed.startsWith(']') || trimmed.startsWith('</')) {
-        indentLevel = Math.max(0, indentLevel - 1)
-      }
-
-      const formatted = '  '.repeat(indentLevel) + trimmed
-
-      // Increase indent after opening brackets
-      const openCount = (trimmed.match(/[{([]/g) || []).length
-      const closeCount = (trimmed.match(/[})\]]/g) || []).length
-
-      // For JSX opening tags without self-closing
-      const jsxOpenTags = (trimmed.match(/<[a-z][^/>]*>$/gi) || []).length
-      const jsxCloseTags = (trimmed.match(/<\/[a-z]+>/gi) || []).length
-
-      indentLevel += openCount - closeCount + jsxOpenTags - jsxCloseTags
-      if (indentLevel < 0)
-        indentLevel = 0
-
-      return formatted
-    })
-
-    return formattedLines.join('\n')
   }
 
   /**

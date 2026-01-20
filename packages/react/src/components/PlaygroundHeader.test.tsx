@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { PlaygroundHeader } from './PlaygroundHeader'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as PlaygroundContext from '../context/PlaygroundContext'
+import { PlaygroundHeader } from './PlaygroundHeader'
 
 // Mock the context
 vi.mock('../context/PlaygroundContext', () => ({

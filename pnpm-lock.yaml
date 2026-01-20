@@ -126,6 +126,9 @@ importers:
       nanostores:
         specifier: ^1.1.0
         version: 1.1.0
+      prettier:
+        specifier: ^3.8.0
+        version: 3.8.0
     devDependencies:
       '@types/node':
         specifier: ^22.15.30
@@ -2426,6 +2429,11 @@ packages:
   prettier@2.8.8:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
+    hasBin: true
+
+  prettier@3.8.0:
+    resolution: {integrity: sha512-yEPsovQfpxYfgWNhCfECjG5AQaO+K3dp6XERmOepyPDVqcJm+bjyCVO3pmU+nAPe0N5dDvekfGezt/EIiRe1TA==}
+    engines: {node: '>=14'}
     hasBin: true
 
   pretty-format@27.5.1:
@@ -5541,6 +5549,8 @@ snapshots:
   prelude-ls@1.2.1: {}
 
   prettier@2.8.8: {}
+
+  prettier@3.8.0: {}
 
   pretty-format@27.5.1:
     dependencies:
