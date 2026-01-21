@@ -35,7 +35,7 @@ export interface FileNode {
 }
 
 export interface ConsoleMessage {
-  type: 'log' | 'warn' | 'error' | 'info'
+  type: 'log' | 'warn' | 'error' | 'info' | 'clear'
   args: any[]
   timestamp: number
 }
