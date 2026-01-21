@@ -24,6 +24,8 @@ describe('playgroundHeader', () => {
     saveSnapshot: vi.fn(),
     consoleMessages: [],
     clearConsole: vi.fn(),
+    terminalMessages: [],
+    clearTerminal: vi.fn(),
     template: null,
   }
 
