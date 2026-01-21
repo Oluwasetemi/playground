@@ -35,11 +35,21 @@ export class PreviewServer {
     // Spawn the dev server process and keep it running in background
     const serverProcess = await this.webcontainer.spawn(cmd, args)
 
-    // Log server output
+    // Capture and emit server output
+    // eslint-disable-next-line ts/no-this-alias
+    const self = this
     serverProcess.output.pipeTo(
       new WritableStream({
         write(data) {
           console.warn('[dev-server]', data)
+          // Emit terminal output event
+          self.events.emit('process:output', {
+            processId: 'dev-server',
+            command,
+            type: 'stdout',
+            data,
+            timestamp: Date.now(),
+          })
         },
       }),
     )
@@ -104,10 +114,11 @@ export class PreviewServer {
             log: console.log,
             warn: console.warn,
             error: console.error,
-            info: console.info
+            info: console.info,
+            clear: console.clear
           };
 
-          ['log', 'warn', 'error', 'info'].forEach(method => {
+          ['log', 'warn', 'error', 'info', 'clear'].forEach(method => {
             console[method] = function(...args) {
               originalConsole[method].apply(console, args);
               window.parent.postMessage({
