@@ -14,9 +14,11 @@ import {
   vueTemplate,
 } from '@setemiojo/playground-templates'
 import { useState } from 'react'
+import { reactTemplate as newTemp } from './react.ts'
 import './playground.css'
 import './App.css'
 
+// console.log(newTemp)
 const templates: Record<string, Template> = {
   vanilla: vanillaTemplate,
   react: reactTemplate,
@@ -60,7 +62,7 @@ export default function App() {
       <main className="app-main">
         <Playground
           key={selectedTemplate}
-          template={template}
+          template={newTemp}
           options={{
             autoSave: true,
           }}
