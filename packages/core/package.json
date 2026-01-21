@@ -8,7 +8,7 @@
     "url": "https://github.com/oluwasetemi/playground",
     "directory": "packages/core"
   },
-  "author": "Oluwasetemi Ojo",
+  "author": "Oluwasetemi Ojo<setemiojo@gmail.com>",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
