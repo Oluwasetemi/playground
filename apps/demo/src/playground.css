@@ -199,7 +199,8 @@
 }
 
 .playground-panel-result,
-.playground-panel-console {
+.playground-panel-console,
+.playground-panel-terminal {
   position: absolute;
   inset: 0;
   display: none;
@@ -207,7 +208,8 @@
 }
 
 .playground-panel-result.active,
-.playground-panel-console.active {
+.playground-panel-console.active,
+.playground-panel-terminal.active {
   display: block;
 }
 
@@ -298,6 +300,34 @@
 
 .playground-console-message.warn {
   color: #dcdcaa;
+}
+
+/* Terminal */
+.playground-panel-terminal {
+  background: var(--terminal-bg);
+  padding: 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--terminal-text);
+}
+
+.playground-terminal-empty {
+  color: var(--playground-text-muted);
+  font-style: italic;
+}
+
+.playground-terminal-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.playground-terminal-line.stderr {
+  color: #f48771;
+}
+
+.playground-terminal-line .terminal-text {
+  display: block;
 }
 
 .playground-console-message.info {
