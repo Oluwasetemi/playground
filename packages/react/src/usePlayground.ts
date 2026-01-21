@@ -196,5 +196,6 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     terminalMessages,
     clearTerminal,
     template,
+    hiddenFiles: template.hiddenFiles ?? [],
   }
 }
