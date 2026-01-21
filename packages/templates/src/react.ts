@@ -156,4 +156,6 @@ button:hover {
     dev: 'npm run dev',
   },
   entryFile: '/src/App.jsx',
+  // Example: hide config files from the file tree
+  hiddenFiles: ['/vite.config.js', '/package.json'],
 }
