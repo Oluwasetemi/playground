@@ -78,12 +78,16 @@ export function ResizablePanel({
 
   const [size, setSize] = useState<number>(() => {
     if (effectiveStorageKey && typeof window !== 'undefined') {
-      const stored = localStorage.getItem(effectiveStorageKey)
-      if (stored) {
-        const parsed = parseFloat(stored)
-        if (!isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
-          return parsed
+      try {
+        const stored = localStorage.getItem(effectiveStorageKey)
+        if (stored) {
+          const parsed = parseFloat(stored)
+          if (!isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
+            return parsed
+          }
         }
+      } catch {
+        // localStorage might be blocked in sandboxed iframes
       }
     }
     return responsive && isMobile ? mobileInitialSize : initialSize
@@ -97,13 +101,17 @@ export function ResizablePanel({
 
     // Load the appropriate size for the current mode
     if (effectiveStorageKey && typeof window !== 'undefined') {
-      const stored = localStorage.getItem(effectiveStorageKey)
-      if (stored) {
-        const parsed = parseFloat(stored)
-        if (!isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
-          setSize(parsed)
-          return
+      try {
+        const stored = localStorage.getItem(effectiveStorageKey)
+        if (stored) {
+          const parsed = parseFloat(stored)
+          if (!isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
+            setSize(parsed)
+            return
+          }
         }
+      } catch {
+        // localStorage might be blocked in sandboxed iframes
       }
     }
     // Fall back to default sizes
@@ -180,7 +188,11 @@ export function ResizablePanel({
       dragStartRef.current = null
 
       if (effectiveStorageKey) {
-        localStorage.setItem(effectiveStorageKey, size.toString())
+        try {
+          localStorage.setItem(effectiveStorageKey, size.toString())
+        } catch {
+          // localStorage might be blocked in sandboxed iframes
+        }
       }
       onResizeEnd?.(size)
     }
