@@ -14,6 +14,8 @@ export interface Template {
   }
   entryFile: string
   mainFile?: string
+  /** List of file paths to hide from the file tree (e.g., ['/vite.config.js', '/package.json']) */
+  hiddenFiles?: string[]
 }
 
 export interface PlaygroundOptions {

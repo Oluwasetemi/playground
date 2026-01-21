@@ -302,32 +302,28 @@
   color: #dcdcaa;
 }
 
-/* Terminal */
+/* Terminal (xterm.js) */
 .playground-panel-terminal {
   background: var(--terminal-bg);
-  padding: 12px;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--terminal-text);
+  overflow: hidden;
 }
 
-.playground-terminal-empty {
-  color: var(--playground-text-muted);
-  font-style: italic;
+.playground-panel-terminal .playground-terminal-container {
+  width: 100%;
+  height: 100%;
 }
 
-.playground-terminal-line {
-  white-space: pre-wrap;
-  word-break: break-word;
+/* xterm.js overrides for better integration */
+.playground-panel-terminal .xterm {
+  padding: 8px;
 }
 
-.playground-terminal-line.stderr {
-  color: #f48771;
+.playground-panel-terminal .xterm-viewport {
+  overflow-y: auto !important;
 }
 
-.playground-terminal-line .terminal-text {
-  display: block;
+.playground-panel-terminal .xterm-screen {
+  width: 100% !important;
 }
 
 .playground-console-message.info {

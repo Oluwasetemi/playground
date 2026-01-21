@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePlaygroundContext } from '../context/PlaygroundContext'
+import { Terminal } from './Terminal'
 
 export type PanelTab = 'result' | 'console' | 'terminal'
 
@@ -14,7 +15,6 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
   const lastUrlRef = useRef<string | null>(null)
   const lastEngineRef = useRef<typeof engine>(null)
   const consoleRef = useRef<HTMLDivElement>(null)
-  const terminalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const shouldMount =
@@ -36,13 +36,6 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
       consoleRef.current.scrollTop = consoleRef.current.scrollHeight
     }
   }, [consoleMessages, activeTab])
-
-  // Auto-scroll terminal to bottom
-  useEffect(() => {
-    if (terminalRef.current && activeTab === 'terminal') {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
-    }
-  }, [terminalMessages, activeTab])
 
   return (
     <div className="playground-panel">
@@ -136,17 +129,8 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
         </div>
         <div
           className={`playground-panel-terminal ${activeTab === 'terminal' ? 'active' : ''}`}
-          ref={terminalRef}
         >
-          {terminalMessages.length === 0 ? (
-            <div className="playground-terminal-empty">No terminal output</div>
-          ) : (
-            terminalMessages.map((msg, index) => (
-              <div key={index} className={`playground-terminal-line ${msg.type}`}>
-                <span className="terminal-text">{msg.text}</span>
-              </div>
-            ))
-          )}
+          <Terminal messages={terminalMessages} />
         </div>
       </div>
     </div>

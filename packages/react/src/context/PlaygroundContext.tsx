@@ -32,6 +32,8 @@ export interface PlaygroundContextValue {
   terminalMessages: TerminalMessage[]
   clearTerminal: () => void
   template: Template | null
+  /** List of file paths that should be hidden from the file tree */
+  hiddenFiles: string[]
 }
 
 export const PlaygroundContext = createContext<PlaygroundContextValue | null>(null)
