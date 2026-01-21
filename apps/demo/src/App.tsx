@@ -1,4 +1,4 @@
-import type { Template } from '@setemiojo/playground-templates'
+// import type { Template } from '@setemiojo/playground-templates'
 import {
   Playground,
   PlaygroundEditor,
@@ -7,29 +7,29 @@ import {
   PlaygroundPanel,
   ResizablePanel,
 } from '@setemiojo/playground-react'
-import {
-  nodeTemplate,
-  reactTemplate,
-  vanillaTemplate,
-  vueTemplate,
-} from '@setemiojo/playground-templates'
 import { useState } from 'react'
 import { reactTemplate as newTemp } from './react.ts'
+// import {
+//   nodeTemplate,
+//   reactTemplate,
+//   vanillaTemplate,
+//   vueTemplate,
+// } from '@setemiojo/playground-templates'
 import './playground.css'
 import './App.css'
 
 // console.log(newTemp)
-const templates: Record<string, Template> = {
-  vanilla: vanillaTemplate,
-  react: reactTemplate,
-  vue: vueTemplate,
-  node: nodeTemplate,
-}
+// const templates: Record<string, Template> = {
+//   vanilla: vanillaTemplate,
+//   react: reactTemplate,
+//   vue: vueTemplate,
+//   node: nodeTemplate,
+// }
 
 export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
   const [showSidebar, setShowSidebar] = useState(false)
-  const template = templates[selectedTemplate]
+  // const template = templates[selectedTemplate]
 
   const getTitle = () => {
     switch (selectedTemplate) {
