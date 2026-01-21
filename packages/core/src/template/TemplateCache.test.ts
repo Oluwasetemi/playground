@@ -1,22 +1,24 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Template } from '../engine/types'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TemplateCache } from './TemplateCache'
 
-const createMockTemplate = (id: string): Template => ({
-  id,
-  name: `Template ${id}`,
-  description: `Description for ${id}`,
-  files: {},
-  dependencies: {},
-  devDependencies: {},
-  commands: {
-    dev: 'npm run dev',
-    build: 'npm run build',
-  },
-  entryFile: 'index.js',
-})
+function createMockTemplate(id: string): Template {
+  return {
+    id,
+    name: `Template ${id}`,
+    description: `Description for ${id}`,
+    files: {},
+    dependencies: {},
+    devDependencies: {},
+    commands: {
+      dev: 'npm run dev',
+      build: 'npm run build',
+    },
+    entryFile: 'index.js',
+  }
+}
 
-describe('TemplateCache', () => {
+describe('templateCache', () => {
   let cache: TemplateCache
 
   beforeEach(() => {
