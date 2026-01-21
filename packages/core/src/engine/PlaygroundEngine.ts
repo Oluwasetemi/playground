@@ -377,6 +377,9 @@ export class PlaygroundEngine {
       cjs: 'babel',
       ts: 'typescript',
       tsx: 'typescript',
+      html: 'html',
+      css: 'css',
+      md: 'markdown',
     }
 
     const parser = ext ? parserMap[ext] : undefined
