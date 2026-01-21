@@ -68,6 +68,7 @@ export class TerminalController {
     this.render()
   }
 
+  // add escape ANSI or can I use TUI?
   private render(): void {
     if (!this.container)
       return
