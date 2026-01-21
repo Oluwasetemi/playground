@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePlaygroundContext } from '../context/PlaygroundContext'
 
-export type PanelTab = 'result' | 'console'
+export type PanelTab = 'result' | 'console' | 'terminal'
 
 export interface PlaygroundPanelProps {
   defaultTab?: PanelTab
 }
 
 export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps) {
-  const { engine, previewUrl, status, consoleMessages } = usePlaygroundContext()
+  const { engine, previewUrl, status, consoleMessages, terminalMessages } = usePlaygroundContext()
   const [activeTab, setActiveTab] = useState<PanelTab>(defaultTab)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const lastUrlRef = useRef<string | null>(null)
   const lastEngineRef = useRef<typeof engine>(null)
   const consoleRef = useRef<HTMLDivElement>(null)
+  const terminalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const shouldMount =
@@ -36,6 +37,13 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
     }
   }, [consoleMessages, activeTab])
 
+  // Auto-scroll terminal to bottom
+  useEffect(() => {
+    if (terminalRef.current && activeTab === 'terminal') {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
+    }
+  }, [terminalMessages, activeTab])
+
   return (
     <div className="playground-panel">
       <div className="playground-panel-header">
@@ -54,6 +62,12 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
             {consoleMessages.length > 0 && (
               <span className="console-badge">{consoleMessages.length}</span>
             )}
+          </button>
+          <button
+            className={`playground-panel-tab ${activeTab === 'terminal' ? 'active' : ''}`}
+            onClick={() => setActiveTab('terminal')}
+          >
+            Terminal
           </button>
         </div>
         <div className="playground-panel-actions">
@@ -116,6 +130,20 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
                 {msg.type === 'warn' && <span className="console-icon">!</span>}
                 {msg.type === 'info' && <span className="console-icon">i</span>}
                 <span className="console-text">{msg.text}</span>
+              </div>
+            ))
+          )}
+        </div>
+        <div
+          className={`playground-panel-terminal ${activeTab === 'terminal' ? 'active' : ''}`}
+          ref={terminalRef}
+        >
+          {terminalMessages.length === 0 ? (
+            <div className="playground-terminal-empty">No terminal output</div>
+          ) : (
+            terminalMessages.map((msg, index) => (
+              <div key={index} className={`playground-terminal-line ${msg.type}`}>
+                <span className="terminal-text">{msg.text}</span>
               </div>
             ))
           )}
