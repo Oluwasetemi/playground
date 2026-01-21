@@ -19,7 +19,7 @@ const CONSOLE_FORWARDER_SCRIPT = `
     warn: console.warn.bind(console),
     error: console.error.bind(console),
     info: console.info.bind(console),
-    clear: console.info.bind(console)
+    clear: console.clear.bind(console)
   };
 
   function serialize(arg) {
