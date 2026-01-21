@@ -161,7 +161,7 @@ export class EditorController {
     this.showLineNumbers = show
     this.view.dispatch({
       effects: this.lineNumbersCompartment.reconfigure(
-        show ? lineNumbers() : []
+        show ? lineNumbers() : [],
       ),
     })
   }
