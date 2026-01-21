@@ -11,7 +11,7 @@ export { ResizablePanel } from './components/ResizablePanel'
 export type { ResizablePanelProps } from './components/ResizablePanel'
 export { useMediaQuery, useIsMobile } from './hooks/useMediaQuery'
 export { usePlaygroundContext } from './context/PlaygroundContext'
-export type { PlaygroundContextValue, ConsoleMessage } from './context/PlaygroundContext'
+export type { PlaygroundContextValue, ConsoleMessage, TerminalMessage } from './context/PlaygroundContext'
 export { Playground } from './Playground'
 
 export type { PlaygroundProps } from './Playground'

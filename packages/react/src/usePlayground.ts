@@ -1,5 +1,5 @@
-import type { PlaygroundOptions, Template } from '@setemiojo/playground-core'
-import type { ConsoleMessage } from './context/PlaygroundContext'
+import type { PlaygroundOptions, ProcessOutput, Template } from '@setemiojo/playground-core'
+import type { ConsoleMessage, TerminalMessage } from './context/PlaygroundContext'
 import { useStore } from '@nanostores/react'
 import {
   $files,
@@ -23,6 +23,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
   // Local state for new features
   const [showLineNumbers, setShowLineNumbers] = useState(true)
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([])
+  const [terminalMessages, setTerminalMessages] = useState<TerminalMessage[]>([])
 
   // Keep template ref up to date
   useEffect(() => {
@@ -56,6 +57,15 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
         }])
       })
 
+      // Subscribe to terminal/process output
+      const unsubscribeTerminal = engine.on('process:output', (output: ProcessOutput) => {
+        setTerminalMessages(prev => [...prev, {
+          type: output.type,
+          text: output.data,
+          timestamp: output.timestamp,
+        }])
+      })
+
       // Mark as initializing
       initializingRef.current = true
 
@@ -85,6 +95,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
           .finally(() => {
             unsubscribeError()
             unsubscribeConsole()
+            unsubscribeTerminal()
             engine.cleanup()
             engineRef.current = null
           })
@@ -95,8 +106,9 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     if (previousTemplateId.current !== template.id) {
       console.warn(`Template change detected: ${previousTemplateId.current} -> ${template.id}`)
 
-      // Clear console on template switch
+      // Clear console and terminal on template switch
       setConsoleMessages([])
+      setTerminalMessages([])
 
       engineRef.current.switchTemplate(template).catch((error: Error) => {
         console.error('Failed to switch template:', error)
@@ -162,6 +174,10 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     setConsoleMessages([])
   }, [])
 
+  const clearTerminal = useCallback(() => {
+    setTerminalMessages([])
+  }, [])
+
   return {
     engine: engineRef.current,
     status,
@@ -177,6 +193,8 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     openInStackBlitz,
     consoleMessages,
     clearConsole,
+    terminalMessages,
+    clearTerminal,
     template,
   }
 }

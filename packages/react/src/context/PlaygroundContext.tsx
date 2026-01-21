@@ -7,6 +7,12 @@ export interface ConsoleMessage {
   timestamp: number
 }
 
+export interface TerminalMessage {
+  type: 'stdout' | 'stderr'
+  text: string
+  timestamp: number
+}
+
 export interface PlaygroundContextValue {
   engine: PlaygroundEngine | null
   status: PlaygroundStatus
@@ -23,6 +29,8 @@ export interface PlaygroundContextValue {
   openInStackBlitz: () => Promise<void>
   consoleMessages: ConsoleMessage[]
   clearConsole: () => void
+  terminalMessages: TerminalMessage[]
+  clearTerminal: () => void
   template: Template | null
 }
 
