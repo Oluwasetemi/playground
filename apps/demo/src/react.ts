@@ -1,4 +1,4 @@
-import type { Template } from './types'
+import type { Template } from '../../packages/react/src/types'
 
 export const reactTemplate: Template = {
   id: 'react',

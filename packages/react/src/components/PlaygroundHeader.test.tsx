@@ -27,6 +27,7 @@ describe('playgroundHeader', () => {
     terminalMessages: [],
     clearTerminal: vi.fn(),
     template: null,
+    hiddenFiles: [],
   }
 
   beforeEach(() => {
