@@ -1,192 +1,89 @@
-import type { Extension } from '@codemirror/state'
 import type { EventEmitter } from '../engine/EventEmitter'
 import type { PlaygroundEvents } from '../engine/types'
-import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete'
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
-import { javascript } from '@codemirror/lang-javascript'
-import { bracketMatching, defaultHighlightStyle, foldGutter, foldKeymap, indentOnInput, syntaxHighlighting } from '@codemirror/language'
-import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
-import { Compartment, EditorState } from '@codemirror/state'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, highlightSpecialChars, keymap, lineNumbers } from '@codemirror/view'
-import { deferUntilIdle } from '../utils/lazyLoader'
+import type { EditorAdapter, EditorOptions, EditorType } from './EditorAdapter'
+import { createEditor } from './editorFactory'
 
-export class EditorController {
-  private view: EditorView | null = null
-  private events: EventEmitter<PlaygroundEvents>
-  private activeFile: string = ''
-  private openTabs: Set<string> = new Set()
-  private theme: 'light' | 'dark' = 'dark'
-  private updateTimeout: number | null = null
-  private initialized: boolean = false
-  private lineNumbersCompartment: Compartment
-  private showLineNumbers: boolean = true
+/**
+ * EditorController - Backwards-compatible wrapper around EditorAdapter
+ *
+ * This class maintains the original API while delegating to the
+ * appropriate editor implementation (CodeMirror or Monaco).
+ *
+ * @deprecated Use createEditor() or createEditorAsync() from editorFactory.ts directly
+ * for new code. This wrapper is provided for backwards compatibility.
+ */
+export class EditorController implements EditorAdapter {
+  private adapter: EditorAdapter
+  private editorType: EditorType
 
-  constructor(events: EventEmitter<PlaygroundEvents>) {
-    this.events = events
-    this.lineNumbersCompartment = new Compartment()
+  constructor(
+    events: EventEmitter<PlaygroundEvents>,
+    editorType: EditorType = 'codemirror',
+  ) {
+    this.editorType = editorType
+    this.adapter = createEditor(editorType, events)
   }
 
   /**
-   * Initialize editor with lazy loading
-   * Heavy extensions are loaded during idle time
+   * Get the underlying editor type
    */
-  async initialize(container: HTMLElement, options: { theme?: 'light' | 'dark' } = {}): Promise<void> {
-    this.theme = options.theme || 'dark'
-
-    // Load basic editor immediately for responsiveness
-    this.createBasicEditor(container)
-
-    // Defer loading heavy extensions until idle
-    await deferUntilIdle(() => {
-      if (this.view && !this.initialized) {
-        this.loadExtensions()
-        this.initialized = true
-      }
-    })
+  getEditorType(): EditorType {
+    return this.editorType
   }
 
-  private createBasicEditor(container: HTMLElement): void {
-    // Get language extension based on file
-    const getLanguageExtension = () => {
-      return javascript({ jsx: true, typescript: true })
-    }
-
-    // Full extensions loaded upfront
-    // CodeMirror is already well-optimized, main perf gains come from other lazy loading
-    const extensions: Extension[] = [
-      this.lineNumbersCompartment.of(this.showLineNumbers ? lineNumbers() : []),
-      highlightActiveLineGutter(),
-      highlightSpecialChars(),
-      history(),
-      foldGutter(),
-      drawSelection(),
-      indentOnInput(),
-      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      bracketMatching(),
-      closeBrackets(),
-      autocompletion(),
-      highlightActiveLine(),
-      highlightSelectionMatches(),
-      getLanguageExtension(),
-      keymap.of([
-        ...closeBracketsKeymap,
-        ...defaultKeymap,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-        ...completionKeymap,
-      ]),
-      this.theme === 'dark' ? oneDark : [],
-      EditorView.updateListener.of((update: any) => {
-        if (update.docChanged) {
-          this.handleContentChange()
-        }
-      }),
-    ]
-
-    const state = EditorState.create({
-      doc: '',
-      extensions,
-    })
-
-    this.view = new EditorView({
-      state,
-      parent: container,
-    })
+  /**
+   * Get the underlying editor adapter
+   * Useful for accessing editor-specific features
+   */
+  getAdapter(): EditorAdapter {
+    return this.adapter
   }
 
-  private loadExtensions(): void {
-    if (!this.view)
-      return
-
-    // For simplicity, we'll skip runtime extension loading and include all in initial setup
-    // This is acceptable since CodeMirror extensions are already lightweight
-    // The main performance gain comes from deferred terminal and other heavy components
-    console.warn('Editor extensions already loaded during initialization')
+  async initialize(container: HTMLElement, options?: EditorOptions): Promise<void> {
+    return this.adapter.initialize(container, options)
   }
 
   async openFile(path: string, content: string): Promise<void> {
-    if (!this.view) {
-      throw new Error('Editor not initialized')
-    }
-
-    this.activeFile = path
-    this.openTabs.add(path)
-
-    this.view.dispatch({
-      changes: {
-        from: 0,
-        to: this.view.state.doc.length,
-        insert: content,
-      },
-    })
+    return this.adapter.openFile(path, content)
   }
 
   getContent(): string {
-    if (!this.view)
-      return ''
-    return this.view.state.doc.toString()
+    return this.adapter.getContent()
   }
 
   setContent(content: string): void {
-    if (!this.view)
-      return
-
-    this.view.dispatch({
-      changes: {
-        from: 0,
-        to: this.view.state.doc.length,
-        insert: content,
-      },
-    })
+    this.adapter.setContent(content)
   }
 
   getActiveFile(): string {
-    return this.activeFile
+    return this.adapter.getActiveFile()
   }
 
   getOpenTabs(): string[] {
-    return Array.from(this.openTabs)
+    return this.adapter.getOpenTabs()
   }
 
   closeTab(path: string): void {
-    this.openTabs.delete(path)
+    this.adapter.closeTab(path)
   }
 
   setLineNumbers(show: boolean): void {
-    if (!this.view)
-      return
-
-    this.showLineNumbers = show
-    this.view.dispatch({
-      effects: this.lineNumbersCompartment.reconfigure(
-        show ? lineNumbers() : [],
-      ),
-    })
+    this.adapter.setLineNumbers(show)
   }
 
   getLineNumbers(): boolean {
-    return this.showLineNumbers
+    return this.adapter.getLineNumbers()
+  }
+
+  setTheme(theme: 'light' | 'dark'): void {
+    this.adapter.setTheme?.(theme)
+  }
+
+  focus(): void {
+    this.adapter.focus?.()
   }
 
   destroy(): void {
-    if (this.view) {
-      this.view.destroy()
-      this.view = null
-    }
-    this.openTabs.clear()
-    this.initialized = false
-  }
-
-  private handleContentChange(): void {
-    if (this.updateTimeout) {
-      clearTimeout(this.updateTimeout)
-    }
-
-    this.updateTimeout = window.setTimeout(() => {
-      const content = this.getContent()
-      this.events.emit('file:change', this.activeFile, content)
-    }, 300)
+    this.adapter.destroy()
   }
 }
