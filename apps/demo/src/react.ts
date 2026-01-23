@@ -1,4 +1,4 @@
-import type { Template } from '../../packages/react/src/types'
+import type { Template } from '@setemiojo/playground-core'
 
 export const reactTemplate: Template = {
   id: 'react',

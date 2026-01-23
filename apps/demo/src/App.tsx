@@ -1,4 +1,4 @@
-// import type { Template } from '@setemiojo/playground-templates'
+import type { Template } from '@setemiojo/playground-templates'
 import {
   Playground,
   PlaygroundEditor,
@@ -6,43 +6,42 @@ import {
   PlaygroundHeader,
   PlaygroundPanel,
   ResizablePanel,
-} from '@setemiojo/playground-react'
-import { useState } from 'react'
-import { reactTemplate as newTemp } from './react.ts'
-// import {
-//   nodeTemplate,
-//   reactTemplate,
-//   vanillaTemplate,
-//   vueTemplate,
-// } from '@setemiojo/playground-templates'
-import './playground.css'
-import './App.css'
+} from "@setemiojo/playground-react";
+import { useState } from "react";
+// import { reactTemplate as newTemp } from "./react.ts";
+import {
+  nodeTemplate,
+  reactTemplate,
+  vanillaTemplate,
+  vueTemplate,
+} from '@setemiojo/playground-templates'
+import "./playground.css";
+import "./App.css";
 
-// console.log(newTemp)
-// const templates: Record<string, Template> = {
-//   vanilla: vanillaTemplate,
-//   react: reactTemplate,
-//   vue: vueTemplate,
-//   node: nodeTemplate,
-// }
+const templates: Record<string, Template> = {
+  vanilla: vanillaTemplate,
+  react: reactTemplate,
+  vue: vueTemplate,
+  node: nodeTemplate,
+}
 
 export default function App() {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
-  const [showSidebar, setShowSidebar] = useState(false)
-  // const template = templates[selectedTemplate]
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("react");
+  const [showSidebar, setShowSidebar] = useState(false);
+  const template = templates[selectedTemplate]
 
   const getTitle = () => {
     switch (selectedTemplate) {
-      case 'react':
-        return 'React Playground'
-      case 'vue':
-        return 'Vue Playground'
-      case 'node':
-        return 'Node.js Playground'
+      case "react":
+        return "React Playground";
+      case "vue":
+        return "Vue Playground";
+      case "node":
+        return "Node.js Playground";
       default:
-        return 'JavaScript Playground'
+        return "JavaScript Playground";
     }
-  }
+  };
 
   return (
     <div className="app">
@@ -50,7 +49,7 @@ export default function App() {
         <select
           disabled
           value={selectedTemplate}
-          onChange={e => setSelectedTemplate(e.target.value)}
+          onChange={(e) => setSelectedTemplate(e.target.value)}
         >
           <option value="vanilla">Vanilla JS</option>
           <option value="react">React</option>
@@ -62,7 +61,7 @@ export default function App() {
       <main className="app-main">
         <Playground
           key={selectedTemplate}
-          template={newTemp}
+          template={template}
           options={{
             autoSave: true,
           }}
@@ -80,16 +79,16 @@ export default function App() {
                 </aside>
               )}
               <ResizablePanel
-                firstPanel={(
+                firstPanel={
                   <div className="playground-editor-section">
                     <PlaygroundEditor />
                   </div>
-                )}
-                secondPanel={(
+                }
+                secondPanel={
                   <div className="playground-preview-section">
                     <PlaygroundPanel />
                   </div>
-                )}
+                }
                 direction="horizontal"
                 responsive
                 responsiveBreakpoint={768}
@@ -105,5 +104,5 @@ export default function App() {
         </Playground>
       </main>
     </div>
-  )
+  );
 }
