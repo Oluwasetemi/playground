@@ -18,6 +18,11 @@ export class PreviewServer {
   }
 
   async start(command: string): Promise<void> {
+    // Inject console forwarder into index.html before the dev server starts so
+    // Vite serves the modified file. DOM injection via contentDocument is
+    // unreliable for cross-origin iframes (different port = different origin).
+    await this.injectConsoleForwarderIntoHtml()
+
     // Unsubscribe any previous listener before re-registering to prevent accumulation
     this.serverReadyUnsubscribe?.()
     this.serverReadyUnsubscribe = this.webcontainer.on('server-ready', (_port, url) => {
@@ -67,10 +72,6 @@ export class PreviewServer {
     if (this.serverUrl) {
       iframe.src = this.serverUrl
     }
-
-    iframe.addEventListener('load', () => {
-      this.injectConsoleForwarder()
-    })
   }
 
   reload(): void {
@@ -102,66 +103,25 @@ export class PreviewServer {
     }
   }
 
-  private injectConsoleForwarder(): void {
-    if (!this.iframe || !this.iframe.contentWindow)
-      return
+  private async injectConsoleForwarderIntoHtml(): Promise<void> {
+    // Minified inline script that intercepts console methods and forwards them
+    // to the parent frame via postMessage. Runs in the iframe's own origin so
+    // window.parent.postMessage is never blocked by cross-origin policy.
+    const forwarderScript = `<script data-playground-console>
+(function(){var orig={log:console.log,warn:console.warn,error:console.error,info:console.info};['log','warn','error','info'].forEach(function(m){console[m]=function(){orig[m].apply(console,arguments);try{window.parent.postMessage({source:'playground-console',type:m,args:Array.prototype.slice.call(arguments).map(function(a){try{return typeof a==='object'&&a!==null?JSON.parse(JSON.stringify(a)):a}catch(e){return String(a)}})},'\x2a')}catch(e){}};});window.addEventListener('error',function(e){try{window.parent.postMessage({source:'playground-console',type:'error',args:[e.message+' at '+e.filename+':'+e.lineno]},'\x2a')}catch(_){}});window.addEventListener('unhandledrejection',function(e){try{window.parent.postMessage({source:'playground-console',type:'error',args:['Unhandled rejection: '+String(e.reason)]},'\x2a')}catch(_){}});})();
+</script>`
 
     try {
-      const script = this.iframe.contentDocument?.createElement('script')
-      if (!script)
+      const html = await this.webcontainer.fs.readFile('/index.html', 'utf-8')
+      // Skip if already injected (e.g. on template switch where file persists)
+      if (html.includes('data-playground-console'))
         return
-
-      script.textContent = `
-        (function() {
-          const originalConsole = {
-            log: console.log,
-            warn: console.warn,
-            error: console.error,
-            info: console.info
-          };
-
-          ['log', 'warn', 'error', 'info'].forEach(method => {
-            console[method] = function(...args) {
-              originalConsole[method].apply(console, args);
-              window.parent.postMessage({
-                source: 'playground-console',
-                type: method,
-                args: args.map(arg => {
-                  try {
-                    if (typeof arg === 'object' && arg !== null) {
-                      return JSON.parse(JSON.stringify(arg));
-                    }
-                    return arg;
-                  } catch (e) {
-                    return String(arg);
-                  }
-                })
-              }, '*');
-            };
-          });
-
-          window.addEventListener('error', (e) => {
-            window.parent.postMessage({
-              source: 'playground-console',
-              type: 'error',
-              args: [e.message, 'at', e.filename + ':' + e.lineno]
-            }, '*');
-          });
-
-          window.addEventListener('unhandledrejection', (e) => {
-            window.parent.postMessage({
-              source: 'playground-console',
-              type: 'error',
-              args: ['Unhandled promise rejection:', e.reason]
-            }, '*');
-          });
-        })();
-      `
-
-      this.iframe.contentDocument?.head.appendChild(script)
+      // Insert immediately after <head> so it runs before any user scripts
+      const modified = html.replace('<head>', `<head>\n  ${forwarderScript}`)
+      await this.webcontainer.fs.writeFile('/index.html', modified)
     }
-    catch (error) {
-      console.warn('Failed to inject console forwarder:', error)
+    catch {
+      // No index.html in this template (e.g. Node.js-only) — skip silently
     }
   }
 }
