@@ -24,6 +24,13 @@ const templates: Record<string, Template> = {
   node: nodeTemplate,
 }
 
+const templateOptions = [
+  { value: 'vanilla', label: 'Vanilla' },
+  { value: 'react',   label: 'React' },
+  { value: 'vue',     label: 'Vue' },
+  { value: 'node',    label: 'Node' },
+]
+
 export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
   const [showSidebar, setShowSidebar] = useState(false)
@@ -31,38 +38,52 @@ export default function App() {
 
   const getTitle = () => {
     switch (selectedTemplate) {
-      case 'react':
-        return 'React Playground'
-      case 'vue':
-        return 'Vue Playground'
-      case 'node':
-        return 'Node.js Playground'
-      default:
-        return 'JavaScript Playground'
+      case 'react':   return 'React Playground'
+      case 'vue':     return 'Vue Playground'
+      case 'node':    return 'Node.js Playground'
+      default:        return 'JavaScript Playground'
     }
   }
 
   return (
     <div className="app">
+      {/* ── Top bar ── */}
       <div className="template-bar">
-        <select
-          value={selectedTemplate}
-          onChange={e => setSelectedTemplate(e.target.value)}
-        >
-          <option value="vanilla">Vanilla JS</option>
-          <option value="react">React</option>
-          <option value="vue">Vue</option>
-          <option value="node">Node.js</option>
-        </select>
+        {/* Brand */}
+        <div className="app-brand">
+          <div className="app-brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="5 3 1 8 5 13" />
+              <polyline points="11 3 15 8 11 13" />
+            </svg>
+          </div>
+          <span className="app-brand-name">playground</span>
+        </div>
+
+        {/* Template picker */}
+        <div className="template-picker" role="group" aria-label="Select template">
+          {templateOptions.map(opt => (
+            <div className="template-option" key={opt.value}>
+              <input
+                type="radio"
+                id={`tpl-${opt.value}`}
+                name="template"
+                value={opt.value}
+                checked={selectedTemplate === opt.value}
+                onChange={() => setSelectedTemplate(opt.value)}
+              />
+              <label htmlFor={`tpl-${opt.value}`}>{opt.label}</label>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* ── Main content ── */}
       <main className="app-main">
         <Playground
           key={selectedTemplate}
           template={template}
-          options={{
-            autoSave: true,
-          }}
+          options={{ autoSave: true }}
         >
           <div className="playground">
             <PlaygroundHeader

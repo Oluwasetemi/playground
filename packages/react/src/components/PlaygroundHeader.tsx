@@ -23,7 +23,7 @@ export function PlaygroundHeader({
   const isReady = status === 'ready'
 
   return (
-    <div className="playground-header">
+    <div className="playground-header" data-status={status}>
       <div className="playground-header-title">{title}</div>
       <div className="playground-header-actions">
         {onToggleSidebar && (

@@ -91,9 +91,11 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
         >
           {status !== 'ready' && (
             <div className="playground-panel-loading">
-              {status === 'initializing' && 'Initializing...'}
-              {status === 'installing' && 'Installing dependencies...'}
-              {status === 'error' && 'Error loading preview'}
+              <span className="playground-panel-loading-text">
+                {status === 'initializing' && 'Starting WebContainer…'}
+                {status === 'installing'   && 'Installing dependencies…'}
+                {status === 'error'        && 'Failed to load preview'}
+              </span>
             </div>
           )}
           <iframe
