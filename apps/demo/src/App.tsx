@@ -46,7 +46,6 @@ export default function App() {
     <div className="app">
       <div className="template-bar">
         <select
-          disabled
           value={selectedTemplate}
           onChange={e => setSelectedTemplate(e.target.value)}
         >

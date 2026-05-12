@@ -38,6 +38,7 @@ export class PlaygroundEngine {
   private status: PlaygroundStatus = 'initializing'
   private options: PlaygroundOptions
   private installedDependenciesHash: string | null = null
+  private autoSaveSetupTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(options: PlaygroundOptions = {}) {
     this.options = options
@@ -111,12 +112,12 @@ export class PlaygroundEngine {
       // Enable auto-save after everything is initialized
       if (this.options.autoSave) {
         // Delay auto-save until editor and other components are mounted
-        setTimeout(() => {
-          // Only enable if filesystemManager and currentTemplate still exist
+        this.autoSaveSetupTimer = setTimeout(() => {
+          this.autoSaveSetupTimer = null
           if (this.filesystemManager && this.currentTemplate) {
             this.enableAutoSave()
           }
-        }, 3000) // 3 seconds to ensure all components are mounted
+        }, 3000)
       }
     }
     catch (error) {
@@ -319,9 +320,19 @@ export class PlaygroundEngine {
       return false
     }
 
-    // Restore files and editor state
+    // Only restore files that belong to the current template's expected paths
+    // to prevent stale data from a prior template version leaking in
+    const expectedPaths = this.templateManager
+      ? this.templateManager.getExpectedPaths(this.currentTemplate!)
+      : null
+
     for (const [path, content] of Object.entries(snapshot.files)) {
-      await this.filesystemManager.writeFile(path, content)
+      if (expectedPaths && !expectedPaths.has(path)) {
+        console.warn(`Snapshot contains unexpected path, skipping: ${path}`)
+        continue
+      }
+      // silent: true prevents triggering spurious file:change events during restore
+      await this.filesystemManager.writeFile(path, content, { silent: true })
     }
 
     for (const tab of snapshot.openTabs) {
@@ -531,10 +542,15 @@ export class PlaygroundEngine {
   async cleanup(): Promise<void> {
     console.warn('Cleaning up playground engine...')
 
+    if (this.autoSaveSetupTimer !== null) {
+      clearTimeout(this.autoSaveSetupTimer)
+      this.autoSaveSetupTimer = null
+    }
+
     this.persistence.disableAutoSave()
     this.editor.destroy()
     this.terminal.destroy()
-    await this.webcontainerManager.killAll()
+    await this.webcontainerManager.teardown()
 
     if (this.filesystemManager) {
       await this.clearFileSystem()
@@ -589,9 +605,11 @@ export class PlaygroundEngine {
     }
 
     // Compute hash of current template dependencies (BOTH deps and devDeps)
-    const depsHash = JSON.stringify(this.currentTemplate.dependencies)
-    const devDepsHash = JSON.stringify(this.currentTemplate.devDependencies)
-    const combinedHash = depsHash + devDepsHash
+    // Sort keys to ensure insertion-order differences don't cause false cache misses
+    const sortedStringify = (obj: Record<string, string>) =>
+      JSON.stringify(obj, Object.keys(obj).sort())
+    const combinedHash = sortedStringify(this.currentTemplate.dependencies)
+      + sortedStringify(this.currentTemplate.devDependencies)
 
     // Check if dependencies match what's already installed
     if (this.installedDependenciesHash === combinedHash) {

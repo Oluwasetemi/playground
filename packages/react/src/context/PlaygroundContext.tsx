@@ -23,7 +23,7 @@ export interface PlaygroundContextValue {
   openInStackBlitz: () => Promise<void>
   consoleMessages: ConsoleMessage[]
   clearConsole: () => void
-  template: Template | null
+  template: Template
 }
 
 export const PlaygroundContext = createContext<PlaygroundContextValue | null>(null)

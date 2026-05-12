@@ -71,9 +71,13 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
       previousTemplateId.current = template.id
 
       return () => {
-        // Don't cleanup if still initializing (React strict mode double-mount)
+        // Always unsubscribe — subscriptions must not outlive this effect instance
+        unsubscribeError()
+        unsubscribeConsole()
+
+        // Skip engine teardown if still initializing (React Strict Mode double-mount)
         if (initializingRef.current) {
-          console.warn('Skipping cleanup - initialization still in progress')
+          console.warn('Skipping engine cleanup - initialization still in progress')
           return
         }
 
@@ -83,8 +87,6 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
             console.warn('Failed to save snapshot on cleanup:', err)
           })
           .finally(() => {
-            unsubscribeError()
-            unsubscribeConsole()
             engine.cleanup()
             engineRef.current = null
           })

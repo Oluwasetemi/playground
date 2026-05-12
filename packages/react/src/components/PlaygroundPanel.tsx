@@ -110,8 +110,8 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
           {consoleMessages.length === 0 ? (
             <div className="playground-console-empty">No console output</div>
           ) : (
-            consoleMessages.map((msg, index) => (
-              <div key={index} className={`playground-console-message ${msg.type}`}>
+            consoleMessages.map((msg) => (
+              <div key={`${msg.timestamp}-${msg.type}`} className={`playground-console-message ${msg.type}`}>
                 {msg.type === 'error' && <span className="console-icon">x</span>}
                 {msg.type === 'warn' && <span className="console-icon">!</span>}
                 {msg.type === 'info' && <span className="console-icon">i</span>}

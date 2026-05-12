@@ -8,6 +8,8 @@ export class PreviewServer {
   private events: EventEmitter<PlaygroundEvents>
   private serverUrl: string | null = null
   private iframe: HTMLIFrameElement | null = null
+  private serverReadyUnsubscribe: (() => void) | null = null
+  private allowedOrigins: Set<string> = new Set()
 
   constructor(webcontainer: WebContainer, events: EventEmitter<PlaygroundEvents>) {
     this.webcontainer = webcontainer
@@ -16,10 +18,17 @@ export class PreviewServer {
   }
 
   async start(command: string): Promise<void> {
-    // Listen for server-ready event
-    this.webcontainer.on('server-ready', (_port, url) => {
+    // Unsubscribe any previous listener before re-registering to prevent accumulation
+    this.serverReadyUnsubscribe?.()
+    this.serverReadyUnsubscribe = this.webcontainer.on('server-ready', (_port, url) => {
       console.warn(`Preview server ready at: ${url}`)
       this.serverUrl = url
+      try {
+        this.allowedOrigins.add(new URL(url).origin)
+      }
+      catch {
+        // ignore malformed URL
+      }
       this.events.emit('preview:ready', url)
       playgroundActions.setPreviewUrl(url)
 
@@ -77,6 +86,10 @@ export class PreviewServer {
   private setupMessageListener(): void {
     if (typeof window !== 'undefined') {
       window.addEventListener('message', (event) => {
+        // Only accept messages from known WebContainer server origins
+        if (this.allowedOrigins.size > 0 && !this.allowedOrigins.has(event.origin)) {
+          return
+        }
         if (event.data && event.data.source === 'playground-console') {
           const message: ConsoleMessage = {
             type: event.data.type,

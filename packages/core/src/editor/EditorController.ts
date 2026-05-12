@@ -3,7 +3,10 @@ import type { EventEmitter } from '../engine/EventEmitter'
 import type { PlaygroundEvents } from '../engine/types'
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
+import { css } from '@codemirror/lang-css'
+import { html } from '@codemirror/lang-html'
 import { javascript } from '@codemirror/lang-javascript'
+import { vue } from '@codemirror/lang-vue'
 import { bracketMatching, defaultHighlightStyle, foldGutter, foldKeymap, indentOnInput, syntaxHighlighting } from '@codemirror/language'
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
 import { Compartment, EditorState } from '@codemirror/state'
@@ -47,9 +50,14 @@ export class EditorController {
   }
 
   private createBasicEditor(container: HTMLElement): void {
-    // Get language extension based on file
-    const getLanguageExtension = () => {
-      return javascript({ jsx: true, typescript: true })
+    const getLanguageExtension = (filePath: string = this.activeFile) => {
+      const ext = filePath.split('.').pop()?.toLowerCase() ?? ''
+      switch (ext) {
+        case 'css': return css()
+        case 'html': case 'htm': return html()
+        case 'vue': return vue()
+        default: return javascript({ jsx: true, typescript: true })
+      }
     }
 
     // Full extensions loaded upfront
@@ -68,7 +76,7 @@ export class EditorController {
       autocompletion(),
       highlightActiveLine(),
       highlightSelectionMatches(),
-      getLanguageExtension(),
+      getLanguageExtension(this.activeFile),
       keymap.of([
         ...closeBracketsKeymap,
         ...defaultKeymap,
@@ -171,6 +179,10 @@ export class EditorController {
   }
 
   destroy(): void {
+    if (this.updateTimeout !== null) {
+      clearTimeout(this.updateTimeout)
+      this.updateTimeout = null
+    }
     if (this.view) {
       this.view.destroy()
       this.view = null

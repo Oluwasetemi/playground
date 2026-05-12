@@ -4,10 +4,24 @@ import { usePlaygroundContext } from '../context/PlaygroundContext'
 export function PlaygroundTerminal() {
   const { engine, status } = usePlaygroundContext()
   const containerRef = useRef<HTMLDivElement>(null)
+  const mountedEngineRef = useRef<typeof engine>(null)
 
   useEffect(() => {
-    if (containerRef.current && engine && status === 'ready') {
+    if (
+      containerRef.current
+      && engine
+      && status === 'ready'
+      && mountedEngineRef.current !== engine
+    ) {
+      mountedEngineRef.current = engine
       engine.mountTerminal(containerRef.current)
+    }
+
+    return () => {
+      // When engine reference changes, reset so the new engine gets a fresh mount
+      if (mountedEngineRef.current !== engine) {
+        mountedEngineRef.current = null
+      }
     }
   }, [engine, status])
 
