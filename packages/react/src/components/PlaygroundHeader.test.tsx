@@ -24,7 +24,16 @@ describe('playgroundHeader', () => {
     saveSnapshot: vi.fn(),
     consoleMessages: [],
     clearConsole: vi.fn(),
-    template: null,
+    template: {
+      id: 'react',
+      name: 'React',
+      description: 'React playground',
+      files: {},
+      dependencies: {},
+      devDependencies: {},
+      commands: { dev: 'vite' },
+      entryFile: '/src/main.tsx',
+    },
   }
 
   beforeEach(() => {
