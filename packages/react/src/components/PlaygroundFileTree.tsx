@@ -1,5 +1,5 @@
 import type { FileNode } from '@setemiojo/playground-core'
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { usePlaygroundContext } from '../context/PlaygroundContext'
 
 interface FileTreeNodeProps {
@@ -41,7 +41,7 @@ function filterHiddenFiles(nodes: FileNode[], hiddenFiles: string[]): FileNode[]
     .filter(node => node.type === 'file' || (node.children && node.children.length > 0))
 }
 
-function FileTreeNode({ node, onFileClick, hiddenFiles }: FileTreeNodeProps) {
+const FileTreeNode = memo(function FileTreeNode({ node, onFileClick, hiddenFiles }: FileTreeNodeProps) {
   if (node.type === 'file') {
     return (
       <div className="file-node" onClick={() => onFileClick(node.path)}>
@@ -69,7 +69,7 @@ function FileTreeNode({ node, onFileClick, hiddenFiles }: FileTreeNodeProps) {
       </div>
     </details>
   )
-}
+})
 
 const SKELETON_WIDTHS = ['60%', '45%', '72%', '38%', '55%', '65%', '42%']
 

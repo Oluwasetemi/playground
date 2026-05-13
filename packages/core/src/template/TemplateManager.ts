@@ -56,51 +56,48 @@ export class TemplateManager {
   async applyDiff(diff: FileDiff, targetTemplate: Template): Promise<void> {
     const targetFiles = this.flattenFileTree(targetTemplate.files)
 
-    // Step 1: Remove obsolete files
-    for (const path of diff.removed) {
+    // Step 1: Remove obsolete files in parallel
+    await Promise.all(diff.removed.map(async (path) => {
       try {
         await this.webcontainer.fs.rm(path, { force: true })
         this.currentFiles.delete(path)
-        console.warn(`✓ Removed: ${path}`)
       }
       catch (error) {
         console.warn(`Failed to remove ${path}:`, error)
       }
-    }
+    }))
 
     // Step 1.5: Clean up empty directories
     await this.cleanupEmptyDirectories()
 
-    // Step 2: Add/update files
-    const filesToWrite = [...diff.added, ...diff.modified]
-    for (const path of filesToWrite) {
+    // Step 2: Add/update files in parallel
+    await Promise.all([...diff.added, ...diff.modified].map(async (path) => {
       const content = targetFiles.get(path)
-      if (content) {
-        try {
-          // Ensure parent directory exists
-          const dirPath = path.substring(0, path.lastIndexOf('/'))
-          if (dirPath && dirPath !== '/') {
-            await this.webcontainer.fs.mkdir(dirPath, { recursive: true })
-          }
-
-          await this.webcontainer.fs.writeFile(path, content)
-          this.currentFiles.set(path, content)
-          console.warn(`✓ ${diff.added.includes(path) ? 'Added' : 'Modified'}: ${path}`)
+      if (!content) return
+      try {
+        const dirPath = path.substring(0, path.lastIndexOf('/'))
+        if (dirPath && dirPath !== '/') {
+          await this.webcontainer.fs.mkdir(dirPath, { recursive: true })
         }
-        catch (error) {
-          console.warn(`Failed to write ${path}:`, error)
-        }
+        await this.webcontainer.fs.writeFile(path, content)
+        this.currentFiles.set(path, content)
       }
-    }
+      catch (error) {
+        console.warn(`Failed to write ${path}:`, error)
+      }
+    }))
   }
 
   /**
    * Check if dependencies changed between templates
    */
   dependenciesChanged(current: Template, target: Template): boolean {
-    const currentDeps = JSON.stringify(current.dependencies) + JSON.stringify(current.devDependencies)
-    const targetDeps = JSON.stringify(target.dependencies) + JSON.stringify(target.devDependencies)
-    return currentDeps !== targetDeps
+    const sorted = (obj: Record<string, string> = {}) =>
+      JSON.stringify(Object.fromEntries(Object.entries(obj).sort()))
+    return (
+      sorted(current.dependencies) !== sorted(target.dependencies)
+      || sorted(current.devDependencies) !== sorted(target.devDependencies)
+    )
   }
 
   /**

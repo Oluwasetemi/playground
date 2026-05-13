@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePlaygroundContext } from '../context/PlaygroundContext'
 import { Terminal } from './Terminal'
 
@@ -84,12 +84,18 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
     }
   }, [consoleMessages, activeTab])
 
-  const errorCount = consoleMessages.filter(m => m.type === 'error').length
-  const warnCount = consoleMessages.filter(m => m.type === 'warn').length
-
-  const filtered = filter === 'all'
-    ? consoleMessages
-    : consoleMessages.filter(m => m.type === filter)
+  const errorCount = useMemo(
+    () => consoleMessages.filter(m => m.type === 'error').length,
+    [consoleMessages],
+  )
+  const warnCount = useMemo(
+    () => consoleMessages.filter(m => m.type === 'warn').length,
+    [consoleMessages],
+  )
+  const filtered = useMemo(
+    () => filter === 'all' ? consoleMessages : consoleMessages.filter(m => m.type === filter),
+    [consoleMessages, filter],
+  )
 
   return (
     <div className="playground-panel">

@@ -243,33 +243,16 @@ export class FileSystemManager {
         withFileTypes: true,
       })
 
-      const nodes: FileNode[] = []
+      const visible = entries.filter(e => e.name !== 'node_modules' && !e.name.startsWith('.'))
 
-      for (const entry of entries) {
-        if (entry.name === 'node_modules' || entry.name.startsWith('.')) {
-          continue
-        }
-
+      const nodes = await Promise.all(visible.map(async (entry): Promise<FileNode> => {
         const fullPath = dirPath === '/' ? `/${entry.name}` : `${dirPath}/${entry.name}`
-
         if (entry.isDirectory()) {
-          // Pass incremented depth to recursive call
           const children = await this.buildFileTree(fullPath, depth + 1)
-          nodes.push({
-            name: entry.name,
-            path: fullPath,
-            type: 'directory',
-            children,
-          })
+          return { name: entry.name, path: fullPath, type: 'directory', children }
         }
-        else {
-          nodes.push({
-            name: entry.name,
-            path: fullPath,
-            type: 'file',
-          })
-        }
-      }
+        return { name: entry.name, path: fullPath, type: 'file' }
+      }))
 
       return nodes.sort((a, b) => {
         if (a.type !== b.type) {
@@ -292,27 +275,24 @@ export class FileSystemManager {
   }
 
   async getAllFiles(): Promise<Record<string, string>> {
-    const files: Record<string, string> = {}
-
-    const collectFiles = async (nodes: FileNode[]) => {
-      for (const node of nodes) {
-        if (node.type === 'file') {
-          try {
-            files[node.path] = await this.readFile(node.path)
-          }
-          catch (error) {
-            console.error(`Failed to read ${node.path}:`, error)
-          }
-        }
-        else if (node.children) {
-          await collectFiles(node.children)
-        }
-      }
-    }
+    const flattenTree = (nodes: FileNode[]): FileNode[] =>
+      nodes.flatMap(n => n.type === 'directory' ? flattenTree(n.children ?? []) : [n])
 
     const tree = await this.getFileTree()
-    await collectFiles(tree)
+    const fileNodes = flattenTree(tree)
 
-    return files
+    const entries = await Promise.all(
+      fileNodes.map(async (node) => {
+        try {
+          const content = await this.readFile(node.path)
+          return [node.path, content] as const
+        }
+        catch {
+          return null
+        }
+      }),
+    )
+
+    return Object.fromEntries(entries.filter((e): e is [string, string] => e !== null))
   }
 }

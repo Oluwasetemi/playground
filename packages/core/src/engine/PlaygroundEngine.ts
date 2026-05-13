@@ -348,14 +348,12 @@ export class PlaygroundEngine {
       ? this.templateManager.getExpectedPaths(this.currentTemplate!)
       : null
 
-    for (const [path, content] of Object.entries(snapshot.files)) {
-      if (expectedPaths && !expectedPaths.has(path)) {
-        console.warn(`Snapshot contains unexpected path, skipping: ${path}`)
-        continue
-      }
-      // silent: true prevents triggering spurious file:change events during restore
-      await this.filesystemManager.writeFile(path, content, { silent: true })
-    }
+    await Promise.all(
+      Object.entries(snapshot.files).map(([path, content]) => {
+        if (expectedPaths && !expectedPaths.has(path)) return Promise.resolve()
+        return this.filesystemManager!.writeFile(path, content, { silent: true })
+      }),
+    )
 
     for (const tab of snapshot.openTabs) {
       const content = snapshot.files[tab] || ''
