@@ -1,5 +1,28 @@
 # @setemiojo/playground-react
 
+## 0.4.0
+
+### Minor Changes
+
+- Add Terminal component, Monaco editor adapter, and hidden files support
+
+  New features:
+  - `Terminal` React component backed by xterm.js with FitAddon, full ANSI rendering, and resize-aware layout
+  - `TerminalController` in core for HTML-based process output rendering with ANSI stripping
+  - Pluggable editor architecture: `EditorAdapter` interface with `CodeMirrorEditor` and lazy-loadable `MonacoEditor`
+  - `hiddenFiles` property on `Template` to exclude files from the file tree
+  - `console.clear` forwarded from WebContainer iframe clears the console panel
+  - `process:output` events pipe dev-server stdout/stderr to the Terminal tab
+  - `terminalMessages` and `clearTerminal` exposed via `usePlayground` hook and `PlaygroundContext`
+  - `ResizablePanel` now tolerates sandboxed environments that block `localStorage`
+
+### Patch Changes
+
+- Update and fixes across the playground
+- Updated dependencies
+- Updated dependencies
+  - @setemiojo/playground-core@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes
