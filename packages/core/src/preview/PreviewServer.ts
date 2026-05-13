@@ -10,6 +10,7 @@ export class PreviewServer {
   private iframe: HTMLIFrameElement | null = null
   private serverReadyUnsubscribe: (() => void) | null = null
   private allowedOrigins: Set<string> = new Set()
+  private serverProcess: import('@webcontainer/api').WebContainerProcess | null = null
 
   constructor(webcontainer: WebContainer, events: EventEmitter<PlaygroundEvents>) {
     this.webcontainer = webcontainer
@@ -17,14 +18,31 @@ export class PreviewServer {
     this.setupMessageListener()
   }
 
+  async stop(): Promise<void> {
+    if (this.serverProcess) {
+      try {
+        this.serverProcess.kill()
+      }
+      catch {
+        // ignore — process may already be dead
+      }
+      this.serverProcess = null
+    }
+    this.serverReadyUnsubscribe?.()
+    this.serverReadyUnsubscribe = null
+    this.serverUrl = null
+  }
+
   async start(command: string): Promise<void> {
+    // Kill any running server before starting a new one so Vite isn't still
+    // watching files when we overwrite them during a template switch.
+    await this.stop()
+
     // Inject console forwarder into index.html before the dev server starts so
     // Vite serves the modified file. DOM injection via contentDocument is
     // unreliable for cross-origin iframes (different port = different origin).
     await this.injectConsoleForwarderIntoHtml()
 
-    // Unsubscribe any previous listener before re-registering to prevent accumulation
-    this.serverReadyUnsubscribe?.()
     this.serverReadyUnsubscribe = this.webcontainer.on('server-ready', (_port, url) => {
       console.warn(`Preview server ready at: ${url}`)
       this.serverUrl = url
@@ -47,10 +65,11 @@ export class PreviewServer {
     const [cmd, ...args] = command.split(' ')
 
     // Spawn the dev server process and keep it running in background
-    const serverProcess = await this.webcontainer.spawn(cmd, args)
+    const proc = await this.webcontainer.spawn(cmd, args)
+    this.serverProcess = proc
 
     // Log server output
-    serverProcess.output.pipeTo(
+    proc.output.pipeTo(
       new WritableStream({
         write(data) {
           console.warn('[dev-server]', data)
@@ -59,7 +78,7 @@ export class PreviewServer {
     )
 
     // Don't await exit - let it run in background
-    serverProcess.exit.then((code) => {
+    proc.exit.then((code: number) => {
       if (code !== 0) {
         console.error(`Dev server exited with code ${code}`)
       }
