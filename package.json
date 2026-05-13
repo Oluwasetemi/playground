@@ -22,9 +22,6 @@
     "version-packages": "changeset version",
     "release": "pnpm run build && changeset publish"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
-  },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
     "@setemiojo/eslint-config": "^6.2.0",
