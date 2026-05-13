@@ -31,9 +31,28 @@ const templateOptions = [
   { value: 'node',    label: 'Node' },
 ]
 
+function HorizontalIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="1" y="2" width="6" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="2" width="6" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function VerticalIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="2" y="1" width="12" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="2" y="9" width="12" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
 export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
   const [showSidebar, setShowSidebar] = useState(false)
+  const [direction, setDirection] = useState<'horizontal' | 'vertical'>('horizontal')
   const template = templates[selectedTemplate]
 
   const getTitle = () => {
@@ -76,12 +95,22 @@ export default function App() {
             </div>
           ))}
         </div>
+
+        {/* Layout toggle */}
+        <button
+          className={`layout-toggle-btn ${direction === 'vertical' ? 'active' : ''}`}
+          onClick={() => setDirection(d => d === 'horizontal' ? 'vertical' : 'horizontal')}
+          title={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
+          aria-label={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
+        >
+          {direction === 'horizontal' ? <VerticalIcon /> : <HorizontalIcon />}
+        </button>
       </div>
 
       {/* ── Main content ── */}
       <main className="app-main">
+        {/* No key prop — template switches are handled by usePlayground's switchTemplate() */}
         <Playground
-          key={selectedTemplate}
           template={template}
           options={{ autoSave: true }}
         >
@@ -108,7 +137,7 @@ export default function App() {
                     <PlaygroundPanel />
                   </div>
                 )}
-                direction="horizontal"
+                direction={direction}
                 responsive
                 responsiveBreakpoint={768}
                 initialSize={50}

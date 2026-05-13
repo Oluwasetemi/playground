@@ -136,6 +136,35 @@
   box-shadow: 0 0 0 3px rgba(0, 214, 143, 0.12);
 }
 
+/* Layout toggle */
+.layout-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #111318;
+  border: 1px solid #252830;
+  border-radius: 7px;
+  color: #8892a4;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.layout-toggle-btn:hover {
+  color: #e2e8f0;
+  border-color: #313540;
+  background: #1d2129;
+}
+
+.layout-toggle-btn.active {
+  color: #00d68f;
+  border-color: rgba(0, 214, 143, 0.35);
+  background: rgba(0, 214, 143, 0.08);
+}
+
 /* ========================================
    MAIN CONTENT
    ======================================== */
