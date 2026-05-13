@@ -122,6 +122,20 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     }
   }, [])
 
+  // ── Effect 3: hot-swap editor adapter when options.editor changes ─────────
+  // Only runs after the engine exists and status is 'ready' so we never
+  // interrupt an in-progress install.
+  const editorType = options?.editor ?? 'codemirror'
+  const prevEditorTypeRef = useRef(editorType)
+  useEffect(() => {
+    if (prevEditorTypeRef.current === editorType) return
+    prevEditorTypeRef.current = editorType
+    if (!engineRef.current || status !== 'ready') return
+    engineRef.current.switchEditorType(editorType).catch((err: Error) => {
+      console.error('Failed to switch editor type:', err)
+    })
+  }, [editorType, status])
+
   const updateFile = useCallback(async (path: string, content: string) => {
     if (engineRef.current) {
       await engineRef.current.updateFile(path, content)

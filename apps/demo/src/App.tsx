@@ -144,10 +144,7 @@ export default function App() {
 
       {/* ── Main content ── */}
       <main className="app-main">
-        {/* key=editorType forces a full remount when switching editors,
-            since the engine and editor instance are created once at mount */}
         <Playground
-          key={editorType}
           template={template}
           options={{ autoSave: true, editor: editorType }}
         >

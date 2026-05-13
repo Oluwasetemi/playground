@@ -41,6 +41,7 @@ export class PlaygroundEngine {
   private options: PlaygroundOptions
   private installedDependenciesHash: string | null = null
   private autoSaveSetupTimer: ReturnType<typeof setTimeout> | null = null
+  private editorContainer: HTMLElement | null = null
 
   constructor(options: PlaygroundOptions = {}) {
     this.options = options
@@ -254,6 +255,7 @@ export class PlaygroundEngine {
   }
 
   async mountEditor(container: HTMLElement): Promise<void> {
+    this.editorContainer = container
     await this.editor.initialize(container, {
       theme: this.options.theme,
       lineNumbers: this.options.showLineNumbers,
@@ -269,6 +271,39 @@ export class PlaygroundEngine {
       catch (error) {
         console.error(`Failed to open entry file ${entryFile}:`, error)
       }
+    }
+  }
+
+  async switchEditorType(type: 'codemirror' | 'monaco'): Promise<void> {
+    if (!this.editorContainer) return
+
+    const activeFile = this.editor.getActiveFile()
+    const content = this.editor.getContent()
+    const openTabs = this.editor.getOpenTabs()
+
+    this.editor.destroy()
+    this.editor = new EditorController(this.events, type)
+
+    await this.editor.initialize(this.editorContainer, {
+      theme: this.options.theme,
+      lineNumbers: this.options.showLineNumbers,
+      ...this.options.editorOptions,
+    })
+
+    // Restore previously open tabs, active file last so it ends up focused
+    const tabsToRestore = openTabs.filter(t => t !== activeFile)
+    for (const tab of tabsToRestore) {
+      try {
+        const tabContent = this.filesystemManager
+          ? await this.filesystemManager.readFile(tab)
+          : ''
+        await this.editor.openFile(tab, tabContent)
+      }
+      catch { /* skip missing tabs */ }
+    }
+
+    if (activeFile) {
+      await this.editor.openFile(activeFile, content)
     }
   }
 
