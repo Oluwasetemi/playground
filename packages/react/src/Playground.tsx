@@ -1,6 +1,6 @@
 import type { PlaygroundOptions, Template } from '@setemiojo/playground-core'
 import type { ReactNode } from 'react'
-import { PlaygroundContext } from './context/PlaygroundContext'
+import { PlaygroundStableContext, PlaygroundVolatileContext } from './context/PlaygroundContext'
 import { usePlayground } from './usePlayground'
 
 export interface PlaygroundProps {
@@ -10,11 +10,13 @@ export interface PlaygroundProps {
 }
 
 export function Playground({ template, options, children }: PlaygroundProps) {
-  const playground = usePlayground(template, options)
+  const { stableValue, volatileValue } = usePlayground(template, options)
 
   return (
-    <PlaygroundContext.Provider value={playground}>
-      {children}
-    </PlaygroundContext.Provider>
+    <PlaygroundStableContext.Provider value={stableValue}>
+      <PlaygroundVolatileContext.Provider value={volatileValue}>
+        {children}
+      </PlaygroundVolatileContext.Provider>
+    </PlaygroundStableContext.Provider>
   )
 }

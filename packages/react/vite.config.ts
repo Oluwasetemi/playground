@@ -11,7 +11,16 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@nanostores/react'],
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        '@nanostores/react',
+        'nanostores',
+        'monaco-editor',
+        /^monaco-editor\//,
+        '@setemiojo/playground-core',
+      ],
       output: {
         globals: {
           'react': 'React',

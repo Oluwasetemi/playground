@@ -7,7 +7,7 @@ import {
   $previewUrl,
   PlaygroundEngine,
 } from '@setemiojo/playground-core'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 export function usePlayground(template: Template, options?: PlaygroundOptions) {
   const engineRef = useRef<PlaygroundEngine | null>(null)
@@ -75,20 +75,26 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
         setConsoleMessages([])
         return
       }
-      setConsoleMessages(prev => [...prev, {
-        type: message.type as 'log' | 'error' | 'warn' | 'info',
-        text: message.args.map(arg =>
-          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg),
-        ).join(' '),
-        timestamp: Date.now(),
-      }])
+      setConsoleMessages((prev) => {
+        const next = [...prev, {
+          type: message.type as 'log' | 'error' | 'warn' | 'info',
+          text: message.args.map(arg =>
+            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg),
+          ).join(' '),
+          timestamp: Date.now(),
+        }]
+        return next.length > 500 ? next.slice(-500) : next
+      })
     })
     const unsubscribeTerminal = engine.on('process:output', (output: ProcessOutput) => {
-      setTerminalMessages(prev => [...prev, {
-        type: output.type,
-        text: output.data,
-        timestamp: output.timestamp,
-      }])
+      setTerminalMessages((prev) => {
+        const next = [...prev, {
+          type: output.type,
+          text: output.data,
+          timestamp: output.timestamp,
+        }]
+        return next.length > 1000 ? next.slice(-1000) : next
+      })
     })
 
     return () => {
@@ -193,24 +199,36 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     setTerminalMessages([])
   }, [])
 
-  return {
+  const stableValue = useMemo(() => ({
     engine: engineRef.current,
-    status,
-    files,
-    previewUrl,
     updateFile,
     openFile,
     saveSnapshot,
     toggleLineNumbers,
-    showLineNumbers,
     formatCode,
     resetCode,
     openInStackBlitz,
-    consoleMessages,
     clearConsole,
-    terminalMessages,
     clearTerminal,
-    template,
     hiddenFiles: template.hiddenFiles ?? [],
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [updateFile, openFile, saveSnapshot, toggleLineNumbers, formatCode, resetCode, openInStackBlitz, clearConsole, clearTerminal, template.hiddenFiles])
+
+  const volatileValue = {
+    status,
+    files,
+    previewUrl,
+    showLineNumbers,
+    consoleMessages,
+    terminalMessages,
+    template,
+  }
+
+  return {
+    stableValue,
+    volatileValue,
+    // flat spread for usePlayground consumers (usePlaygroundContext merges them)
+    ...stableValue,
+    ...volatileValue,
   }
 }

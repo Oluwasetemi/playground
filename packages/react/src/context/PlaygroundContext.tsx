@@ -13,35 +13,46 @@ export interface TerminalMessage {
   timestamp: number
 }
 
-export interface PlaygroundContextValue {
+// Stable: callbacks and engine reference — only changes when engine is swapped
+export interface PlaygroundStableValue {
   engine: PlaygroundEngine | null
-  status: PlaygroundStatus
-  files: FileNode[]
-  previewUrl: string | null
   updateFile: (path: string, content: string) => Promise<void>
   openFile: (path: string) => Promise<void>
   saveSnapshot: () => Promise<void>
-  // New methods for enhanced toolbar
   toggleLineNumbers: () => void
-  showLineNumbers: boolean
   formatCode: () => Promise<void>
   resetCode: () => Promise<void>
   openInStackBlitz: () => Promise<void>
-  consoleMessages: ConsoleMessage[]
   clearConsole: () => void
-  terminalMessages: TerminalMessage[]
   clearTerminal: () => void
-  template: Template | null
-  /** List of file paths that should be hidden from the file tree */
   hiddenFiles: string[]
 }
 
-export const PlaygroundContext = createContext<PlaygroundContextValue | null>(null)
+// Volatile: state that changes frequently (status updates, messages, file changes)
+export interface PlaygroundVolatileValue {
+  status: PlaygroundStatus
+  files: FileNode[]
+  previewUrl: string | null
+  showLineNumbers: boolean
+  consoleMessages: ConsoleMessage[]
+  terminalMessages: TerminalMessage[]
+  template: Template | null
+}
+
+// Combined type for backward-compat consumers of usePlaygroundContext()
+export type PlaygroundContextValue = PlaygroundStableValue & PlaygroundVolatileValue
+
+export const PlaygroundStableContext = createContext<PlaygroundStableValue | null>(null)
+export const PlaygroundVolatileContext = createContext<PlaygroundVolatileValue | null>(null)
+
+// Keep the old name as an alias so existing imports don't break
+export const PlaygroundContext = PlaygroundStableContext
 
 export function usePlaygroundContext(): PlaygroundContextValue {
-  const context = useContext(PlaygroundContext)
-  if (!context) {
+  const stable = useContext(PlaygroundStableContext)
+  const volatile = useContext(PlaygroundVolatileContext)
+  if (!stable || !volatile) {
     throw new Error('usePlaygroundContext must be used within a Playground component')
   }
-  return context
+  return { ...stable, ...volatile }
 }
