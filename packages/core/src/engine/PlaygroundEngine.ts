@@ -10,6 +10,8 @@ import sdk from '@stackblitz/sdk'
 import * as prettier from 'prettier'
 import prettierBabelPlugin from 'prettier/plugins/babel'
 import prettierEstreePlugin from 'prettier/plugins/estree'
+import prettierHtmlPlugin from 'prettier/plugins/html'
+import prettierPostcssPlugin from 'prettier/plugins/postcss'
 import prettierTypescriptPlugin from 'prettier/plugins/typescript'
 import { EditorController } from '../editor/EditorController'
 import { PersistenceManager } from '../persistence/PersistenceManager'
@@ -151,10 +153,10 @@ export class PlaygroundEngine {
     try {
       this.setStatus('initializing')
 
-      // Step 1: Kill dev server BEFORE making filesystem changes
-      // This prevents Vite from trying to reload config files before deps are installed
+      // Step 1: Stop dev server BEFORE making filesystem changes so Vite isn't
+      // watching files while we overwrite them (prevents spurious config restarts).
       console.warn('Stopping current dev server...')
-      await this.webcontainerManager.killAll()
+      await this.preview?.stop()
 
       // Step 2: Compute file diff
       const diff = await this.templateManager.computeDiff(newTemplate)
@@ -180,13 +182,17 @@ export class PlaygroundEngine {
         newTemplate,
       )
 
+      // Step 4.5: Switch currentTemplate NOW so installDependencies hashes the
+      // new template's deps, not the old one (which would always match and skip).
+      const previousTemplate = this.currentTemplate
+      this.currentTemplate = newTemplate
+      this.persistence = new PersistenceManager(newTemplate.id)
+      this.templateManager.updateCurrentState(newTemplate)
+      this.persistence.clearSnapshot()
+
       if (depsChanged) {
         console.warn('Dependencies changed, running npm install...')
         this.setStatus('installing')
-
-        // Don't manually write package.json here - installDependencies will handle it
-        // The template's package.json was already applied via applyDiff above
-
         await this.installDependencies()
       }
       else {
@@ -199,24 +205,8 @@ export class PlaygroundEngine {
         await this.preview.start(newTemplate.commands.dev)
       }
 
-      // Step 6: Update state
-      const previousTemplate = this.currentTemplate
-      this.currentTemplate = newTemplate
-      this.persistence = new PersistenceManager(newTemplate.id)
-      this.templateManager.updateCurrentState(newTemplate)
-
-      // Step 7: Clear localStorage snapshot for the new template
-      // We don't want to restore snapshots from previous sessions when switching templates
-      // The user should see the clean template, not mixed files from different templates
-      this.persistence.clearSnapshot()
-
-      // Step 8: Build initial file tree
-      let fileTree = await this.filesystemManager.getFileTree()
-
-      // Step 9: Validate and clean - ensure no old template files leaked through
-      fileTree = await this.validateAndCleanFileTree(newTemplate, fileTree)
-
-      // Step 10: Emit validated file tree
+      // Step 6: Emit file tree (applyDiff already cleaned up old files — no extra validation needed)
+      const fileTree = await this.filesystemManager.getFileTree()
       this.events.emit('files:update', fileTree)
       playgroundActions.setFiles(fileTree)
 
@@ -268,12 +258,13 @@ export class PlaygroundEngine {
     })
 
     if (this.filesystemManager && this.currentTemplate) {
+      const entryFile = this.currentTemplate.entryFile
       try {
-        const entryContent = await this.filesystemManager.readFile(this.currentTemplate.entryFile)
-        await this.editor.openFile(this.currentTemplate.entryFile, entryContent)
+        const entryContent = await this.filesystemManager.readFile(entryFile)
+        await this.editor.openFile(entryFile, entryContent)
       }
       catch (error) {
-        console.error('Failed to open entry file:', error)
+        console.error(`Failed to open entry file ${entryFile}:`, error)
       }
     }
   }
@@ -380,18 +371,24 @@ export class PlaygroundEngine {
     const content = this.editor.getContent()
     const ext = activeFile.split('.').pop()?.toLowerCase()
 
-    // Map file extensions to Prettier parsers
-    const parserMap: Record<string, string> = {
-      js: 'babel',
-      jsx: 'babel',
-      mjs: 'babel',
-      cjs: 'babel',
-      ts: 'typescript',
-      tsx: 'typescript',
+    type ParserEntry = { parser: string, plugins: any[] }
+    const parserMap: Record<string, ParserEntry> = {
+      js: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
+      jsx: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
+      mjs: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
+      cjs: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
+      ts: { parser: 'typescript', plugins: [prettierTypescriptPlugin, prettierEstreePlugin] },
+      tsx: { parser: 'typescript', plugins: [prettierTypescriptPlugin, prettierEstreePlugin] },
+      html: { parser: 'html', plugins: [prettierHtmlPlugin] },
+      htm: { parser: 'html', plugins: [prettierHtmlPlugin] },
+      vue: { parser: 'vue', plugins: [prettierHtmlPlugin] },
+      css: { parser: 'css', plugins: [prettierPostcssPlugin] },
+      scss: { parser: 'scss', plugins: [prettierPostcssPlugin] },
+      less: { parser: 'less', plugins: [prettierPostcssPlugin] },
     }
 
-    const parser = ext ? parserMap[ext] : undefined
-    if (!parser) {
+    const entry = ext ? parserMap[ext] : undefined
+    if (!entry) {
       console.warn(`File type .${ext} is not supported for formatting`)
       return
     }
@@ -399,8 +396,8 @@ export class PlaygroundEngine {
     try {
       // Use Prettier to format the code (browser-compatible)
       const formattedCode = await prettier.format(content, {
-        parser,
-        plugins: [prettierBabelPlugin, prettierEstreePlugin, prettierTypescriptPlugin],
+        parser: entry.parser,
+        plugins: entry.plugins,
         tabWidth: 2,
         useTabs: false,
         semi: true,
@@ -748,60 +745,4 @@ export class PlaygroundEngine {
    * Flatten file tree to array of paths
    * Used for validation after template switching
    */
-  private flattenFileTreePaths(nodes: FileNode[]): string[] {
-    const paths: string[] = []
-
-    const traverse = (nodeList: FileNode[]) => {
-      for (const node of nodeList) {
-        paths.push(node.path)
-        if (node.type === 'directory' && node.children) {
-          traverse(node.children)
-        }
-      }
-    }
-
-    traverse(nodes)
-    return paths
   }
-
-  /**
-   * Validate file tree matches template and clean up unexpected files
-   */
-  private async validateAndCleanFileTree(
-    template: Template,
-    fileTree: FileNode[],
-  ): Promise<FileNode[]> {
-    const expectedPaths = this.templateManager!.getExpectedPaths(template)
-    const actualPaths = this.flattenFileTreePaths(fileTree)
-
-    // Find files that shouldn't exist
-    const unexpectedFiles = actualPaths.filter(path =>
-      !expectedPaths.has(path)
-      && path !== '/package.json'
-      && path !== '/package-lock.json'
-      && !path.startsWith('/node_modules'),
-    )
-
-    if (unexpectedFiles.length > 0) {
-      console.warn('⚠️  Found unexpected files from old template, cleaning:', unexpectedFiles)
-
-      // Remove unexpected files
-      for (const path of unexpectedFiles) {
-        try {
-          await this.filesystemManager!.removeFile(path)
-          console.warn(`✓ Removed unexpected file: ${path}`)
-        }
-        catch (error) {
-          console.warn(`Failed to remove ${path}:`, error)
-        }
-      }
-
-      // Rebuild tree after cleanup
-      const cleanTree = await this.filesystemManager!.getFileTree()
-      console.warn('✅ File tree cleaned and rebuilt')
-      return cleanTree
-    }
-
-    return fileTree
-  }
-}
