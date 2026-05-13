@@ -13,8 +13,8 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      // Mark monaco-editor as external for optional peer dependency
-      external: ['monaco-editor'],
+      // Mark monaco-editor and all subpaths as external (optional peer dep)
+      external: ['monaco-editor', /^monaco-editor\//, 'nanostores'],
       output: {
         // Manual chunking for code splitting
         manualChunks: {
