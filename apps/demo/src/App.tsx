@@ -6,16 +6,17 @@ import {
   PlaygroundHeader,
   PlaygroundPanel,
   ResizablePanel,
-} from '@setemiojo/playground-react'
+} from "@setemiojo/playground-react";
+import { useState } from "react";
+// import { reactTemplate as newTemp } from "./react.ts";
 import {
   nodeTemplate,
   reactTemplate,
   vanillaTemplate,
   vueTemplate,
 } from '@setemiojo/playground-templates'
-import { useState } from 'react'
-import './playground.css'
-import './App.css'
+import "./playground.css";
+import "./App.css";
 
 const templates: Record<string, Template> = {
   vanilla: vanillaTemplate,
@@ -50,19 +51,23 @@ function VerticalIcon() {
 }
 
 export default function App() {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
-  const [showSidebar, setShowSidebar] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("react");
+  const [showSidebar, setShowSidebar] = useState(false);
   const [direction, setDirection] = useState<'horizontal' | 'vertical'>('horizontal')
   const template = templates[selectedTemplate]
 
   const getTitle = () => {
     switch (selectedTemplate) {
-      case 'react':   return 'React Playground'
-      case 'vue':     return 'Vue Playground'
-      case 'node':    return 'Node.js Playground'
-      default:        return 'JavaScript Playground'
+      case "react":
+        return "React Playground";
+      case "vue":
+        return "Vue Playground";
+      case "node":
+        return "Node.js Playground";
+      default:
+        return "JavaScript Playground";
     }
-  }
+  };
 
   return (
     <div className="app">
@@ -127,16 +132,16 @@ export default function App() {
                 </aside>
               )}
               <ResizablePanel
-                firstPanel={(
+                firstPanel={
                   <div className="playground-editor-section">
                     <PlaygroundEditor />
                   </div>
-                )}
-                secondPanel={(
+                }
+                secondPanel={
                   <div className="playground-preview-section">
                     <PlaygroundPanel />
                   </div>
-                )}
+                }
                 direction={direction}
                 responsive
                 responsiveBreakpoint={768}
@@ -152,5 +157,5 @@ export default function App() {
         </Playground>
       </main>
     </div>
-  )
+  );
 }

@@ -1,10 +1,9 @@
+import type { CSSProperties, ReactNode } from 'react'
 import {
   useCallback,
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type ReactNode,
 } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
 
@@ -78,34 +77,45 @@ export function ResizablePanel({
 
   const [size, setSize] = useState<number>(() => {
     if (effectiveStorageKey && typeof window !== 'undefined') {
-      const stored = localStorage.getItem(effectiveStorageKey)
-      if (stored) {
-        const parsed = parseFloat(stored)
-        if (!isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
-          return parsed
+      try {
+        const stored = localStorage.getItem(effectiveStorageKey)
+        if (stored) {
+          const parsed = Number.parseFloat(stored)
+          if (!Number.isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
+            return parsed
+          }
         }
+      }
+      catch {
+        // localStorage might be blocked in sandboxed iframes
       }
     }
     return responsive && isMobile ? mobileInitialSize : initialSize
   })
   const [isDragging, setIsDragging] = useState(false)
-  const dragStartRef = useRef<{ position: number; size: number } | null>(null)
+  const dragStartRef = useRef<{ position: number, size: number } | null>(null)
   const currentSizeRef = useRef(size)
   currentSizeRef.current = size
 
   // Update size when switching between mobile and desktop
   useEffect(() => {
-    if (!responsive) return
+    if (!responsive)
+      return
 
     // Load the appropriate size for the current mode
     if (effectiveStorageKey && typeof window !== 'undefined') {
-      const stored = localStorage.getItem(effectiveStorageKey)
-      if (stored) {
-        const parsed = parseFloat(stored)
-        if (!isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
-          setSize(parsed)
-          return
+      try {
+        const stored = localStorage.getItem(effectiveStorageKey)
+        if (stored) {
+          const parsed = Number.parseFloat(stored)
+          if (!Number.isNaN(parsed) && parsed >= minSize && parsed <= maxSize) {
+            setSize(parsed)
+            return
+          }
         }
+      }
+      catch {
+        // localStorage might be blocked in sandboxed iframes
       }
     }
     // Fall back to default sizes
@@ -114,7 +124,7 @@ export function ResizablePanel({
 
   const clampSize = useCallback(
     (value: number) => Math.min(maxSize, Math.max(minSize, value)),
-    [minSize, maxSize]
+    [minSize, maxSize],
   )
 
   const handleMouseDown = useCallback(
@@ -127,7 +137,7 @@ export function ResizablePanel({
       }
       onResizeStart?.()
     },
-    [isHorizontal, size, onResizeStart]
+    [isHorizontal, size, onResizeStart],
   )
 
   const handleTouchStart = useCallback(
@@ -140,14 +150,16 @@ export function ResizablePanel({
       }
       onResizeStart?.()
     },
-    [isHorizontal, size, onResizeStart]
+    [isHorizontal, size, onResizeStart],
   )
 
   useEffect(() => {
-    if (!isDragging) return
+    if (!isDragging)
+      return
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current || !dragStartRef.current) return
+      if (!containerRef.current || !dragStartRef.current)
+        return
 
       const container = containerRef.current.getBoundingClientRect()
       const containerSize = isHorizontal ? container.width : container.height
@@ -162,7 +174,8 @@ export function ResizablePanel({
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!containerRef.current || !dragStartRef.current) return
+      if (!containerRef.current || !dragStartRef.current)
+        return
 
       const touch = e.touches[0]
       const container = containerRef.current.getBoundingClientRect()
@@ -182,7 +195,12 @@ export function ResizablePanel({
       dragStartRef.current = null
       const finalSize = currentSizeRef.current
       if (effectiveStorageKey) {
-        localStorage.setItem(effectiveStorageKey, finalSize.toString())
+        try {
+          localStorage.setItem(effectiveStorageKey, finalSize.toString())
+        }
+        catch {
+          // localStorage might be blocked in sandboxed iframes
+        }
       }
       onResizeEnd?.(finalSize)
     }

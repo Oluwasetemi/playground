@@ -46,7 +46,8 @@ export class PlaygroundEngine {
     this.options = options
     this.events = new EventEmitter<PlaygroundEvents>()
     this.webcontainerManager = new WebContainerManager(this.events, options.webcontainerAuth)
-    this.editor = new EditorController(this.events)
+    // Create editor with specified type (defaults to codemirror)
+    this.editor = new EditorController(this.events, options.editor || 'codemirror')
     this.terminal = new TerminalController(this.events)
     this.persistence = new PersistenceManager('default')
 
@@ -253,8 +254,10 @@ export class PlaygroundEngine {
   }
 
   async mountEditor(container: HTMLElement): Promise<void> {
-    this.editor.initialize(container, {
+    await this.editor.initialize(container, {
       theme: this.options.theme,
+      lineNumbers: this.options.showLineNumbers,
+      ...this.options.editorOptions,
     })
 
     if (this.filesystemManager && this.currentTemplate) {

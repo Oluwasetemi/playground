@@ -68,11 +68,21 @@ export class PreviewServer {
     const proc = await this.webcontainer.spawn(cmd, args)
     this.serverProcess = proc
 
-    // Log server output
+    // Capture and emit server output
+    // eslint-disable-next-line ts/no-this-alias
+    const self = this
     proc.output.pipeTo(
       new WritableStream({
         write(data) {
           console.warn('[dev-server]', data)
+          // Emit terminal output event
+          self.events.emit('process:output', {
+            processId: 'dev-server',
+            command,
+            type: 'stdout',
+            data,
+            timestamp: Date.now(),
+          })
         },
       }),
     )

@@ -1,12 +1,47 @@
 import type { FileNode } from '@setemiojo/playground-core'
+import { useMemo } from 'react'
 import { usePlaygroundContext } from '../context/PlaygroundContext'
 
 interface FileTreeNodeProps {
   node: FileNode
   onFileClick: (path: string) => void
+  hiddenFiles: string[]
 }
 
-function FileTreeNode({ node, onFileClick }: FileTreeNodeProps) {
+/**
+ * Check if a path should be hidden
+ */
+function isHidden(path: string, hiddenFiles: string[]): boolean {
+  // Normalize path to always start with /
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  return hiddenFiles.some((hidden) => {
+    const normalizedHidden = hidden.startsWith('/') ? hidden : `/${hidden}`
+    return normalizedPath === normalizedHidden
+  })
+}
+
+/**
+ * Recursively filter out hidden files from a file tree
+ */
+function filterHiddenFiles(nodes: FileNode[], hiddenFiles: string[]): FileNode[] {
+  if (!hiddenFiles.length) return nodes
+
+  return nodes
+    .filter(node => !isHidden(node.path, hiddenFiles))
+    .map((node) => {
+      if (node.type === 'directory' && node.children) {
+        return {
+          ...node,
+          children: filterHiddenFiles(node.children, hiddenFiles),
+        }
+      }
+      return node
+    })
+    // Filter out empty directories after filtering children
+    .filter(node => node.type === 'file' || (node.children && node.children.length > 0))
+}
+
+function FileTreeNode({ node, onFileClick, hiddenFiles }: FileTreeNodeProps) {
   if (node.type === 'file') {
     return (
       <div className="file-node" onClick={() => onFileClick(node.path)}>
@@ -24,7 +59,12 @@ function FileTreeNode({ node, onFileClick }: FileTreeNodeProps) {
       </summary>
       <div className="directory-children">
         {node.children?.map((child: FileNode) => (
-          <FileTreeNode key={child.path} node={child} onFileClick={onFileClick} />
+          <FileTreeNode
+            key={child.path}
+            node={child}
+            onFileClick={onFileClick}
+            hiddenFiles={hiddenFiles}
+          />
         ))}
       </div>
     </details>
@@ -47,8 +87,14 @@ function FileTreeSkeleton() {
 }
 
 export function PlaygroundFileTree() {
-  const { files, openFile, status } = usePlaygroundContext()
+  const { files, openFile, status, hiddenFiles } = usePlaygroundContext()
   const isLoading = status === 'initializing' || status === 'installing' || files.length === 0
+
+  // Filter out hidden files
+  const visibleFiles = useMemo(
+    () => filterHiddenFiles(files, hiddenFiles),
+    [files, hiddenFiles],
+  )
 
   return (
     <div className="playground-file-tree">
@@ -59,8 +105,13 @@ export function PlaygroundFileTree() {
       <div className="file-tree-content">
         {isLoading
           ? <FileTreeSkeleton />
-          : files.map(node => (
-              <FileTreeNode key={node.path} node={node} onFileClick={openFile} />
+          : visibleFiles.map(node => (
+              <FileTreeNode
+                key={node.path}
+                node={node}
+                onFileClick={openFile}
+                hiddenFiles={hiddenFiles}
+              />
             ))}
       </div>
     </div>

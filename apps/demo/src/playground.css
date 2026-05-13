@@ -228,8 +228,8 @@
 
 .editor-container {
   flex: 1;
-  overflow: auto;
   position: relative;
+  overflow: hidden;
 }
 
 /* Template-switching overlay */
@@ -295,6 +295,7 @@
   40% { opacity: 1; transform: scale(1); }
 }
 
+/* CodeMirror Editor Styles */
 .editor-container .cm-editor {
   height: 100%;
   background: var(--editor-bg) !important;
@@ -305,6 +306,56 @@
   font-size: 13.5px;
   line-height: 1.7;
   font-variant-ligatures: common-ligatures;
+}
+
+/* Monaco Editor Styles */
+.editor-container .monaco-editor {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  --monaco-monospace-font: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+  --vscode-editor-background: var(--editor-bg);
+  --vscode-editorGutter-background: var(--editor-bg);
+}
+
+.editor-container .monaco-editor .overflow-guard {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Fix Monaco textarea/input area */
+.editor-container .monaco-editor .inputarea {
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+.editor-container .monaco-editor .lines-content {
+  min-width: 100% !important;
+}
+
+.editor-container .monaco-editor .view-lines {
+  min-width: 100% !important;
+}
+
+/* Ensure editor scrollable element works correctly */
+.editor-container .monaco-editor .monaco-scrollable-element.editor-scrollable {
+  width: 100% !important;
+}
+
+/* Monaco Editor Links */
+.editor-container .monaco-editor a {
+  text-decoration: none;
+}
+
+.editor-container .monaco-editor a:hover {
+  text-decoration: underline;
+}
+
+/* Monaco fixed widgets */
+.editor-container .monaco-editor .overflowingContentWidgets {
+  z-index: 100;
 }
 
 .editor-container .cm-focused {
@@ -530,7 +581,8 @@
 }
 
 .playground-panel-result,
-.playground-panel-console {
+.playground-panel-console,
+.playground-panel-terminal {
   position: absolute;
   inset: 0;
   display: none;
@@ -540,7 +592,8 @@
   overflow: auto;
 }
 
-.playground-panel-result.active {
+.playground-panel-result.active,
+.playground-panel-terminal.active {
   display: block;
 }
 
@@ -742,6 +795,30 @@
 
 .console-row.error:hover {
   background: rgba(244, 67, 54, 0.12);
+}
+
+/* Terminal (xterm.js) */
+.playground-panel-terminal {
+  background: var(--terminal-bg);
+  overflow: hidden;
+}
+
+.playground-panel-terminal .playground-terminal-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* xterm.js overrides for better integration */
+.playground-panel-terminal .xterm {
+  padding: 8px;
+}
+
+.playground-panel-terminal .xterm-viewport {
+  overflow-y: auto !important;
+}
+
+.playground-panel-terminal .xterm-screen {
+  width: 100% !important;
 }
 
 .console-row.warn {

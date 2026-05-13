@@ -41,8 +41,8 @@ export function PlaygroundEditor() {
   const isSwitching = status === 'initializing' || status === 'installing'
 
   const switchingLabel = status === 'installing'
-    ? `Installing ${template.name} dependencies…`
-    : `Switching to ${template.name}…`
+    ? `Installing ${template?.name ?? ''} dependencies…`
+    : `Switching to ${template?.name ?? ''}…`
 
   return (
     <div className="playground-editor">

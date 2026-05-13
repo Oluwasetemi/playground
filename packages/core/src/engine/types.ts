@@ -14,6 +14,8 @@ export interface Template {
   }
   entryFile: string
   mainFile?: string
+  /** List of file paths to hide from the file tree (e.g., ['/vite.config.js', '/package.json']) */
+  hiddenFiles?: string[]
 }
 
 export interface PlaygroundOptions {
@@ -25,6 +27,25 @@ export interface PlaygroundOptions {
     clientId?: string
     scope?: string
   }
+  /**
+   * Editor implementation to use
+   * - 'codemirror' (default): Lightweight, fast loading
+   * - 'monaco': VS Code-like editor with IntelliSense (larger bundle)
+   */
+  editor?: 'codemirror' | 'monaco'
+  /** Editor-specific options */
+  editorOptions?: {
+    /** Font size in pixels */
+    fontSize?: number
+    /** Font family */
+    fontFamily?: string
+    /** Tab size */
+    tabSize?: number
+    /** Word wrap mode */
+    wordWrap?: 'on' | 'off' | 'wordWrapColumn' | 'bounded'
+    /** Show minimap (Monaco only) */
+    minimap?: boolean
+  }
 }
 
 export interface FileNode {
@@ -35,7 +56,7 @@ export interface FileNode {
 }
 
 export interface ConsoleMessage {
-  type: 'log' | 'warn' | 'error' | 'info'
+  type: 'log' | 'warn' | 'error' | 'info' | 'clear'
   args: any[]
   timestamp: number
 }

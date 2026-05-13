@@ -1,5 +1,5 @@
-import type { PlaygroundOptions, Template } from '@setemiojo/playground-core'
-import type { ConsoleMessage } from './context/PlaygroundContext'
+import type { PlaygroundOptions, ProcessOutput, Template } from '@setemiojo/playground-core'
+import type { ConsoleMessage, TerminalMessage } from './context/PlaygroundContext'
 import { useStore } from '@nanostores/react'
 import {
   $files,
@@ -21,6 +21,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
 
   const [showLineNumbers, setShowLineNumbers] = useState(true)
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([])
+  const [terminalMessages, setTerminalMessages] = useState<TerminalMessage[]>([])
 
   useEffect(() => {
     templateRef.current = template
@@ -47,7 +48,9 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     }
     else if (previousTemplateId.current !== template.id) {
       console.warn(`Template change detected: ${previousTemplateId.current} -> ${template.id}`)
+      // Clear console and terminal on template switch
       setConsoleMessages([])
+      setTerminalMessages([])
 
       engineRef.current.switchTemplate(template).catch((error: Error) => {
         console.error('Failed to switch template:', error)
@@ -68,6 +71,10 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
       }])
     })
     const unsubscribeConsole = engine.on('console:message', (message: { type: string, args: any[] }) => {
+      if (message.type === 'clear') {
+        setConsoleMessages([])
+        return
+      }
       setConsoleMessages(prev => [...prev, {
         type: message.type as 'log' | 'error' | 'warn' | 'info',
         text: message.args.map(arg =>
@@ -76,10 +83,18 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
         timestamp: Date.now(),
       }])
     })
+    const unsubscribeTerminal = engine.on('process:output', (output: ProcessOutput) => {
+      setTerminalMessages(prev => [...prev, {
+        type: output.type,
+        text: output.data,
+        timestamp: output.timestamp,
+      }])
+    })
 
     return () => {
       unsubscribeError()
       unsubscribeConsole()
+      unsubscribeTerminal()
       // No engine teardown here — that belongs in the unmount-only effect below.
     }
   }, [template.id])
@@ -160,6 +175,10 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     setConsoleMessages([])
   }, [])
 
+  const clearTerminal = useCallback(() => {
+    setTerminalMessages([])
+  }, [])
+
   return {
     engine: engineRef.current,
     status,
@@ -175,6 +194,9 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     openInStackBlitz,
     consoleMessages,
     clearConsole,
+    terminalMessages,
+    clearTerminal,
     template,
+    hiddenFiles: template.hiddenFiles ?? [],
   }
 }

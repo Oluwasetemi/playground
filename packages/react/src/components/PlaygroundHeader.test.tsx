@@ -24,6 +24,8 @@ describe('playgroundHeader', () => {
     saveSnapshot: vi.fn(),
     consoleMessages: [],
     clearConsole: vi.fn(),
+    terminalMessages: [],
+    clearTerminal: vi.fn(),
     template: {
       id: 'react',
       name: 'React',
@@ -34,6 +36,7 @@ describe('playgroundHeader', () => {
       commands: { dev: 'vite' },
       entryFile: '/src/main.tsx',
     },
+    hiddenFiles: [],
   }
 
   beforeEach(() => {

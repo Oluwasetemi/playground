@@ -29,7 +29,63 @@
 
 .editor-container {
   flex: 1;
-  overflow: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* CodeMirror Editor */
+.editor-container .cm-editor {
+  height: 100%;
+}
+
+/* Monaco Editor */
+.editor-container .monaco-editor {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  --monaco-monospace-font: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+  --vscode-editor-background: var(--playground-surface);
+  --vscode-editorGutter-background: var(--playground-surface);
+}
+
+.editor-container .monaco-editor .overflow-guard {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Fix Monaco textarea/input area */
+.editor-container .monaco-editor .inputarea {
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+.editor-container .monaco-editor .lines-content {
+  min-width: 100% !important;
+}
+
+.editor-container .monaco-editor .view-lines {
+  min-width: 100% !important;
+}
+
+/* Ensure editor scrollable element works correctly */
+.editor-container .monaco-editor .monaco-scrollable-element.editor-scrollable {
+  width: 100% !important;
+}
+
+/* Monaco Editor Links */
+.editor-container .monaco-editor a {
+  text-decoration: none;
+}
+
+.editor-container .monaco-editor a:hover {
+  text-decoration: underline;
+}
+
+/* Monaco fixed widgets */
+.editor-container .monaco-editor .overflowingContentWidgets {
+  z-index: 100;
 }
 
 /* Preview */

@@ -7,6 +7,12 @@ export interface ConsoleMessage {
   timestamp: number
 }
 
+export interface TerminalMessage {
+  type: 'stdout' | 'stderr'
+  text: string
+  timestamp: number
+}
+
 export interface PlaygroundContextValue {
   engine: PlaygroundEngine | null
   status: PlaygroundStatus
@@ -23,7 +29,11 @@ export interface PlaygroundContextValue {
   openInStackBlitz: () => Promise<void>
   consoleMessages: ConsoleMessage[]
   clearConsole: () => void
-  template: Template
+  terminalMessages: TerminalMessage[]
+  clearTerminal: () => void
+  template: Template | null
+  /** List of file paths that should be hidden from the file tree */
+  hiddenFiles: string[]
 }
 
 export const PlaygroundContext = createContext<PlaygroundContextValue | null>(null)

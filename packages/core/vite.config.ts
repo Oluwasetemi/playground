@@ -5,13 +5,16 @@ import dts from 'vite-plugin-dts'
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        monaco: resolve(__dirname, 'src/monaco.ts'),
+      },
       name: 'PlaygroundCore',
       formats: ['es'],
-      fileName: 'index',
     },
     rollupOptions: {
-      external: [],
+      // Mark monaco-editor as external for optional peer dependency
+      external: ['monaco-editor'],
       output: {
         // Manual chunking for code splitting
         manualChunks: {
@@ -24,6 +27,11 @@ export default defineConfig({
             '@codemirror/autocomplete',
             '@codemirror/language',
             '@codemirror/theme-one-dark',
+            '@codemirror/lang-javascript',
+            '@codemirror/lang-json',
+            '@codemirror/lang-html',
+            '@codemirror/lang-css',
+            '@codemirror/lang-markdown',
           ],
           // Separate WebContainer bundle
           webcontainer: ['@webcontainer/api'],

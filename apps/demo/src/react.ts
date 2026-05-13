@@ -1,4 +1,4 @@
-import type { Template } from './types'
+import type { Template } from '@setemiojo/playground-core'
 
 export const reactTemplate: Template = {
   id: 'react',
@@ -75,21 +75,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         },
         'App.jsx': {
           file: {
-            contents: `import { useState, useEffect } from 'react';
+            contents: `import { useState } from 'react';
 import './App.css';
 
 function App() {
   const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    console.log('React Playground ready!');
-  }, []);
-
-  const handleClick = () => {
-    const next = count + 1;
-    setCount(next);
-    console.log('Count updated:', next);
-  };
 
   return (
     <div className="App">
@@ -97,7 +87,7 @@ function App() {
       <p>Edit src/App.jsx to see changes instantly.</p>
 
       <div className="card">
-        <button onClick={handleClick}>
+        <button onClick={() => setCount((count) => count + 1)}>
           Count is {count}
         </button>
       </div>

@@ -1,8 +1,8 @@
+import type { PlaygroundEvents } from './types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EventEmitter } from './EventEmitter'
-import type { PlaygroundEvents } from './types'
 
-describe('EventEmitter', () => {
+describe('eventEmitter', () => {
   let emitter: EventEmitter<PlaygroundEvents>
 
   beforeEach(() => {

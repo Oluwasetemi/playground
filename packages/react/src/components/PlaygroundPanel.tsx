@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePlaygroundContext } from '../context/PlaygroundContext'
+import { Terminal } from './Terminal'
 
-export type PanelTab = 'result' | 'console'
+export type PanelTab = 'result' | 'console' | 'terminal'
 export type ConsoleFilter = 'all' | 'log' | 'warn' | 'error' | 'info'
 
 export interface PlaygroundPanelProps {
@@ -55,7 +56,7 @@ const RefreshIcon = () => (
 )
 
 export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps) {
-  const { engine, previewUrl, status, consoleMessages, clearConsole } = usePlaygroundContext()
+  const { engine, previewUrl, status, consoleMessages, clearConsole, terminalMessages } = usePlaygroundContext()
   const [activeTab, setActiveTab] = useState<PanelTab>(defaultTab)
   const [filter, setFilter] = useState<ConsoleFilter>('all')
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -110,6 +111,12 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
                 {consoleMessages.length}
               </span>
             )}
+          </button>
+          <button
+            className={`playground-panel-tab ${activeTab === 'terminal' ? 'active' : ''}`}
+            onClick={() => setActiveTab('terminal')}
+          >
+            Terminal
           </button>
         </div>
         <div className="playground-panel-actions">
@@ -195,6 +202,11 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
               ))
             )}
           </div>
+        </div>
+        <div
+          className={`playground-panel-terminal ${activeTab === 'terminal' ? 'active' : ''}`}
+        >
+          <Terminal messages={terminalMessages} />
         </div>
       </div>
     </div>

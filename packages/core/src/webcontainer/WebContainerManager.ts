@@ -91,17 +91,17 @@ export class WebContainerManager {
         command,
         type,
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       })
     }
 
     process.output.pipeTo(
       new WritableStream({
-        write: data => emitOutput('stdout', data)
+        write: data => emitOutput('stdout', data),
       }),
     )
 
-    process.exit.then((code) => {
+    process.exit.then((code: number) => {
       this.processes.delete(processId)
       if (code !== 0) {
         emitOutput('stderr', `Process "${command}" exited with code ${code}`)
