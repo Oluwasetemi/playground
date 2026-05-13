@@ -121,25 +121,26 @@ export default function App() {
           ))}
         </div>
 
-        {/* Editor toggle */}
-        <button
-          className={`layout-toggle-btn ${editorType === 'monaco' ? 'active' : ''}`}
-          onClick={() => setEditorType(e => e === 'codemirror' ? 'monaco' : 'codemirror')}
-          title={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
-          aria-label={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
-        >
-          {editorType === 'codemirror' ? <MonacoIcon /> : <CodeMirrorIcon />}
-        </button>
+        {/* Right-side controls */}
+        <div className="toolbar-actions">
+          <button
+            className={`layout-toggle-btn ${editorType === 'monaco' ? 'active' : ''}`}
+            onClick={() => setEditorType(e => e === 'codemirror' ? 'monaco' : 'codemirror')}
+            title={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
+            aria-label={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
+          >
+            {editorType === 'codemirror' ? <MonacoIcon /> : <CodeMirrorIcon />}
+          </button>
 
-        {/* Layout toggle */}
-        <button
-          className={`layout-toggle-btn ${direction === 'vertical' ? 'active' : ''}`}
-          onClick={() => setDirection(d => d === 'horizontal' ? 'vertical' : 'horizontal')}
-          title={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
-          aria-label={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
-        >
-          {direction === 'horizontal' ? <VerticalIcon /> : <HorizontalIcon />}
-        </button>
+          <button
+            className={`layout-toggle-btn ${direction === 'vertical' ? 'active' : ''}`}
+            onClick={() => setDirection(d => d === 'horizontal' ? 'vertical' : 'horizontal')}
+            title={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
+            aria-label={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
+          >
+            {direction === 'horizontal' ? <VerticalIcon /> : <HorizontalIcon />}
+          </button>
+        </div>
       </div>
 
       {/* ── Main content ── */}

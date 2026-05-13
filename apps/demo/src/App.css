@@ -136,6 +136,13 @@
   box-shadow: 0 0 0 3px rgba(0, 214, 143, 0.12);
 }
 
+/* Right-side icon group */
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* Layout toggle */
 .layout-toggle-btn {
   display: flex;
