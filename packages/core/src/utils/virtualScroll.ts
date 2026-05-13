@@ -56,6 +56,7 @@ export class VirtualScrollManager<T> {
   private scrollTop: number = 0
   private container: HTMLElement | null = null
   private renderItem: (item: T, index: number) => HTMLElement
+  private scrollHandler: (() => void) | null = null
 
   constructor(
     config: VirtualScrollConfig,
@@ -72,17 +73,19 @@ export class VirtualScrollManager<T> {
 
   mount(container: HTMLElement): void {
     this.container = container
-
-    // Set up scroll listener
-    container.addEventListener('scroll', () => {
+    this.scrollHandler = () => {
       this.scrollTop = container.scrollTop
       this.render()
-    })
-
+    }
+    container.addEventListener('scroll', this.scrollHandler)
     this.render()
   }
 
   unmount(): void {
+    if (this.container && this.scrollHandler) {
+      this.container.removeEventListener('scroll', this.scrollHandler)
+      this.scrollHandler = null
+    }
     this.container = null
   }
 

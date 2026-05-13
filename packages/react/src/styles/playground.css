@@ -76,11 +76,11 @@
 
 /* Monaco Editor Links */
 .editor-container .monaco-editor a {
-  border-bottom: none;
+  text-decoration: none;
 }
 
 .editor-container .monaco-editor a:hover {
-  border-bottom: none;
+  text-decoration: underline;
 }
 
 /* Monaco fixed widgets */

@@ -94,6 +94,8 @@ export function ResizablePanel({
   })
   const [isDragging, setIsDragging] = useState(false)
   const dragStartRef = useRef<{ position: number, size: number } | null>(null)
+  const currentSizeRef = useRef(size)
+  currentSizeRef.current = size
 
   // Update size when switching between mobile and desktop
   useEffect(() => {
@@ -191,16 +193,16 @@ export function ResizablePanel({
     const handleEnd = () => {
       setIsDragging(false)
       dragStartRef.current = null
-
+      const finalSize = currentSizeRef.current
       if (effectiveStorageKey) {
         try {
-          localStorage.setItem(effectiveStorageKey, size.toString())
+          localStorage.setItem(effectiveStorageKey, finalSize.toString())
         }
         catch {
           // localStorage might be blocked in sandboxed iframes
         }
       }
-      onResizeEnd?.(size)
+      onResizeEnd?.(finalSize)
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -214,7 +216,7 @@ export function ResizablePanel({
       document.removeEventListener('touchmove', handleTouchMove)
       document.removeEventListener('touchend', handleEnd)
     }
-  }, [isDragging, isHorizontal, clampSize, size, effectiveStorageKey, onResize, onResizeEnd])
+  }, [isDragging, isHorizontal, clampSize, effectiveStorageKey, onResize, onResizeEnd])
 
   const containerStyle: CSSProperties = {
     display: 'flex',
@@ -237,7 +239,7 @@ export function ResizablePanel({
 
   const resizerStyle: CSSProperties = {
     [isHorizontal ? 'width' : 'height']: '8px',
-    [isHorizontal ? 'cursor' : 'cursor']: isHorizontal ? 'col-resize' : 'row-resize',
+    cursor: isHorizontal ? 'col-resize' : 'row-resize',
     background: 'transparent',
     position: 'relative',
     flexShrink: 0,

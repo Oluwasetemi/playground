@@ -25,9 +25,35 @@ const templates: Record<string, Template> = {
   node: nodeTemplate,
 }
 
+const templateOptions = [
+  { value: 'vanilla', label: 'Vanilla' },
+  { value: 'react',   label: 'React' },
+  { value: 'vue',     label: 'Vue' },
+  { value: 'node',    label: 'Node' },
+]
+
+function HorizontalIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="1" y="2" width="6" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="2" width="6" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function VerticalIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="2" y="1" width="12" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="2" y="9" width="12" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
 export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("react");
   const [showSidebar, setShowSidebar] = useState(false);
+  const [direction, setDirection] = useState<'horizontal' | 'vertical'>('horizontal')
   const template = templates[selectedTemplate]
 
   const getTitle = () => {
@@ -45,26 +71,53 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* ── Top bar ── */}
       <div className="template-bar">
-        <select
-          disabled
-          value={selectedTemplate}
-          onChange={(e) => setSelectedTemplate(e.target.value)}
+        {/* Brand */}
+        <div className="app-brand">
+          <div className="app-brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="5 3 1 8 5 13" />
+              <polyline points="11 3 15 8 11 13" />
+            </svg>
+          </div>
+          <span className="app-brand-name">playground</span>
+        </div>
+
+        {/* Template picker */}
+        <div className="template-picker" role="group" aria-label="Select template">
+          {templateOptions.map(opt => (
+            <div className="template-option" key={opt.value}>
+              <input
+                type="radio"
+                id={`tpl-${opt.value}`}
+                name="template"
+                value={opt.value}
+                checked={selectedTemplate === opt.value}
+                onChange={() => setSelectedTemplate(opt.value)}
+              />
+              <label htmlFor={`tpl-${opt.value}`}>{opt.label}</label>
+            </div>
+          ))}
+        </div>
+
+        {/* Layout toggle */}
+        <button
+          className={`layout-toggle-btn ${direction === 'vertical' ? 'active' : ''}`}
+          onClick={() => setDirection(d => d === 'horizontal' ? 'vertical' : 'horizontal')}
+          title={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
+          aria-label={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
         >
-          <option value="vanilla">Vanilla JS</option>
-          <option value="react">React</option>
-          <option value="vue">Vue</option>
-          <option value="node">Node.js</option>
-        </select>
+          {direction === 'horizontal' ? <VerticalIcon /> : <HorizontalIcon />}
+        </button>
       </div>
 
+      {/* ── Main content ── */}
       <main className="app-main">
+        {/* No key prop — template switches are handled by usePlayground's switchTemplate() */}
         <Playground
-          key={selectedTemplate}
           template={template}
-          options={{
-            autoSave: true,
-          }}
+          options={{ autoSave: true }}
         >
           <div className="playground">
             <PlaygroundHeader
@@ -89,7 +142,7 @@ export default function App() {
                     <PlaygroundPanel />
                   </div>
                 }
-                direction="horizontal"
+                direction={direction}
                 responsive
                 responsiveBreakpoint={768}
                 initialSize={50}

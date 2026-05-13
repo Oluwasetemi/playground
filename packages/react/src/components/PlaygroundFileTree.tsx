@@ -71,8 +71,24 @@ function FileTreeNode({ node, onFileClick, hiddenFiles }: FileTreeNodeProps) {
   )
 }
 
+const SKELETON_WIDTHS = ['60%', '45%', '72%', '38%', '55%', '65%', '42%']
+
+function FileTreeSkeleton() {
+  return (
+    <div className="file-tree-skeleton" aria-label="Loading files…" aria-busy="true">
+      {SKELETON_WIDTHS.map((w, i) => (
+        <div key={i} className="file-tree-skeleton-row" style={{ paddingLeft: i > 1 ? 22 : 8 }}>
+          <div className="file-tree-skeleton-icon" />
+          <div className="file-tree-skeleton-label" style={{ width: w }} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function PlaygroundFileTree() {
-  const { files, openFile, hiddenFiles } = usePlaygroundContext()
+  const { files, openFile, status, hiddenFiles } = usePlaygroundContext()
+  const isLoading = status === 'initializing' || status === 'installing' || files.length === 0
 
   // Filter out hidden files
   const visibleFiles = useMemo(
@@ -82,16 +98,21 @@ export function PlaygroundFileTree() {
 
   return (
     <div className="playground-file-tree">
-      <div className="file-tree-header">Files</div>
+      <div className="file-tree-header">
+        Files
+        {isLoading && <span className="file-tree-spinner" aria-hidden="true" />}
+      </div>
       <div className="file-tree-content">
-        {visibleFiles.map(node => (
-          <FileTreeNode
-            key={node.path}
-            node={node}
-            onFileClick={openFile}
-            hiddenFiles={hiddenFiles}
-          />
-        ))}
+        {isLoading
+          ? <FileTreeSkeleton />
+          : visibleFiles.map(node => (
+              <FileTreeNode
+                key={node.path}
+                node={node}
+                onFileClick={openFile}
+                hiddenFiles={hiddenFiles}
+              />
+            ))}
       </div>
     </div>
   )

@@ -1,8 +1,10 @@
+import type { FileSystemTree } from '@webcontainer/api'
+
 export interface Template {
   id: string
   name: string
   description: string
-  files: any // Using any to avoid type conflicts with @webcontainer/api
+  files: FileSystemTree
   dependencies: Record<string, string>
   devDependencies: Record<string, string>
   commands: {

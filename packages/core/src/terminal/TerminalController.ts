@@ -68,7 +68,13 @@ export class TerminalController {
     this.render()
   }
 
-  // add escape ANSI or can I use TUI?
+  // eslint-disable-next-line no-control-regex
+  private readonly ANSI_RE = /\x1B\[[0-9;]*[A-Za-z]/g
+
+  private stripAnsi(text: string): string {
+    return text.replace(this.ANSI_RE, '')
+  }
+
   private render(): void {
     if (!this.container)
       return
@@ -77,12 +83,15 @@ export class TerminalController {
       .map((line) => {
         if ('data' in line) {
           const className = line.type === 'stderr' ? 'terminal-error' : 'terminal-output'
-          return `<div class="${className}">${this.escapeHtml(line.data)}</div>`
+          return `<div class="${className}">${this.escapeHtml(this.stripAnsi(line.data))}</div>`
         }
         else {
+          if (line.type === 'clear') {
+            return ''
+          }
           const className = `terminal-${line.type}`
           const args = line.args.map(arg => this.formatArg(arg)).join(' ')
-          return `<div class="${className}">${this.escapeHtml(args)}</div>`
+          return `<div class="${className}">${this.escapeHtml(this.stripAnsi(args))}</div>`
         }
       })
       .join('')

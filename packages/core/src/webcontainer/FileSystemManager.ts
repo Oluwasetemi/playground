@@ -209,8 +209,7 @@ export class FileSystemManager {
   }
 
   async removeFile(path: string): Promise<void> {
-    await this.webcontainer.fs.rm(path)
-    // TODO: emit a file:delete event if necessary
+    await this.webcontainer.fs.rm(path, { recursive: true, force: true })
   }
 
   /**

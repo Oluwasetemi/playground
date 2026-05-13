@@ -15,113 +15,112 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
   const initializingRef = useRef(false)
   const templateRef = useRef<Template>(template)
 
-  // Subscribe to Nanostores instead of local state
   const status = useStore($playgroundStatus)
   const files = useStore($files)
   const previewUrl = useStore($previewUrl)
 
-  // Local state for new features
   const [showLineNumbers, setShowLineNumbers] = useState(true)
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([])
   const [terminalMessages, setTerminalMessages] = useState<TerminalMessage[]>([])
 
-  // Keep template ref up to date
   useEffect(() => {
     templateRef.current = template
   }, [template])
 
+  // ── Effect 1: initialization + template switching + subscriptions ──────────
+  // Cleanup here ONLY unsubscribes events. Engine teardown lives in Effect 2.
+  // This prevents the [template.id] re-run cleanup from tearing down the
+  // WebContainer while switchTemplate() is still running mid-operation.
   useEffect(() => {
-    // On first mount, create engine and do full initialization
     if (!engineRef.current) {
       const engine = new PlaygroundEngine(options)
       engineRef.current = engine
-
-      // Subscribe to error events
-      const unsubscribeError = engine.on('error', (error) => {
-        console.error('Playground error:', error)
-        setConsoleMessages(prev => [...prev, {
-          type: 'error',
-          text: error.message,
-          timestamp: Date.now(),
-        }])
-      })
-
-      // Subscribe to console messages
-      const unsubscribeConsole = engine.on('console:message', (message: { type: string, args: any[] }) => {
-        setConsoleMessages(prev => [...prev, {
-          type: message.type as 'log' | 'error' | 'warn' | 'info',
-          text: message.args.map(arg =>
-            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg),
-          ).join(' '),
-          timestamp: Date.now(),
-        }])
-      })
-
-      // Subscribe to terminal/process output
-      const unsubscribeTerminal = engine.on('process:output', (output: ProcessOutput) => {
-        setTerminalMessages(prev => [...prev, {
-          type: output.type,
-          text: output.data,
-          timestamp: output.timestamp,
-        }])
-      })
-
-      // Mark as initializing
       initializingRef.current = true
 
       engine.initialize(template)
-        .then(() => {
-          initializingRef.current = false
-        })
+        .then(() => { initializingRef.current = false })
         .catch((error: Error) => {
           console.error('Failed to initialize playground:', error)
           initializingRef.current = false
         })
 
       previousTemplateId.current = template.id
-
-      return () => {
-        // Don't cleanup if still initializing (React strict mode double-mount)
-        if (initializingRef.current) {
-          console.warn('Skipping cleanup - initialization still in progress')
-          return
-        }
-
-        // CRITICAL: Save snapshot BEFORE cleanup to prevent data loss
-        engine.saveSnapshot()
-          .catch((err: Error) => {
-            console.warn('Failed to save snapshot on cleanup:', err)
-          })
-          .finally(() => {
-            unsubscribeError()
-            unsubscribeConsole()
-            unsubscribeTerminal()
-            engine.cleanup()
-            engineRef.current = null
-          })
-      }
     }
-
-    // On subsequent renders with different template, use smart switching
-    if (previousTemplateId.current !== template.id) {
+    else if (previousTemplateId.current !== template.id) {
       console.warn(`Template change detected: ${previousTemplateId.current} -> ${template.id}`)
-
       // Clear console and terminal on template switch
       setConsoleMessages([])
       setTerminalMessages([])
 
       engineRef.current.switchTemplate(template).catch((error: Error) => {
         console.error('Failed to switch template:', error)
-        // Fallback to full re-initialization
-        engineRef.current?.cleanup()
-        const engine = new PlaygroundEngine(options)
-        engineRef.current = engine
-        engine.initialize(template)
       })
 
       previousTemplateId.current = template.id
     }
+
+    // Always subscribe for this effect instance so Strict Mode double-mount
+    // re-attaches listeners to the existing engine.
+    const engine = engineRef.current!
+    const unsubscribeError = engine.on('error', (error) => {
+      console.error('Playground error:', error)
+      setConsoleMessages(prev => [...prev, {
+        type: 'error',
+        text: error.message,
+        timestamp: Date.now(),
+      }])
+    })
+    const unsubscribeConsole = engine.on('console:message', (message: { type: string, args: any[] }) => {
+      if (message.type === 'clear') {
+        setConsoleMessages([])
+        return
+      }
+      setConsoleMessages(prev => [...prev, {
+        type: message.type as 'log' | 'error' | 'warn' | 'info',
+        text: message.args.map(arg =>
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg),
+        ).join(' '),
+        timestamp: Date.now(),
+      }])
+    })
+    const unsubscribeTerminal = engine.on('process:output', (output: ProcessOutput) => {
+      setTerminalMessages(prev => [...prev, {
+        type: output.type,
+        text: output.data,
+        timestamp: output.timestamp,
+      }])
+    })
+
+    return () => {
+      unsubscribeError()
+      unsubscribeConsole()
+      unsubscribeTerminal()
+      // No engine teardown here — that belongs in the unmount-only effect below.
+    }
   }, [template.id])
+
+  // ── Effect 2: engine teardown on component unmount only ───────────────────
+  // Empty deps means this cleanup runs once, when the Playground unmounts.
+  // It never fires on template switches, so switchTemplate() can't be aborted.
+  useEffect(() => {
+    return () => {
+      if (initializingRef.current) {
+        console.warn('Skipping engine cleanup - initialization still in progress')
+        return
+      }
+      const engine = engineRef.current
+      if (!engine) return
+
+      engine.saveSnapshot()
+        .catch((err: Error) => {
+          console.warn('Failed to save snapshot on cleanup:', err)
+        })
+        .finally(() => {
+          engine.cleanup()
+          engineRef.current = null
+        })
+    }
+  }, [])
 
   const updateFile = useCallback(async (path: string, content: string) => {
     if (engineRef.current) {
@@ -131,7 +130,9 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
 
   const openFile = useCallback(async (path: string) => {
     if (engineRef.current) {
-      await engineRef.current.openFile(path)
+      await engineRef.current.openFile(path).catch((err: Error) => {
+        console.error(`Failed to open file ${path}:`, err)
+      })
     }
   }, [])
 

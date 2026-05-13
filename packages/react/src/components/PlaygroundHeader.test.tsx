@@ -26,7 +26,16 @@ describe('playgroundHeader', () => {
     clearConsole: vi.fn(),
     terminalMessages: [],
     clearTerminal: vi.fn(),
-    template: null,
+    template: {
+      id: 'react',
+      name: 'React',
+      description: 'React playground',
+      files: {},
+      dependencies: {},
+      devDependencies: {},
+      commands: { dev: 'vite' },
+      entryFile: '/src/main.tsx',
+    },
     hiddenFiles: [],
   }
 
