@@ -32,6 +32,25 @@ const templateOptions = [
   { value: 'node',    label: 'Node' },
 ]
 
+function CodeMirrorIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <polyline points="4 5 1 8 4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points="12 5 15 8 12 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="9" y1="3" x2="7" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function MonacoIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 5l2 3-2 3M9 11h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function HorizontalIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -54,6 +73,7 @@ export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("react");
   const [showSidebar, setShowSidebar] = useState(false);
   const [direction, setDirection] = useState<'horizontal' | 'vertical'>('horizontal')
+  const [editorType, setEditorType] = useState<'codemirror' | 'monaco'>('codemirror')
   const template = templates[selectedTemplate]
 
   const getTitle = () => {
@@ -101,6 +121,16 @@ export default function App() {
           ))}
         </div>
 
+        {/* Editor toggle */}
+        <button
+          className={`layout-toggle-btn ${editorType === 'monaco' ? 'active' : ''}`}
+          onClick={() => setEditorType(e => e === 'codemirror' ? 'monaco' : 'codemirror')}
+          title={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
+          aria-label={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
+        >
+          {editorType === 'codemirror' ? <MonacoIcon /> : <CodeMirrorIcon />}
+        </button>
+
         {/* Layout toggle */}
         <button
           className={`layout-toggle-btn ${direction === 'vertical' ? 'active' : ''}`}
@@ -114,10 +144,12 @@ export default function App() {
 
       {/* ── Main content ── */}
       <main className="app-main">
-        {/* No key prop — template switches are handled by usePlayground's switchTemplate() */}
+        {/* key=editorType forces a full remount when switching editors,
+            since the engine and editor instance are created once at mount */}
         <Playground
+          key={editorType}
           template={template}
-          options={{ autoSave: true }}
+          options={{ autoSave: true, editor: editorType }}
         >
           <div className="playground">
             <PlaygroundHeader
