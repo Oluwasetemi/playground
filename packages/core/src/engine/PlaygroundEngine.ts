@@ -6,13 +6,6 @@ import type {
   PlaygroundStatus,
   Template,
 } from './types'
-import sdk from '@stackblitz/sdk'
-import * as prettier from 'prettier'
-import prettierBabelPlugin from 'prettier/plugins/babel'
-import prettierEstreePlugin from 'prettier/plugins/estree'
-import prettierHtmlPlugin from 'prettier/plugins/html'
-import prettierPostcssPlugin from 'prettier/plugins/postcss'
-import prettierTypescriptPlugin from 'prettier/plugins/typescript'
 import { EditorController } from '../editor/EditorController'
 import { PersistenceManager } from '../persistence/PersistenceManager'
 import { PreviewServer } from '../preview/PreviewServer'
@@ -410,30 +403,44 @@ export class PlaygroundEngine {
     const ext = activeFile.split('.').pop()?.toLowerCase()
 
     type ParserEntry = { parser: string, plugins: any[] }
-    const parserMap: Record<string, ParserEntry> = {
-      js: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
-      jsx: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
-      mjs: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
-      cjs: { parser: 'babel', plugins: [prettierBabelPlugin, prettierEstreePlugin] },
-      ts: { parser: 'typescript', plugins: [prettierTypescriptPlugin, prettierEstreePlugin] },
-      tsx: { parser: 'typescript', plugins: [prettierTypescriptPlugin, prettierEstreePlugin] },
-      html: { parser: 'html', plugins: [prettierHtmlPlugin] },
-      htm: { parser: 'html', plugins: [prettierHtmlPlugin] },
-      vue: { parser: 'vue', plugins: [prettierHtmlPlugin] },
-      css: { parser: 'css', plugins: [prettierPostcssPlugin] },
-      scss: { parser: 'scss', plugins: [prettierPostcssPlugin] },
-      less: { parser: 'less', plugins: [prettierPostcssPlugin] },
+
+    const extToParser: Record<string, string> = {
+      js: 'babel', jsx: 'babel', mjs: 'babel', cjs: 'babel',
+      ts: 'typescript', tsx: 'typescript',
+      html: 'html', htm: 'html', vue: 'vue',
+      css: 'css', scss: 'scss', less: 'less',
     }
 
-    const entry = ext ? parserMap[ext] : undefined
-    if (!entry) {
+    const parser = ext ? extToParser[ext] : undefined
+    if (!parser) {
       console.warn(`File type .${ext} is not supported for formatting`)
       return
     }
 
     try {
-      // Use Prettier to format the code (browser-compatible)
-      const formattedCode = await prettier.format(content, {
+      const [prettier, babelPlugin, estreePlugin, htmlPlugin, postcssPlugin, tsPlugin] =
+        await Promise.all([
+          import('prettier'),
+          import('prettier/plugins/babel'),
+          import('prettier/plugins/estree'),
+          import('prettier/plugins/html'),
+          import('prettier/plugins/postcss'),
+          import('prettier/plugins/typescript'),
+        ])
+
+      const parserMap: Record<string, ParserEntry> = {
+        babel:      { parser: 'babel',      plugins: [babelPlugin.default, estreePlugin.default] },
+        typescript: { parser: 'typescript', plugins: [tsPlugin.default, estreePlugin.default] },
+        html:       { parser: 'html',       plugins: [htmlPlugin.default] },
+        vue:        { parser: 'vue',        plugins: [htmlPlugin.default] },
+        css:        { parser: 'css',        plugins: [postcssPlugin.default] },
+        scss:       { parser: 'scss',       plugins: [postcssPlugin.default] },
+        less:       { parser: 'less',       plugins: [postcssPlugin.default] },
+      }
+
+      const entry = parserMap[parser]
+
+      const formattedCode = await prettier.default.format(content, {
         parser: entry.parser,
         plugins: entry.plugins,
         tabWidth: 2,
@@ -449,7 +456,6 @@ export class PlaygroundEngine {
     }
     catch (error) {
       console.error('Failed to format code with Prettier:', error)
-      // Emit error event so UI can show feedback
       this.events.emit('error', new Error(`Format failed: ${error instanceof Error ? error.message : 'Unknown error'}`))
     }
   }
@@ -525,6 +531,8 @@ export class PlaygroundEngine {
     const entryFile = template.entryFile?.startsWith('/')
       ? template.entryFile.slice(1)
       : template.entryFile || 'index.js'
+
+    const { default: sdk } = await import('@stackblitz/sdk')
 
     // Open project in StackBlitz using the SDK
     sdk.openProject(
