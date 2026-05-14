@@ -294,7 +294,8 @@ export class FileSystemManager {
           const content = await this.readFile(node.path)
           return [node.path, content] as const
         }
-        catch {
+        catch (error) {
+          console.warn(`getAllFiles: failed to read ${node.path}:`, error)
           return null
         }
       }),

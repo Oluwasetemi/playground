@@ -199,6 +199,14 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     setTerminalMessages([])
   }, [])
 
+  // Stable reference for the hidden files array. `?? []` would create a new
+  // array literal every render when hiddenFiles is undefined, which would give
+  // stableValue a new identity on every render and defeat the context split.
+  const hiddenFiles = useMemo(
+    () => template.hiddenFiles ?? [],
+    [template.hiddenFiles],
+  )
+
   const stableValue = useMemo(() => ({
     updateFile,
     openFile,
@@ -209,9 +217,8 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     openInStackBlitz,
     clearConsole,
     clearTerminal,
-    hiddenFiles: template.hiddenFiles ?? [],
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [updateFile, openFile, saveSnapshot, toggleLineNumbers, formatCode, resetCode, openInStackBlitz, clearConsole, clearTerminal, template.hiddenFiles])
+    hiddenFiles,
+  }), [updateFile, openFile, saveSnapshot, toggleLineNumbers, formatCode, resetCode, openInStackBlitz, clearConsole, clearTerminal, hiddenFiles])
 
   // engine is read from the ref on every render so it's always current.
   // Refs don't trigger re-renders, so this must live in volatileValue (rebuilt

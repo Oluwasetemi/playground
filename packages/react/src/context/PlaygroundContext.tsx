@@ -47,7 +47,9 @@ export type PlaygroundContextValue = PlaygroundStableValue & PlaygroundVolatileV
 export const PlaygroundStableContext = createContext<PlaygroundStableValue | null>(null)
 export const PlaygroundVolatileContext = createContext<PlaygroundVolatileValue | null>(null)
 
-// Keep the old name as an alias so existing imports don't break
+// @deprecated — use PlaygroundStableContext or PlaygroundVolatileContext directly.
+// This alias only covers the stable half; volatile state (engine, status, files…)
+// is missing. Kept for build-compat until the next major version.
 export const PlaygroundContext = PlaygroundStableContext
 
 export function usePlaygroundContext(): PlaygroundContextValue {

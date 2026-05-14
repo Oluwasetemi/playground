@@ -92,7 +92,7 @@ export class TemplateManager {
    * Check if dependencies changed between templates
    */
   dependenciesChanged(current: Template, target: Template): boolean {
-    const sorted = (obj: Record<string, string> = {}) =>
+    const sorted = (obj: Record<string, string>) =>
       JSON.stringify(Object.fromEntries(Object.entries(obj).sort()))
     return (
       sorted(current.dependencies) !== sorted(target.dependencies)

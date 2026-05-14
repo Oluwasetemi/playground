@@ -388,7 +388,9 @@ export class PlaygroundEngine {
    * @see https://prettier.io/docs/en/browser
    */
   async formatCode(): Promise<void> {
-    if (!this.filesystemManager || !this.currentTemplate) {
+    // formatCode only needs the editor and a template (for context); it no longer
+    // reads from the filesystem, so filesystemManager is not required here.
+    if (!this.currentTemplate) {
       return
     }
 
@@ -437,6 +439,10 @@ export class PlaygroundEngine {
       }
 
       const entry = parserMap[parser]
+      if (!entry) {
+        console.warn(`No Prettier config for parser: ${parser}`)
+        return
+      }
 
       const formattedCode = await prettier.default.format(content, {
         parser: entry.parser,

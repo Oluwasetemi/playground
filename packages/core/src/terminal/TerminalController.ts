@@ -17,6 +17,9 @@ export class TerminalController {
 
   async mount(container: HTMLElement): Promise<void> {
     this.container = container
+    // Sync count from the real DOM in case the container already has children
+    // (e.g. React Strict Mode double-mount, hot-reload, or re-mount after switch).
+    this.lineCount = container.childElementCount
 
     await deferUntilIdle(() => {
       if (!this.initialized) {
@@ -89,9 +92,16 @@ export class TerminalController {
   }
 
   private escapeHtml(text: string): string {
-    if (!this.escapeDiv) return text
-    this.escapeDiv.textContent = text
-    return this.escapeDiv.innerHTML
+    if (this.escapeDiv) {
+      this.escapeDiv.textContent = text
+      return this.escapeDiv.innerHTML
+    }
+    // Fallback for non-browser environments (tests, SSR): manual replacement
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
   }
 
   destroy(): void {
