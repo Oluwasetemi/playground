@@ -200,7 +200,6 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
   }, [])
 
   const stableValue = useMemo(() => ({
-    engine: engineRef.current,
     updateFile,
     openFile,
     saveSnapshot,
@@ -214,7 +213,11 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [updateFile, openFile, saveSnapshot, toggleLineNumbers, formatCode, resetCode, openInStackBlitz, clearConsole, clearTerminal, template.hiddenFiles])
 
+  // engine is read from the ref on every render so it's always current.
+  // Refs don't trigger re-renders, so this must live in volatileValue (rebuilt
+  // every render) rather than in the memoized stableValue.
   const volatileValue = {
+    engine: engineRef.current,
     status,
     files,
     previewUrl,

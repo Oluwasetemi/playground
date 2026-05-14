@@ -243,16 +243,23 @@ export class FileSystemManager {
         withFileTypes: true,
       })
 
-      const visible = entries.filter(e => e.name !== 'node_modules' && !e.name.startsWith('.'))
+      const nodes: FileNode[] = []
 
-      const nodes = await Promise.all(visible.map(async (entry): Promise<FileNode> => {
+      for (const entry of entries) {
+        if (entry.name === 'node_modules' || entry.name.startsWith('.')) {
+          continue
+        }
+
         const fullPath = dirPath === '/' ? `/${entry.name}` : `${dirPath}/${entry.name}`
+
         if (entry.isDirectory()) {
           const children = await this.buildFileTree(fullPath, depth + 1)
-          return { name: entry.name, path: fullPath, type: 'directory', children }
+          nodes.push({ name: entry.name, path: fullPath, type: 'directory', children })
         }
-        return { name: entry.name, path: fullPath, type: 'file' }
-      }))
+        else {
+          nodes.push({ name: entry.name, path: fullPath, type: 'file' })
+        }
+      }
 
       return nodes.sort((a, b) => {
         if (a.type !== b.type) {

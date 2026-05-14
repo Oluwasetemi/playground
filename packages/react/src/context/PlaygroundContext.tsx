@@ -13,9 +13,8 @@ export interface TerminalMessage {
   timestamp: number
 }
 
-// Stable: callbacks and engine reference — only changes when engine is swapped
+// Stable: pure callbacks — identity is stable across renders (useMemo'd in usePlayground)
 export interface PlaygroundStableValue {
-  engine: PlaygroundEngine | null
   updateFile: (path: string, content: string) => Promise<void>
   openFile: (path: string) => Promise<void>
   saveSnapshot: () => Promise<void>
@@ -28,8 +27,11 @@ export interface PlaygroundStableValue {
   hiddenFiles: string[]
 }
 
-// Volatile: state that changes frequently (status updates, messages, file changes)
+// Volatile: state that changes frequently — rebuilt every render, never memoized.
+// engine lives here (not stable) because refs don't trigger re-renders; reading
+// engineRef.current must happen at render time to pick up the initialized engine.
 export interface PlaygroundVolatileValue {
+  engine: PlaygroundEngine | null
   status: PlaygroundStatus
   files: FileNode[]
   previewUrl: string | null

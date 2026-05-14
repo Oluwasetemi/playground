@@ -56,8 +56,8 @@ export class TemplateManager {
   async applyDiff(diff: FileDiff, targetTemplate: Template): Promise<void> {
     const targetFiles = this.flattenFileTree(targetTemplate.files)
 
-    // Step 1: Remove obsolete files in parallel
-    await Promise.all(diff.removed.map(async (path) => {
+    // Step 1: Remove obsolete files sequentially to avoid FS race conditions
+    for (const path of diff.removed) {
       try {
         await this.webcontainer.fs.rm(path, { force: true })
         this.currentFiles.delete(path)
@@ -65,15 +65,15 @@ export class TemplateManager {
       catch (error) {
         console.warn(`Failed to remove ${path}:`, error)
       }
-    }))
+    }
 
     // Step 1.5: Clean up empty directories
     await this.cleanupEmptyDirectories()
 
-    // Step 2: Add/update files in parallel
-    await Promise.all([...diff.added, ...diff.modified].map(async (path) => {
+    // Step 2: Add/update files (dirs created sequentially to avoid mkdir races)
+    for (const path of [...diff.added, ...diff.modified]) {
       const content = targetFiles.get(path)
-      if (!content) return
+      if (!content) continue
       try {
         const dirPath = path.substring(0, path.lastIndexOf('/'))
         if (dirPath && dirPath !== '/') {
@@ -85,7 +85,7 @@ export class TemplateManager {
       catch (error) {
         console.warn(`Failed to write ${path}:`, error)
       }
-    }))
+    }
   }
 
   /**
