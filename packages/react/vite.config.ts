@@ -28,8 +28,7 @@ export default defineConfig({
         },
       },
     },
-    // Enable minification and tree shaking
-    minify: 'esbuild',
+    minify: true,
     target: 'esnext',
   },
   plugins: [
@@ -37,11 +36,4 @@ export default defineConfig({
       insertTypesEntry: true,
     }),
   ],
-  // Enable build optimizations
-  esbuild: {
-    treeShaking: true,
-    minifyIdentifiers: true,
-    minifySyntax: true,
-    minifyWhitespace: true,
-  },
 })

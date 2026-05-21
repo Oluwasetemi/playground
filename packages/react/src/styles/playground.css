@@ -91,13 +91,138 @@
 /* Preview */
 .playground-preview {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--playground-border);
-  position: relative;
   background: var(--playground-surface);
   overflow: hidden;
 }
 
-.playground-preview iframe {
+/* Preview toolbar — URL bar + controls */
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: var(--playground-bg);
+  border-bottom: 1px solid var(--playground-border);
+  flex-shrink: 0;
+}
+
+.preview-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--playground-text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0 2px;
+}
+
+.preview-url-form {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-url-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  background: var(--playground-surface);
+  border: 1px solid var(--playground-border);
+  border-radius: 5px;
+}
+
+.preview-url-bar:focus-within {
+  border-color: #007bff;
+}
+
+.preview-url-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12px;
+  color: var(--playground-text);
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  min-width: 0;
+}
+
+.preview-url-input:disabled {
+  color: var(--playground-text-muted);
+  cursor: default;
+}
+
+.preview-url-input::placeholder {
+  color: var(--playground-text-muted);
+  font-style: italic;
+}
+
+/* Status dot — green when ready, dim when not */
+.preview-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--playground-border);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.preview-dot[data-ready="true"] {
+  background: #28a745;
+}
+
+/* Spinner while iframe is loading */
+.preview-spinner {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--playground-border);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: preview-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes preview-spin {
+  to { transform: rotate(360deg); }
+}
+
+.preview-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--playground-border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--playground-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.preview-icon-btn:hover:not(:disabled) {
+  background: var(--playground-surface);
+  color: var(--playground-text);
+}
+
+.preview-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Frame area — fills remaining space */
+.preview-frame-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-frame-area iframe {
   width: 100%;
   height: 100%;
   border: none;

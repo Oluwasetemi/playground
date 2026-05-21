@@ -1,9 +1,10 @@
 import type { Template } from './types'
+import { CONSOLE_FORWARDER_SCRIPT } from './console-forwarder'
 
 export const vueTemplate: Template = {
   id: 'vue',
   name: 'Vue 3',
-  description: 'Vue 3 with Vite',
+  description: 'Vue 3 with Vite 8',
   files: {
     'package.json': {
       file: {
@@ -11,8 +12,8 @@ export const vueTemplate: Template = {
           name: 'vue-playground',
           type: 'module',
           scripts: { dev: 'vite', build: 'vite build' },
-          dependencies: { vue: '^3.5.26' },
-          devDependencies: { '@vitejs/plugin-vue': '^6.0.3', 'vite': '^7.3.1' },
+          dependencies: { vue: '^3.5.34' },
+          devDependencies: { '@vitejs/plugin-vue': '^6.0.7', 'vite': '^8.0.13' },
         }, null, 2),
       },
     },
@@ -23,7 +24,7 @@ export const vueTemplate: Template = {
     },
     'index.html': {
       file: {
-        contents: `<!DOCTYPE html>\n<html>\n<head><title>Vue Playground</title></head>\n<body>\n<div id="app"></div>\n<script type="module" src="/src/main.js"></script>\n</body>\n</html>`,
+        contents: `<!DOCTYPE html>\n<html>\n<head><title>Vue Playground</title>${CONSOLE_FORWARDER_SCRIPT}</head>\n<body>\n<div id="app"></div>\n<script type="module" src="/src/main.js"></script>\n</body>\n</html>`,
       },
     },
     'src': {
@@ -41,8 +42,8 @@ export const vueTemplate: Template = {
       },
     },
   },
-  dependencies: { vue: '^3.5.26' },
-  devDependencies: { '@vitejs/plugin-vue': '^6.0.3', 'vite': '^7.3.1' },
+  dependencies: { vue: '^3.5.34' },
+  devDependencies: { '@vitejs/plugin-vue': '^6.0.7', 'vite': '^8.0.13' },
   commands: { dev: 'npm run dev' },
   entryFile: '/src/App.vue',
 }

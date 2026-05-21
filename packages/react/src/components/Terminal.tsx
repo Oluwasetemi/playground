@@ -3,6 +3,27 @@ import { Terminal as XTerm } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 
+// Strip ANSI cursor-movement and screen-clearing sequences that cause blank
+// gaps in a scrollable xterm buffer. Vite uses these to update its status
+// line in place (cursor-up + clear-line), but in xterm's scrollback model
+// they leave empty rows instead of overwriting. SGR color codes are kept.
+function stripCursorControls(data: string): string {
+  return data
+    // Cursor movement: up/down/forward/back  \x1b[nA-D
+    .replace(/\x1b\[\d*[ABCD]/g, '')
+    // Cursor position: \x1b[row;colH  \x1b[H  \x1b[row;colf
+    .replace(/\x1b\[\d*;?\d*[Hf]/g, '')
+    // Erase in display / erase in line: \x1b[nJ  \x1b[nK
+    .replace(/\x1b\[\d*[JK]/g, '')
+    // Scroll up/down: \x1b[nS  \x1b[nT
+    .replace(/\x1b\[\d*[ST]/g, '')
+    // Private mode set/reset (hide cursor, alt screen, etc.): \x1b[?nh
+    .replace(/\x1b\[\?\d+[hl]/g, '')
+    // Save / restore cursor position
+    .replace(/\x1b[78]/g, '')
+    .replace(/\x1b\[[su]/g, '')
+}
+
 export interface TerminalProps {
   /** Terminal messages to display */
   messages?: Array<{
@@ -87,12 +108,17 @@ export function Terminal({
 
     terminal.open(containerRef.current)
 
-    // Initial fit
-    try {
-      fitAddon.fit()
-    } catch {
-      // Ignore fit errors during initialization
-    }
+    // Defer initial fit to after the browser has laid out the container.
+    // The terminal may be inside a display:none tab panel at mount time,
+    // so calling fit() synchronously gives 0 rows and creates blank gaps.
+    requestAnimationFrame(() => {
+      try {
+        fitAddon.fit()
+      }
+      catch {
+        // Ignore fit errors if terminal was disposed before RAF fired
+      }
+    })
 
     terminalRef.current = terminal
     fitAddonRef.current = fitAddon
@@ -105,15 +131,19 @@ export function Terminal({
     }
   }, [theme, fontFamily, fontSize, lineHeight])
 
-  // Handle resize
+  // Handle resize — always defer to next frame so the browser has applied
+  // the new layout dimensions before xterm recalculates rows/cols.
   const handleResize = useCallback(() => {
-    if (fitAddonRef.current && terminalRef.current) {
-      try {
-        fitAddonRef.current.fit()
-      } catch {
-        // Ignore fit errors
+    requestAnimationFrame(() => {
+      if (fitAddonRef.current && terminalRef.current) {
+        try {
+          fitAddonRef.current.fit()
+        }
+        catch {
+          // ignore
+        }
       }
-    }
+    })
   }, [])
 
   useEffect(() => {
@@ -139,7 +169,7 @@ export function Terminal({
     const newMessages = messages.slice(lastMessageIndexRef.current)
 
     for (const msg of newMessages) {
-      terminalRef.current.write(msg.text)
+      terminalRef.current.write(stripCursorControls(msg.text))
     }
 
     lastMessageIndexRef.current = messages.length

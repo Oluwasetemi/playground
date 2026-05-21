@@ -35,8 +35,10 @@ export default defineConfig({
     // Ensure proper chunking to avoid duplicate React
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom'],
+        codeSplitting: {
+          groups: [
+            { test: /react-dom|\/react\//, name: 'react' },
+          ],
         },
       },
     },

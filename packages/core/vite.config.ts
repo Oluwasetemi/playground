@@ -16,32 +16,17 @@ export default defineConfig({
       // Mark monaco-editor and all subpaths as external (optional peer dep)
       external: ['monaco-editor', /^monaco-editor\//, 'nanostores'],
       output: {
-        // Manual chunking for code splitting
-        manualChunks: {
-          // Separate CodeMirror bundle
-          editor: [
-            '@codemirror/state',
-            '@codemirror/view',
-            '@codemirror/commands',
-            '@codemirror/search',
-            '@codemirror/autocomplete',
-            '@codemirror/language',
-            '@codemirror/theme-one-dark',
-            '@codemirror/lang-javascript',
-            '@codemirror/lang-json',
-            '@codemirror/lang-html',
-            '@codemirror/lang-css',
-            '@codemirror/lang-markdown',
+        codeSplitting: {
+          groups: [
+            { test: /@webcontainer\/api/, name: 'webcontainer' },
+            { test: /@codemirror\//, name: 'editor' },
           ],
-          // Separate WebContainer bundle
-          webcontainer: ['@webcontainer/api'],
         },
       },
     },
-    // Enable minification and tree shaking
-    minify: 'esbuild',
+    // Vite 8 uses Rolldown + OXC by default — minify: true enables OXC minifier
+    minify: true,
     target: 'esnext',
-    // Reduce chunk size warnings threshold
     chunkSizeWarningLimit: 600,
   },
   plugins: [
@@ -49,11 +34,4 @@ export default defineConfig({
       insertTypesEntry: true,
     }),
   ],
-  // Enable build optimizations
-  esbuild: {
-    treeShaking: true,
-    minifyIdentifiers: true,
-    minifySyntax: true,
-    minifyWhitespace: true,
-  },
 })

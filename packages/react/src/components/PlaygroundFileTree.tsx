@@ -88,7 +88,7 @@ function FileTreeSkeleton() {
 
 export function PlaygroundFileTree() {
   const { files, openFile, status, hiddenFiles } = usePlaygroundContext()
-  const isLoading = status === 'initializing' || status === 'installing' || files.length === 0
+  const isLoading = status === 'initializing' || status === 'installing'
 
   // Filter out hidden files
   const visibleFiles = useMemo(

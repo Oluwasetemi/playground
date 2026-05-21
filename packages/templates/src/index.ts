@@ -1,3 +1,4 @@
+export { honoTemplate } from './hono'
 export { nodeTemplate } from './node'
 export { reactTemplate } from './react'
 export type { Template } from './types'

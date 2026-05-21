@@ -55,10 +55,20 @@ const RefreshIcon = () => (
   </svg>
 )
 
+const ExternalLinkIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+)
+
 export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps) {
   const { engine, previewUrl, status, consoleMessages, clearConsole, terminalMessages } = usePlaygroundContext()
   const [activeTab, setActiveTab] = useState<PanelTab>(defaultTab)
   const [filter, setFilter] = useState<ConsoleFilter>('all')
+  const [inputUrl, setInputUrl] = useState('')
+  const [iframeLoading, setIframeLoading] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const lastUrlRef = useRef<string | null>(null)
   const lastEngineRef = useRef<typeof engine>(null)
@@ -78,6 +88,14 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
     }
   }, [engine, previewUrl])
 
+  // Keep URL input in sync when the server URL changes (new template boot / switch)
+  useEffect(() => {
+    if (previewUrl) {
+      setInputUrl(previewUrl)
+      setIframeLoading(true)
+    }
+  }, [previewUrl])
+
   useEffect(() => {
     if (consoleRef.current && activeTab === 'console') {
       consoleRef.current.scrollTop = consoleRef.current.scrollHeight
@@ -96,6 +114,15 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
     () => filter === 'all' ? consoleMessages : consoleMessages.filter(m => m.type === filter),
     [consoleMessages, filter],
   )
+
+  const isReady = status === 'ready' && !!previewUrl
+
+  function handleUrlSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!iframeRef.current || !inputUrl) return
+    setIframeLoading(true)
+    iframeRef.current.src = inputUrl
+  }
 
   return (
     <div className="playground-panel">
@@ -125,16 +152,53 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
             Terminal
           </button>
         </div>
+
+        {activeTab === 'result' && (
+          <form className="panel-url-form" onSubmit={handleUrlSubmit}>
+            <div className="panel-url-bar">
+              {iframeLoading && isReady
+                ? <span className="panel-url-spinner" aria-hidden="true" />
+                : <span className="panel-url-dot" aria-hidden="true" data-ready={isReady} />}
+              <input
+                type="text"
+                className="panel-url-input"
+                value={inputUrl}
+                onChange={e => setInputUrl(e.target.value)}
+                disabled={!isReady}
+                spellCheck={false}
+                aria-label="Preview URL"
+                placeholder="Waiting for server…"
+              />
+            </div>
+          </form>
+        )}
+
         <div className="playground-panel-actions">
-          {activeTab === 'result' && previewUrl && (
-            <button
-              className="playground-panel-action-btn"
-              onClick={() => { if (iframeRef.current) iframeRef.current.src = previewUrl }}
-              title="Refresh preview"
-              aria-label="Refresh preview"
-            >
-              <RefreshIcon />
-            </button>
+          {activeTab === 'result' && (
+            <>
+              <button
+                className="playground-panel-action-btn"
+                onClick={() => {
+                  if (!iframeRef.current) return
+                  setIframeLoading(true)
+                  iframeRef.current.src = iframeRef.current.src
+                }}
+                disabled={!isReady}
+                title="Refresh preview"
+                aria-label="Refresh preview"
+              >
+                <RefreshIcon />
+              </button>
+              <button
+                className="playground-panel-action-btn"
+                onClick={() => window.open(inputUrl || previewUrl || '', '_blank')}
+                disabled={!isReady}
+                title="Open in new tab"
+                aria-label="Open in new tab"
+              >
+                <ExternalLinkIcon />
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -155,6 +219,7 @@ export function PlaygroundPanel({ defaultTab = 'result' }: PlaygroundPanelProps)
             title="Preview"
             className="playground-panel-iframe"
             style={{ display: previewUrl ? 'block' : 'none' }}
+            onLoad={() => setIframeLoading(false)}
           />
         </div>
 

@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 // import { reactTemplate as newTemp } from "./react.ts";
 import {
+  honoTemplate,
   nodeTemplate,
   reactTemplate,
   vanillaTemplate,
@@ -23,6 +24,7 @@ const templates: Record<string, Template> = {
   react: reactTemplate,
   vue: vueTemplate,
   node: nodeTemplate,
+  hono: honoTemplate,
 }
 
 const templateOptions = [
@@ -30,6 +32,7 @@ const templateOptions = [
   { value: 'react',   label: 'React' },
   { value: 'vue',     label: 'Vue' },
   { value: 'node',    label: 'Node' },
+  { value: 'hono',    label: 'Hono' },
 ]
 
 function CodeMirrorIcon() {
@@ -84,6 +87,8 @@ export default function App() {
         return "Vue Playground";
       case "node":
         return "Node.js Playground";
+      case "hono":
+        return "Hono Playground";
       default:
         return "JavaScript Playground";
     }

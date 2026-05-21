@@ -1,4 +1,5 @@
 import type { Template } from './types'
+import { CONSOLE_FORWARDER_SCRIPT } from './console-forwarder'
 
 export const vanillaTemplate: Template = {
   id: 'vanilla-js',
@@ -16,7 +17,7 @@ export const vanillaTemplate: Template = {
               build: 'vite build',
             },
             devDependencies: {
-              vite: '^7.3.1',
+              vite: '^8.0.13',
             },
           },
           null,
@@ -32,6 +33,7 @@ export const vanillaTemplate: Template = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vanilla Playground</title>
+    ${CONSOLE_FORWARDER_SCRIPT}
   </head>
   <body>
     <div id="app"></div>
@@ -91,7 +93,7 @@ button:hover {
   dependencies: {},
   // Synced with package.json
   devDependencies: {
-    vite: '^7.3.1',
+    vite: '^8.0.13',
   },
   commands: {
     dev: 'npm run dev',

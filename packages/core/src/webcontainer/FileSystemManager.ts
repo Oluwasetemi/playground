@@ -4,71 +4,7 @@ import type { FileNode, PlaygroundEvents } from '../engine/types'
 import { playgroundActions } from '../state/actions'
 import { FileWatcher } from './FileWatcher'
 
-// Add this type definition near your imports
-type FileSystemNode = FileSystemTree[string]
 
-// Console forwarder script to inject into HTML files
-const CONSOLE_FORWARDER_SCRIPT = `
-<script>
-(function() {
-  if (window.__playgroundConsoleInjected) return;
-  window.__playgroundConsoleInjected = true;
-
-  const originalConsole = {
-    log: console.log.bind(console),
-    warn: console.warn.bind(console),
-    error: console.error.bind(console),
-    info: console.info.bind(console),
-    clear: console.clear.bind(console)
-  };
-
-  function serialize(arg) {
-    try {
-      if (arg === undefined) return 'undefined';
-      if (arg === null) return 'null';
-      if (typeof arg === 'function') return arg.toString();
-      if (typeof arg === 'object') {
-        if (arg instanceof Error) return arg.message + (arg.stack ? '\\n' + arg.stack : '');
-        return JSON.stringify(arg, null, 2);
-      }
-      return String(arg);
-    } catch (e) {
-      return String(arg);
-    }
-  }
-
-  ['log', 'warn', 'error', 'info', 'clear'].forEach(function(method) {
-    console[method] = function() {
-      var args = Array.prototype.slice.call(arguments);
-      originalConsole[method].apply(console, args);
-      try {
-        window.parent.postMessage({
-          source: 'playground-console',
-          type: method,
-          args: args.map(serialize)
-        }, '*');
-      } catch (e) {}
-    };
-  });
-
-  window.addEventListener('error', function(e) {
-    window.parent.postMessage({
-      source: 'playground-console',
-      type: 'error',
-      args: [e.message + ' at ' + (e.filename || 'unknown') + ':' + (e.lineno || 0)]
-    }, '*');
-  });
-
-  window.addEventListener('unhandledrejection', function(e) {
-    window.parent.postMessage({
-      source: 'playground-console',
-      type: 'error',
-      args: ['Unhandled promise rejection: ' + (e.reason ? (e.reason.message || e.reason) : 'unknown')]
-    }, '*');
-  });
-})();
-</script>
-`
 
 export class FileSystemManager {
   private webcontainer: WebContainer
@@ -87,10 +23,7 @@ export class FileSystemManager {
     // FIX: Clear cache BEFORE mount to prevent stale reads
     this.fileCache.clear()
 
-    // Inject console forwarder into HTML files
-    const modifiedFiles = this.injectConsoleForwarder(files)
-
-    await this.webcontainer.mount(modifiedFiles)
+    await this.webcontainer.mount(files)
 
     const fileTree = await this.buildFileTree('/')
     this.events.emit('files:update', fileTree)
@@ -98,55 +31,6 @@ export class FileSystemManager {
 
     // Auto-watch the root directory for changes
     await this.fileWatcher.watch('/')
-  }
-
-  /**
-   * Inject console forwarder script into HTML files
-   */
-  private injectConsoleForwarder(files: FileSystemTree): FileSystemTree {
-    const result: FileSystemTree = {}
-
-    for (const [name, node] of Object.entries(files) as [string, FileSystemNode][]) {
-      if ('directory' in node) {
-        // Recursively process directories
-        result[name] = {
-          directory: this.injectConsoleForwarder(node.directory),
-        }
-      }
-      else if ('file' in node && name.endsWith('.html') && 'contents' in node.file) {
-        // Inject script into HTML files
-        const fileContents = node.file.contents
-        const content = typeof fileContents === 'string'
-          ? fileContents
-          : new TextDecoder().decode(fileContents as Uint8Array)
-
-        // Inject the script right after <head> or at the start of the file
-        let modifiedContent: string
-        if (content.includes('<head>')) {
-          modifiedContent = content.replace('<head>', `<head>${CONSOLE_FORWARDER_SCRIPT}`)
-        }
-        else if (content.includes('<head ')) {
-          modifiedContent = content.replace(/<head\s[^>]*>/, `\$&${CONSOLE_FORWARDER_SCRIPT}`)
-        }
-        else if (content.includes('<html>') || content.includes('<html ')) {
-          modifiedContent = content.replace(/<html[^>]*>/, `\$&${CONSOLE_FORWARDER_SCRIPT}`)
-        }
-        else {
-          // Prepend if no html/head tags found
-          modifiedContent = CONSOLE_FORWARDER_SCRIPT + content
-        }
-
-        result[name] = {
-          file: { contents: modifiedContent },
-        }
-      }
-      else {
-        // Keep other files as-is
-        result[name] = node
-      }
-    }
-
-    return result
   }
 
   /**

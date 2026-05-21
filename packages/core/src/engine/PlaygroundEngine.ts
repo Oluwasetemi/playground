@@ -35,6 +35,7 @@ export class PlaygroundEngine {
   private installedDependenciesHash: string | null = null
   private autoSaveSetupTimer: ReturnType<typeof setTimeout> | null = null
   private editorContainer: HTMLElement | null = null
+  private editorInitialized: boolean = false
 
   constructor(options: PlaygroundOptions = {}) {
     this.options = options
@@ -94,6 +95,12 @@ export class PlaygroundEngine {
       playgroundActions.setStatus('installing')
       await this.installDependencies()
 
+      // Refresh file tree after npm install — package-lock.json and any other
+      // generated files are now on disk but weren't there during mount().
+      const fileTreeAfterInstall = await this.filesystemManager.getFileTree()
+      this.events.emit('files:update', fileTreeAfterInstall)
+      playgroundActions.setFiles(fileTreeAfterInstall)
+
       // Start preview server
       if (!this.preview) {
         throw new Error('Preview server not initialized')
@@ -147,6 +154,7 @@ export class PlaygroundEngine {
 
     try {
       this.setStatus('initializing')
+      playgroundActions.setStatus('initializing')
 
       // Step 1: Stop dev server BEFORE making filesystem changes so Vite isn't
       // watching files while we overwrite them (prevents spurious config restarts).
@@ -188,6 +196,7 @@ export class PlaygroundEngine {
       if (depsChanged) {
         console.warn('Dependencies changed, running npm install...')
         this.setStatus('installing')
+        playgroundActions.setStatus('installing')
         await this.installDependencies()
       }
       else {
@@ -204,8 +213,10 @@ export class PlaygroundEngine {
       const fileTree = await this.filesystemManager.getFileTree()
       this.events.emit('files:update', fileTree)
       playgroundActions.setFiles(fileTree)
+      playgroundActions.setTemplate(newTemplate)
 
       this.setStatus('ready')
+      playgroundActions.setStatus('ready')
 
       // eslint-disable-next-line no-console
       console.timeEnd('Template switch')
@@ -249,11 +260,18 @@ export class PlaygroundEngine {
 
   async mountEditor(container: HTMLElement): Promise<void> {
     this.editorContainer = container
-    await this.editor.initialize(container, {
-      theme: this.options.theme,
-      lineNumbers: this.options.showLineNumbers,
-      ...this.options.editorOptions,
-    })
+
+    // Only initialize once — re-mounts after template switches just open the new entry file.
+    // CodeMirrorEditor.initialize() appends a new view every call; calling it twice
+    // would stack two editors in the same container.
+    if (!this.editorInitialized) {
+      await this.editor.initialize(container, {
+        theme: this.options.theme,
+        lineNumbers: this.options.showLineNumbers,
+        ...this.options.editorOptions,
+      })
+      this.editorInitialized = true
+    }
 
     if (this.filesystemManager && this.currentTemplate) {
       const entryFile = this.currentTemplate.entryFile
@@ -275,6 +293,7 @@ export class PlaygroundEngine {
     const openTabs = this.editor.getOpenTabs()
 
     this.editor.destroy()
+    this.editorInitialized = false
     this.editor = new EditorController(this.events, type)
 
     await this.editor.initialize(this.editorContainer, {
@@ -282,6 +301,7 @@ export class PlaygroundEngine {
       lineNumbers: this.options.showLineNumbers,
       ...this.options.editorOptions,
     })
+    this.editorInitialized = true
 
     // Restore previously open tabs, active file last so it ends up focused
     const tabsToRestore = openTabs.filter(t => t !== activeFile)
@@ -596,6 +616,7 @@ export class PlaygroundEngine {
 
     this.persistence.disableAutoSave()
     this.editor.destroy()
+    this.editorInitialized = false
     this.terminal.destroy()
     await this.webcontainerManager.teardown()
 

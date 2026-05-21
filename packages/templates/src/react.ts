@@ -1,9 +1,10 @@
 import type { Template } from './types'
+import { CONSOLE_FORWARDER_SCRIPT } from './console-forwarder'
 
 export const reactTemplate: Template = {
   id: 'react',
   name: 'React',
-  description: 'React 19 with Vite',
+  description: 'React 19 with Vite 8',
   files: {
     'package.json': {
       file: {
@@ -16,14 +17,14 @@ export const reactTemplate: Template = {
               build: 'vite build',
             },
             dependencies: {
-              'react': '^19.2.3',
-              'react-dom': '^19.2.3',
+              'react': '^19.2.6',
+              'react-dom': '^19.2.6',
             },
             devDependencies: {
-              '@types/react': '^19.2.8',
+              '@types/react': '^19.2.15',
               '@types/react-dom': '^19.2.3',
-              '@vitejs/plugin-react': '^5.1.2',
-              'vite': '^7.3.1',
+              '@vitejs/plugin-react': '^6.0.2',
+              'vite': '^8.0.13',
             },
           },
           null,
@@ -49,6 +50,7 @@ export default defineConfig({
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>React Playground</title>
+    ${CONSOLE_FORWARDER_SCRIPT}
   </head>
   <body>
     <div id="root"></div>
@@ -153,14 +155,14 @@ button:hover {
     },
   },
   dependencies: {
-    'react': '^19.2.3',
-    'react-dom': '^19.2.3',
+    'react': '^19.2.6',
+    'react-dom': '^19.2.6',
   },
   devDependencies: {
-    '@types/react': '^19.2.8',
+    '@types/react': '^19.2.15',
     '@types/react-dom': '^19.2.3',
-    '@vitejs/plugin-react': '^5.1.2',
-    'vite': '^7.3.1',
+    '@vitejs/plugin-react': '^6.0.2',
+    'vite': '^8.0.13',
   },
   commands: {
     dev: 'npm run dev',
