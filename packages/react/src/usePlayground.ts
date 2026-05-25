@@ -182,6 +182,7 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
     if (engineRef.current && templateRef.current) {
       await engineRef.current.resetToTemplate(templateRef.current)
       setConsoleMessages([])
+      setTerminalMessages([])
     }
   }, [])
 

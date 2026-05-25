@@ -618,6 +618,7 @@ export class PlaygroundEngine {
     this.editor.destroy()
     this.editorInitialized = false
     this.terminal.destroy()
+    await this.preview?.stop()
     await this.webcontainerManager.teardown()
 
     if (this.filesystemManager) {

@@ -108,15 +108,13 @@ export function Terminal({
 
     terminal.open(containerRef.current)
 
-    // Defer initial fit to after the browser has laid out the container.
-    // The terminal may be inside a display:none tab panel at mount time,
-    // so calling fit() synchronously gives 0 rows and creates blank gaps.
-    requestAnimationFrame(() => {
+    // Defer initial fit — cancel if component unmounts before frame fires.
+    let rafId = requestAnimationFrame(() => {
       try {
         fitAddon.fit()
       }
       catch {
-        // Ignore fit errors if terminal was disposed before RAF fired
+        // terminal may have been disposed before the frame ran
       }
     })
 
@@ -125,6 +123,7 @@ export function Terminal({
     lastMessageIndexRef.current = 0
 
     return () => {
+      cancelAnimationFrame(rafId)
       terminal.dispose()
       terminalRef.current = null
       fitAddonRef.current = null

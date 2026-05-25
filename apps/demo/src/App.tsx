@@ -13,8 +13,12 @@ import {
   honoTemplate,
   nodeTemplate,
   reactTemplate,
+  reactEslintTemplate,
+  solidTemplate,
+  svelteTemplate,
   vanillaTemplate,
   vueTemplate,
+  vueEslintTemplate,
 } from '@setemiojo/playground-templates'
 import "./playground.css";
 import "./App.css";
@@ -22,17 +26,25 @@ import "./App.css";
 const templates: Record<string, Template> = {
   vanilla: vanillaTemplate,
   react: reactTemplate,
+  'react-eslint': reactEslintTemplate,
   vue: vueTemplate,
+  'vue-eslint': vueEslintTemplate,
+  solid: solidTemplate,
+  svelte: svelteTemplate,
   node: nodeTemplate,
   hono: honoTemplate,
 }
 
 const templateOptions = [
-  { value: 'vanilla', label: 'Vanilla' },
-  { value: 'react',   label: 'React' },
-  { value: 'vue',     label: 'Vue' },
-  { value: 'node',    label: 'Node' },
-  { value: 'hono',    label: 'Hono' },
+  { value: 'vanilla',      label: 'Vanilla' },
+  { value: 'react',        label: 'React' },
+  { value: 'react-eslint', label: 'React+ESLint' },
+  { value: 'vue',          label: 'Vue' },
+  { value: 'vue-eslint',   label: 'Vue+ESLint' },
+  { value: 'solid',        label: 'Solid' },
+  { value: 'svelte',       label: 'Svelte' },
+  { value: 'node',         label: 'Node' },
+  { value: 'hono',         label: 'Hono' },
 ]
 
 function CodeMirrorIcon() {
@@ -80,18 +92,17 @@ export default function App() {
   const template = templates[selectedTemplate]
 
   const getTitle = () => {
-    switch (selectedTemplate) {
-      case "react":
-        return "React Playground";
-      case "vue":
-        return "Vue Playground";
-      case "node":
-        return "Node.js Playground";
-      case "hono":
-        return "Hono Playground";
-      default:
-        return "JavaScript Playground";
+    const titles: Record<string, string> = {
+      react: 'React Playground',
+      'react-eslint': 'React + ESLint Playground',
+      vue: 'Vue Playground',
+      'vue-eslint': 'Vue + ESLint Playground',
+      solid: 'SolidJS Playground',
+      svelte: 'Svelte Playground',
+      node: 'Node.js Playground',
+      hono: 'Hono Playground',
     }
+    return titles[selectedTemplate] ?? 'JavaScript Playground'
   };
 
   return (
