@@ -1,4 +1,6 @@
+export { astroTemplate } from './astro'
 export { honoTemplate } from './hono'
+export { nextjsTemplate } from './nextjs'
 export { nodeTemplate } from './node'
 export { reactTemplate } from './react'
 export { reactEslintTemplate } from './react-eslint'

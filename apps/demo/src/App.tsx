@@ -10,7 +10,9 @@ import {
 import { useState } from "react";
 // import { reactTemplate as newTemp } from "./react.ts";
 import {
+  astroTemplate,
   honoTemplate,
+  nextjsTemplate,
   nodeTemplate,
   reactTemplate,
   reactEslintTemplate,
@@ -31,6 +33,8 @@ const templates: Record<string, Template> = {
   'vue-eslint': vueEslintTemplate,
   solid: solidTemplate,
   svelte: svelteTemplate,
+  astro: astroTemplate,
+  nextjs: nextjsTemplate,
   node: nodeTemplate,
   hono: honoTemplate,
 }
@@ -43,6 +47,8 @@ const templateOptions = [
   { value: 'vue-eslint',   label: 'Vue+ESLint' },
   { value: 'solid',        label: 'Solid' },
   { value: 'svelte',       label: 'Svelte' },
+  { value: 'astro',        label: 'Astro' },
+  { value: 'nextjs',       label: 'Next.js' },
   { value: 'node',         label: 'Node' },
   { value: 'hono',         label: 'Hono' },
 ]
@@ -99,6 +105,8 @@ export default function App() {
       'vue-eslint': 'Vue + ESLint Playground',
       solid: 'SolidJS Playground',
       svelte: 'Svelte Playground',
+      astro: 'Astro Playground',
+      nextjs: 'Next.js Playground',
       node: 'Node.js Playground',
       hono: 'Hono Playground',
     }

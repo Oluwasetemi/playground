@@ -738,7 +738,9 @@ npm install @setemiojo/playground-templates
 | `vueEslintTemplate` | Vue 3 + Vite + `@setemiojo/eslint-config` | Adds `eslint .` script |
 | `solidTemplate` | SolidJS 1.9 + `vite-plugin-solid` | `createSignal`, fine-grained reactivity |
 | `svelteTemplate` | Svelte 5 + `@sveltejs/vite-plugin-svelte` | Runes API — `$state`, `mount()` |
-| `nodeTemplate` | Node.js | Terminal output only, no browser preview |
+| `astroTemplate` | Astro 6 | Islands architecture, zero JS by default |
+| `nextjsTemplate` | Next.js 16 + React 19 | App Router, `'use client'` for interactivity |
+| `nodeTemplate` | Node.js + Express | Terminal output + browser preview |
 | `honoTemplate` | Hono + Node.js | HTTP server with `node --watch` hot reload |
 
 ```ts
@@ -750,6 +752,8 @@ import {
   vueEslintTemplate,
   solidTemplate,
   svelteTemplate,
+  astroTemplate,
+  nextjsTemplate,
   nodeTemplate,
   honoTemplate,
 } from '@setemiojo/playground-templates'
