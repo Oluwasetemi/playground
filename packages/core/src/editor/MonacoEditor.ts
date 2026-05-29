@@ -146,14 +146,18 @@ export class MonacoEditor implements EditorAdapter {
    * This sets up the worker environment for Monaco editor features like IntelliSense.
    */
   private configureMonacoEnvironment(): void {
+    // `declare let MonacoEnvironment` in monaco's types is not a `var`, so it doesn't
+    // appear on `typeof globalThis`. Cast to reach it without losing type safety.
+    const g = globalThis as typeof globalThis & { MonacoEnvironment?: import('monaco-editor').Environment }
+
     // Skip if already configured
-    if (globalThis.MonacoEnvironment?.getWorker) {
+    if (g.MonacoEnvironment?.getWorker) {
       return
     }
 
     // Configure Monaco to use workers
     // We'll try Vite worker imports first, fallback to CDN
-    globalThis.MonacoEnvironment = {
+    g.MonacoEnvironment = {
       getWorker: async (_workerId: string, label: string) => {
         // Try to use Vite worker imports (recommended for Vite-based hosts).
         // The ?worker suffix is Vite-only; other bundlers fall through to the CDN fallback.
@@ -476,5 +480,3 @@ export class MonacoEditor implements EditorAdapter {
   }
 }
 
-// Monaco environment is set on self (globalThis) for web worker configuration
-// The type is already declared by monaco-editor
