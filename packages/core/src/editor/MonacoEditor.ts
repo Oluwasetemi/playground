@@ -55,7 +55,7 @@ export class MonacoEditor implements EditorAdapter {
       },
       lineNumbers: this.showLineNumbers ? 'on' : 'off',
       fontSize: options.fontSize || 14,
-      fontFamily: options.fontFamily || "'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace",
+      fontFamily: options.fontFamily || '\'JetBrains Mono\', \'Fira Code\', Menlo, Monaco, \'Courier New\', monospace',
       tabSize: options.tabSize || 2,
       wordWrap: options.wordWrap || 'on',
       readOnly: options.readOnly || false,
@@ -130,17 +130,10 @@ export class MonacoEditor implements EditorAdapter {
   private async initializeServices(_monaco: Monaco): Promise<void> {
     try {
       // Import StandaloneServices for proper initialization
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - Monaco internal API, no type declarations
       const { StandaloneServices } = await import('monaco-editor/esm/vs/editor/standalone/browser/standaloneServices')
-
-      // Check if services are already initialized
-      if (!StandaloneServices.get) {
-        return
-      }
-
-      // Services are automatically initialized on first editor creation
-      // We just need to ensure Monaco is ready
+      // Services are automatically initialized on first editor creation when StandaloneServices is present
+      void StandaloneServices
     }
     catch {
       // StandaloneServices may not be available in all Monaco builds
@@ -154,40 +147,45 @@ export class MonacoEditor implements EditorAdapter {
    */
   private configureMonacoEnvironment(): void {
     // Skip if already configured
-    if (self.MonacoEnvironment?.getWorker) {
+    if (globalThis.MonacoEnvironment?.getWorker) {
       return
     }
 
     // Configure Monaco to use workers
     // We'll try Vite worker imports first, fallback to CDN
-    self.MonacoEnvironment = {
+    globalThis.MonacoEnvironment = {
       getWorker: async (_workerId: string, label: string) => {
         // Try to use Vite worker imports (recommended for Vite-based hosts).
         // The ?worker suffix is Vite-only; other bundlers fall through to the CDN fallback.
         try {
           if (label === 'json') {
             // @ts-ignore - ?worker is a Vite-specific import suffix, no type decls available
-            const JsonWorker = await import('monaco-editor/esm/vs/language/json/json.worker?worker')
-            return new JsonWorker.default()
+            const w = await import('monaco-editor/esm/vs/language/json/json.worker?worker')
+            // eslint-disable-next-line new-cap
+            return new w.default()
           }
           if (label === 'css' || label === 'scss' || label === 'less') {
             // @ts-ignore
-            const CssWorker = await import('monaco-editor/esm/vs/language/css/css.worker?worker')
-            return new CssWorker.default()
+            const w = await import('monaco-editor/esm/vs/language/css/css.worker?worker')
+            // eslint-disable-next-line new-cap
+            return new w.default()
           }
           if (label === 'html' || label === 'handlebars' || label === 'razor') {
             // @ts-ignore
-            const HtmlWorker = await import('monaco-editor/esm/vs/language/html/html.worker?worker')
-            return new HtmlWorker.default()
+            const w = await import('monaco-editor/esm/vs/language/html/html.worker?worker')
+            // eslint-disable-next-line new-cap
+            return new w.default()
           }
           if (label === 'typescript' || label === 'javascript') {
             // @ts-ignore
-            const TsWorker = await import('monaco-editor/esm/vs/language/typescript/ts.worker?worker')
-            return new TsWorker.default()
+            const w = await import('monaco-editor/esm/vs/language/typescript/ts.worker?worker')
+            // eslint-disable-next-line new-cap
+            return new w.default()
           }
           // @ts-ignore
-          const EditorWorker = await import('monaco-editor/esm/vs/editor/editor.worker?worker')
-          return new EditorWorker.default()
+          const w = await import('monaco-editor/esm/vs/editor/editor.worker?worker')
+          // eslint-disable-next-line new-cap
+          return new w.default()
         }
         catch {
           // Fallback to CDN workers if Vite imports fail

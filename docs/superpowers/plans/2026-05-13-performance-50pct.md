@@ -221,7 +221,7 @@ In `packages/react/src/context/PlaygroundContext.tsx`, create two contexts:
 // Stable: engine, callbacks — changes only on engine swap
 export const PlaygroundStableContext = createContext<PlaygroundStableValue | null>(null)
 
-// Volatile: status, files, messages — changes frequently  
+// Volatile: status, files, messages — changes frequently
 export const PlaygroundVolatileContext = createContext<PlaygroundVolatileValue | null>(null)
 ```
 
@@ -287,7 +287,8 @@ Keep backward compat by re-exporting a combined hook:
 export function usePlaygroundContext() {
   const stable = useContext(PlaygroundStableContext)
   const volatile = useContext(PlaygroundVolatileContext)
-  if (!stable || !volatile) throw new Error('usePlaygroundContext must be used inside <Playground>')
+  if (!stable || !volatile)
+    throw new Error('usePlaygroundContext must be used inside <Playground>')
   return { ...stable, ...volatile }
 }
 ```
@@ -318,7 +319,7 @@ git commit -m "perf(react): split context into stable/volatile — stops 7-compo
 
 ```ts
 // In the console:message handler:
-setConsoleMessages(prev => {
+setConsoleMessages((prev) => {
   const next = [...prev, newMsg]
   return next.length > 500 ? next.slice(-500) : next
 })
@@ -328,7 +329,7 @@ setConsoleMessages(prev => {
 
 ```ts
 // In the process:output handler:
-setTerminalMessages(prev => {
+setTerminalMessages((prev) => {
   const next = [...prev, { type: output.type, text: output.data, timestamp: output.timestamp }]
   return next.length > 1000 ? next.slice(-1000) : next
 })
@@ -388,7 +389,7 @@ git commit -m "perf(react): memoize errorCount, warnCount, filteredMessages in P
 - [ ] **Step 1: Wrap FileTreeNode in React.memo**
 
 ```ts
-const FileTreeNode = React.memo(function FileTreeNode({ node, depth, onFileClick }: FileTreeNodeProps) {
+const FileTreeNode = React.memo(({ node, depth, onFileClick }: FileTreeNodeProps) => {
   // ... existing implementation unchanged
 })
 ```
@@ -418,7 +419,8 @@ In `FileSystemManager.buildFileTree`, replace the sequential `for` loop over ent
 const entries = await this.webcontainer.fs.readdir(dirPath, { withFileTypes: true })
 const children = await Promise.all(
   entries.map(async (entry) => {
-    if (entry.isDirectory()) return this.buildFileTree(`${dirPath}/${entry.name}`)
+    if (entry.isDirectory())
+      return this.buildFileTree(`${dirPath}/${entry.name}`)
     return { name: entry.name, path: `${dirPath}/${entry.name}`, type: 'file' as const }
   })
 )

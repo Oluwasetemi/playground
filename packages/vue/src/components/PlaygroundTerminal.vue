@@ -1,10 +1,3 @@
-<template>
-  <div class="playground-terminal">
-    <div class="terminal-header">Console</div>
-    <div ref="containerRef" class="terminal-content" />
-  </div>
-</template>
-
 <script setup lang="ts">
 import type { PlaygroundEngine } from '@setemiojo/playground-core'
 import { ref, watch } from 'vue'
@@ -27,5 +20,16 @@ watch(
 )
 
 // Reset on engine change so the new instance gets mounted when ready
-watch(engine, () => { mountedEngine.value = null })
+watch(engine, () => {
+  mountedEngine.value = null
+})
 </script>
+
+<template>
+  <div class="playground-terminal">
+    <div class="terminal-header">
+      Console
+    </div>
+    <div ref="containerRef" class="terminal-content" />
+  </div>
+</template>

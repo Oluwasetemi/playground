@@ -115,7 +115,8 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
         return
       }
       const engine = engineRef.current
-      if (!engine) return
+      if (!engine)
+        return
 
       engine.saveSnapshot()
         .catch((err: Error) => {
@@ -141,7 +142,8 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
       prevEditorTypeRef.current = editorType
     }
 
-    if (!typeChanged && pendingEditorTypeRef.current === null) return
+    if (!typeChanged && pendingEditorTypeRef.current === null)
+      return
     if (!engineRef.current || status !== 'ready') {
       // Park the requested type; it will be applied once status is 'ready'.
       if (typeChanged)

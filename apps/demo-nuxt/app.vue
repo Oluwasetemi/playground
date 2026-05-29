@@ -1,3 +1,25 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const selectedTemplate = ref('react')
+const direction = ref<'horizontal' | 'vertical'>('horizontal')
+const editorType = ref<'codemirror' | 'monaco'>('codemirror')
+
+const templateOptions = [
+  { value: 'vanilla', label: 'Vanilla' },
+  { value: 'react', label: 'React' },
+  { value: 'react-eslint', label: 'React+ESLint' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'vue-eslint', label: 'Vue+ESLint' },
+  { value: 'solid', label: 'Solid' },
+  { value: 'svelte', label: 'Svelte' },
+  { value: 'astro', label: 'Astro' },
+  { value: 'nextjs', label: 'Next.js' },
+  { value: 'node', label: 'Node' },
+  { value: 'hono', label: 'Hono' },
+]
+</script>
+
 <template>
   <div class="app">
     <!-- ── Top bar ── -->
@@ -22,13 +44,13 @@
               type="radio"
               name="template"
               :value="opt.value"
-            />
+            >
             <label :for="`tpl-${opt.value}`">{{ opt.label }}</label>
           </div>
         </div>
 
         <button
-          :class="['layout-toggle-btn', editorType === 'monaco' ? 'active' : '']"
+          class="layout-toggle-btn" :class="[editorType === 'monaco' ? 'active' : '']"
           :title="editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'"
           :aria-label="editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'"
           @click="editorType = editorType === 'codemirror' ? 'monaco' : 'codemirror'"
@@ -45,7 +67,7 @@
         </button>
 
         <button
-          :class="['layout-toggle-btn', direction === 'vertical' ? 'active' : '']"
+          class="layout-toggle-btn" :class="[direction === 'vertical' ? 'active' : '']"
           :title="direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'"
           @click="direction = direction === 'horizontal' ? 'vertical' : 'horizontal'"
         >
@@ -76,28 +98,6 @@
     </main>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const selectedTemplate = ref('react')
-const direction = ref<'horizontal' | 'vertical'>('horizontal')
-const editorType = ref<'codemirror' | 'monaco'>('codemirror')
-
-const templateOptions = [
-  { value: 'vanilla',      label: 'Vanilla' },
-  { value: 'react',        label: 'React' },
-  { value: 'react-eslint', label: 'React+ESLint' },
-  { value: 'vue',          label: 'Vue' },
-  { value: 'vue-eslint',   label: 'Vue+ESLint' },
-  { value: 'solid',        label: 'Solid' },
-  { value: 'svelte',       label: 'Svelte' },
-  { value: 'astro',        label: 'Astro' },
-  { value: 'nextjs',       label: 'Next.js' },
-  { value: 'node',         label: 'Node' },
-  { value: 'hono',         label: 'Hono' },
-]
-</script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');

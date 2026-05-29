@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const widths = ['60%', '45%', '72%', '38%', '55%', '65%', '42%']
+</script>
+
 <template>
   <div class="file-tree-skeleton" aria-label="Loading files…" aria-busy="true">
     <div
@@ -11,7 +15,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-const widths = ['60%', '45%', '72%', '38%', '55%', '65%', '42%']
-</script>

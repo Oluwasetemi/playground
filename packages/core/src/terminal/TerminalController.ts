@@ -42,7 +42,8 @@ export class TerminalController {
   }
 
   private appendLine(html: string): void {
-    if (!this.container) return
+    if (!this.container)
+      return
     this.container.insertAdjacentHTML('beforeend', html)
     this.lineCount++
     if (this.lineCount > this.maxLines && this.container.firstChild) {
@@ -69,11 +70,12 @@ export class TerminalController {
 
   clear(): void {
     this.lineCount = 0
-    if (this.container) this.container.innerHTML = ''
+    if (this.container)
+      this.container.innerHTML = ''
   }
 
   // eslint-disable-next-line no-control-regex
-  private readonly ANSI_RE = /\x1B\[[0-9;]*[A-Za-z]/g
+  private readonly ANSI_RE = /\x1B\[[0-9;]*[A-Z]/gi
 
   private stripAnsi(text: string): string {
     return text.replace(this.ANSI_RE, '')

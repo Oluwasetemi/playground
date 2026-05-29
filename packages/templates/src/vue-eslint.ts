@@ -18,7 +18,7 @@ export const vueEslintTemplate: Template = {
               lint: 'eslint .',
             },
             dependencies: {
-              'vue': '^3.5.34',
+              vue: '^3.5.34',
             },
             devDependencies: {
               '@setemiojo/eslint-config': '^9.0.0',
@@ -138,7 +138,7 @@ button:hover { opacity: 0.85; }
     },
   },
   dependencies: {
-    'vue': '^3.5.34',
+    vue: '^3.5.34',
   },
   devDependencies: {
     '@setemiojo/eslint-config': '^9.0.0',

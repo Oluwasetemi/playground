@@ -1,5 +1,12 @@
+<script setup lang="ts">
+import type { FileNode } from '@setemiojo/playground-core'
+
+defineProps<{ node: FileNode, hiddenFiles: string[] }>()
+defineEmits<{ (e: 'fileClick', path: string): void }>()
+</script>
+
 <template>
-  <div v-if="node.type === 'file'" class="file-node" @click="$emit('file-click', node.path)">
+  <div v-if="node.type === 'file'" class="file-node" @click="$emit('fileClick', node.path)">
     <span class="file-icon">📄</span>
     <span class="file-name">{{ node.name }}</span>
   </div>
@@ -14,15 +21,8 @@
         :key="child.path"
         :node="child"
         :hidden-files="hiddenFiles"
-        @file-click="$emit('file-click', $event)"
+        @file-click="$emit('fileClick', $event)"
       />
     </div>
   </details>
 </template>
-
-<script setup lang="ts">
-import type { FileNode } from '@setemiojo/playground-core'
-
-defineProps<{ node: FileNode; hiddenFiles: string[] }>()
-defineEmits<{ (e: 'file-click', path: string): void }>()
-</script>

@@ -1,3 +1,57 @@
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { usePlaygroundContext } from '../context/PlaygroundContext'
+
+withDefaults(defineProps<{ title?: string }>(), { title: 'Preview' })
+
+const { engine, previewUrl, status } = usePlaygroundContext()
+
+const iframeRef = ref<HTMLIFrameElement | null>(null)
+const inputUrl = ref('')
+const iframeLoading = ref(false)
+const lastUrl = ref<string | null>(null)
+const lastEngine = ref(engine.value)
+
+// .value required in <script> for ref access; templates auto-unwrap
+const isReady = computed(() => status.value === 'ready' && !!previewUrl.value)
+
+watch(previewUrl, (url) => {
+  if (url) {
+    inputUrl.value = url
+    iframeLoading.value = true
+  }
+})
+
+watch([engine, previewUrl], ([eng, url]) => {
+  const shouldMount = iframeRef.value && eng && url
+    && (url !== lastUrl.value || eng !== lastEngine.value)
+  if (shouldMount && iframeRef.value) {
+    eng!.mountPreview(iframeRef.value)
+    lastUrl.value = url!
+    lastEngine.value = eng
+  }
+}, { flush: 'post' })
+
+function handleSubmit() {
+  if (!iframeRef.value || !inputUrl.value)
+    return
+  iframeLoading.value = true
+  iframeRef.value.src = inputUrl.value
+}
+
+function handleRefresh() {
+  if (!iframeRef.value)
+    return
+  iframeLoading.value = true
+  // eslint-disable-next-line no-self-assign
+  iframeRef.value.src = iframeRef.value.src
+}
+
+function openNewTab() {
+  window.open(inputUrl.value || previewUrl.value || '', '_blank')
+}
+</script>
+
 <template>
   <div class="playground-preview">
     <div class="preview-toolbar">
@@ -15,7 +69,7 @@
             spellcheck="false"
             aria-label="Preview URL"
             placeholder="Waiting for server…"
-          />
+          >
         </div>
       </form>
 
@@ -36,9 +90,15 @@
 
     <div class="preview-frame-area">
       <div v-if="status !== 'ready'" class="loading">
-        <template v-if="status === 'initializing'">Initializing…</template>
-        <template v-else-if="status === 'installing'">Installing dependencies…</template>
-        <template v-else-if="status === 'error'">Error loading preview</template>
+        <template v-if="status === 'initializing'">
+          Initializing…
+        </template>
+        <template v-else-if="status === 'installing'">
+          Installing dependencies…
+        </template>
+        <template v-else-if="status === 'error'">
+          Error loading preview
+        </template>
       </div>
       <iframe
         ref="iframeRef"
@@ -49,51 +109,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { usePlaygroundContext } from '../context/PlaygroundContext'
-
-withDefaults(defineProps<{ title?: string }>(), { title: 'Preview' })
-
-const { engine, previewUrl, status } = usePlaygroundContext()
-
-const iframeRef = ref<HTMLIFrameElement | null>(null)
-const inputUrl = ref('')
-const iframeLoading = ref(false)
-const lastUrl = ref<string | null>(null)
-const lastEngine = ref(engine.value)
-
-// .value required in <script> for ref access; templates auto-unwrap
-const isReady = computed(() => status.value === 'ready' && !!previewUrl.value)
-
-watch(previewUrl, (url) => {
-  if (url) { inputUrl.value = url; iframeLoading.value = true }
-})
-
-watch([engine, previewUrl], ([eng, url]) => {
-  const shouldMount = iframeRef.value && eng && url
-    && (url !== lastUrl.value || eng !== lastEngine.value)
-  if (shouldMount && iframeRef.value) {
-    eng!.mountPreview(iframeRef.value)
-    lastUrl.value = url!
-    lastEngine.value = eng
-  }
-}, { flush: 'post' })
-
-function handleSubmit() {
-  if (!iframeRef.value || !inputUrl.value) return
-  iframeLoading.value = true
-  iframeRef.value.src = inputUrl.value
-}
-
-function handleRefresh() {
-  if (!iframeRef.value) return
-  iframeLoading.value = true
-  iframeRef.value.src = iframeRef.value.src
-}
-
-function openNewTab() {
-  window.open(inputUrl.value || previewUrl.value || '', '_blank')
-}
-</script>

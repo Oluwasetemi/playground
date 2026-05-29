@@ -73,7 +73,8 @@ export class TemplateManager {
     // Step 2: Add/update files (dirs created sequentially to avoid mkdir races)
     for (const path of [...diff.added, ...diff.modified]) {
       const content = targetFiles.get(path)
-      if (content === undefined) continue // undefined means path not in map; empty string is a valid file
+      if (content === undefined)
+        continue // undefined means path not in map; empty string is a valid file
       try {
         const dirPath = path.substring(0, path.lastIndexOf('/'))
         if (dirPath && dirPath !== '/') {

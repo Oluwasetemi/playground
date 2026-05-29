@@ -24,7 +24,8 @@ function isHidden(path: string, hiddenFiles: string[]): boolean {
  * Recursively filter out hidden files from a file tree
  */
 function filterHiddenFiles(nodes: FileNode[], hiddenFiles: string[]): FileNode[] {
-  if (!hiddenFiles.length) return nodes
+  if (!hiddenFiles.length)
+    return nodes
 
   return nodes
     .filter(node => !isHidden(node.path, hiddenFiles))

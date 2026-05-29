@@ -6,51 +6,51 @@ import {
   PlaygroundHeader,
   PlaygroundPanel,
   ResizablePanel,
-} from "@setemiojo/playground-react";
-import { useState } from "react";
+} from '@setemiojo/playground-react'
 // import { reactTemplate as newTemp } from "./react.ts";
 import {
   astroTemplate,
   honoTemplate,
   nextjsTemplate,
   nodeTemplate,
-  reactTemplate,
   reactEslintTemplate,
+  reactTemplate,
   solidTemplate,
   svelteTemplate,
   vanillaTemplate,
-  vueTemplate,
   vueEslintTemplate,
+  vueTemplate,
 } from '@setemiojo/playground-templates'
-import "./playground.css";
-import "./App.css";
+import { useState } from 'react'
+import './playground.css'
+import './App.css'
 
 const templates: Record<string, Template> = {
-  vanilla: vanillaTemplate,
-  react: reactTemplate,
+  'vanilla': vanillaTemplate,
+  'react': reactTemplate,
   'react-eslint': reactEslintTemplate,
-  vue: vueTemplate,
+  'vue': vueTemplate,
   'vue-eslint': vueEslintTemplate,
-  solid: solidTemplate,
-  svelte: svelteTemplate,
-  astro: astroTemplate,
-  nextjs: nextjsTemplate,
-  node: nodeTemplate,
-  hono: honoTemplate,
+  'solid': solidTemplate,
+  'svelte': svelteTemplate,
+  'astro': astroTemplate,
+  'nextjs': nextjsTemplate,
+  'node': nodeTemplate,
+  'hono': honoTemplate,
 }
 
 const templateOptions = [
-  { value: 'vanilla',      label: 'Vanilla' },
-  { value: 'react',        label: 'React' },
+  { value: 'vanilla', label: 'Vanilla' },
+  { value: 'react', label: 'React' },
   { value: 'react-eslint', label: 'React+ESLint' },
-  { value: 'vue',          label: 'Vue' },
-  { value: 'vue-eslint',   label: 'Vue+ESLint' },
-  { value: 'solid',        label: 'Solid' },
-  { value: 'svelte',       label: 'Svelte' },
-  { value: 'astro',        label: 'Astro' },
-  { value: 'nextjs',       label: 'Next.js' },
-  { value: 'node',         label: 'Node' },
-  { value: 'hono',         label: 'Hono' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'vue-eslint', label: 'Vue+ESLint' },
+  { value: 'solid', label: 'Solid' },
+  { value: 'svelte', label: 'Svelte' },
+  { value: 'astro', label: 'Astro' },
+  { value: 'nextjs', label: 'Next.js' },
+  { value: 'node', label: 'Node' },
+  { value: 'hono', label: 'Hono' },
 ]
 
 function CodeMirrorIcon() {
@@ -91,27 +91,27 @@ function VerticalIcon() {
 }
 
 export default function App() {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("react");
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('react')
+  const [showSidebar, setShowSidebar] = useState(false)
   const [direction, setDirection] = useState<'horizontal' | 'vertical'>('horizontal')
   const [editorType, setEditorType] = useState<'codemirror' | 'monaco'>('codemirror')
   const template = templates[selectedTemplate]
 
   const getTitle = () => {
     const titles: Record<string, string> = {
-      react: 'React Playground',
+      'react': 'React Playground',
       'react-eslint': 'React + ESLint Playground',
-      vue: 'Vue Playground',
+      'vue': 'Vue Playground',
       'vue-eslint': 'Vue + ESLint Playground',
-      solid: 'SolidJS Playground',
-      svelte: 'Svelte Playground',
-      astro: 'Astro Playground',
-      nextjs: 'Next.js Playground',
-      node: 'Node.js Playground',
-      hono: 'Hono Playground',
+      'solid': 'SolidJS Playground',
+      'svelte': 'Svelte Playground',
+      'astro': 'Astro Playground',
+      'nextjs': 'Next.js Playground',
+      'node': 'Node.js Playground',
+      'hono': 'Hono Playground',
     }
     return titles[selectedTemplate] ?? 'JavaScript Playground'
-  };
+  }
 
   return (
     <div className="app">
@@ -184,16 +184,16 @@ export default function App() {
                 </aside>
               )}
               <ResizablePanel
-                firstPanel={
+                firstPanel={(
                   <div className="playground-editor-section">
                     <PlaygroundEditor />
                   </div>
-                }
-                secondPanel={
+                )}
+                secondPanel={(
                   <div className="playground-preview-section">
                     <PlaygroundPanel />
                   </div>
-                }
+                )}
                 direction={direction}
                 responsive
                 responsiveBreakpoint={768}
@@ -209,5 +209,5 @@ export default function App() {
         </Playground>
       </main>
     </div>
-  );
+  )
 }

@@ -4,8 +4,6 @@ import type { FileNode, PlaygroundEvents } from '../engine/types'
 import { playgroundActions } from '../state/actions'
 import { FileWatcher } from './FileWatcher'
 
-
-
 export class FileSystemManager {
   private webcontainer: WebContainer
   private events: EventEmitter<PlaygroundEvents>

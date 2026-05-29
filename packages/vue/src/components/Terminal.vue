@@ -1,17 +1,8 @@
-<template>
-  <div
-    ref="containerRef"
-    class="playground-terminal-container"
-    :class="className"
-    style="width:100%;height:100%;overflow:hidden"
-  />
-</template>
-
 <script setup lang="ts">
 import { FitAddon } from '@xterm/addon-fit'
 import { Terminal as XTerm } from '@xterm/xterm'
-import '@xterm/xterm/css/xterm.css'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
+import '@xterm/xterm/css/xterm.css'
 
 interface TerminalMessage {
   type: 'stdout' | 'stderr'
@@ -41,25 +32,41 @@ const props = withDefaults(defineProps<{
 })
 
 const DEFAULT_THEME = {
-  background: '#1e1e1e', foreground: '#d4d4d4', cursor: '#d4d4d4',
-  cursorAccent: '#1e1e1e', selectionBackground: '#264f78',
-  black: '#1e1e1e', red: '#f48771', green: '#50fa7b', yellow: '#f1fa8c',
-  blue: '#6272a4', magenta: '#ff79c6', cyan: '#8be9fd', white: '#f8f8f2',
-  brightBlack: '#6272a4', brightRed: '#ff5555', brightGreen: '#69ff94',
-  brightYellow: '#ffffa5', brightBlue: '#d6acff', brightMagenta: '#ff92df',
-  brightCyan: '#a4ffff', brightWhite: '#ffffff',
+  background: '#1e1e1e',
+  foreground: '#d4d4d4',
+  cursor: '#d4d4d4',
+  cursorAccent: '#1e1e1e',
+  selectionBackground: '#264f78',
+  black: '#1e1e1e',
+  red: '#f48771',
+  green: '#50fa7b',
+  yellow: '#f1fa8c',
+  blue: '#6272a4',
+  magenta: '#ff79c6',
+  cyan: '#8be9fd',
+  white: '#f8f8f2',
+  brightBlack: '#6272a4',
+  brightRed: '#ff5555',
+  brightGreen: '#69ff94',
+  brightYellow: '#ffffa5',
+  brightBlue: '#d6acff',
+  brightMagenta: '#ff92df',
+  brightCyan: '#a4ffff',
+  brightWhite: '#ffffff',
 }
 
+/* eslint-disable no-control-regex */
 function stripCursorControls(data: string): string {
   return data
-    .replace(/\x1b\[\d*[ABCD]/g, '')
-    .replace(/\x1b\[\d*;?\d*[Hf]/g, '')
-    .replace(/\x1b\[\d*[JK]/g, '')
-    .replace(/\x1b\[\d*[ST]/g, '')
-    .replace(/\x1b\[\?\d+[hl]/g, '')
-    .replace(/\x1b[78]/g, '')
-    .replace(/\x1b\[[su]/g, '')
+    .replace(/\x1B\[\d*[A-D]/g, '')
+    .replace(/\x1B\[\d*(?:;\d*)?[Hf]/g, '')
+    .replace(/\x1B\[\d*[JK]/g, '')
+    .replace(/\x1B\[\d*[ST]/g, '')
+    .replace(/\x1B\[\?\d+[hl]/g, '')
+    .replace(/\x1B[78]/g, '')
+    .replace(/\x1B\[[su]/g, '')
 }
+/* eslint-enable no-control-regex */
 
 const containerRef = ref<HTMLDivElement | null>(null)
 let terminal: XTerm | null = null
@@ -69,13 +76,16 @@ let rafId = 0
 
 function handleResize() {
   rafId = requestAnimationFrame(() => {
-    try { fitAddon?.fit() }
+    try {
+      fitAddon?.fit()
+    }
     catch { /* disposed */ }
   })
 }
 
 onMounted(() => {
-  if (!containerRef.value) return
+  if (!containerRef.value)
+    return
 
   terminal = new XTerm({
     theme: { ...DEFAULT_THEME, ...props.theme },
@@ -95,7 +105,9 @@ onMounted(() => {
   terminal.open(containerRef.value)
 
   rafId = requestAnimationFrame(() => {
-    try { fitAddon?.fit() }
+    try {
+      fitAddon?.fit()
+    }
     catch { /* disposed */ }
   })
 
@@ -104,7 +116,8 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
 
   const observer = new ResizeObserver(handleResize)
-  if (containerRef.value) observer.observe(containerRef.value)
+  if (containerRef.value)
+    observer.observe(containerRef.value)
 
   onUnmounted(() => {
     cancelAnimationFrame(rafId)
@@ -120,7 +133,8 @@ onMounted(() => {
 watch(
   () => props.messages,
   (messages) => {
-    if (!terminal) return
+    if (!terminal)
+      return
     const newMsgs = messages.slice(lastMessageIndex)
     for (const msg of newMsgs) {
       terminal.write(stripCursorControls(msg.text))
@@ -131,3 +145,12 @@ watch(
   { deep: true },
 )
 </script>
+
+<template>
+  <div
+    ref="containerRef"
+    class="playground-terminal-container"
+    :class="className"
+    style="width:100%;height:100%;overflow:hidden"
+  />
+</template>

@@ -56,16 +56,19 @@ export function PlaygroundPreview({ title = 'Preview' }: PlaygroundPreviewProps)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!iframeRef.current || !inputUrl) return
+    if (!iframeRef.current || !inputUrl)
+      return
     setIframeLoading(true)
     iframeRef.current.src = inputUrl
   }
 
   function handleRefresh() {
-    if (!iframeRef.current) return
+    if (!iframeRef.current)
+      return
     setIframeLoading(true)
     // Reassigning src triggers a reload without needing contentWindow access
     // (which is blocked cross-origin for WebContainer preview URLs)
+    // eslint-disable-next-line no-self-assign
     iframeRef.current.src = iframeRef.current.src
   }
 

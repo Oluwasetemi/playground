@@ -1,6 +1,28 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { usePlaygroundContext } from '../context/PlaygroundContext'
+
+// Props are auto-available in <template> without binding to a variable
+withDefaults(defineProps<{
+  title?: string
+  onToggleSidebar?: (() => void) | undefined
+  showSidebar?: boolean
+}>(), {
+  title: 'Playground',
+  showSidebar: true,
+})
+
+const { status, toggleLineNumbers, formatCode, resetCode, openInStackBlitz, showLineNumbers } = usePlaygroundContext()
+
+// Computed values used in <template> are auto-unwrapped as plain values
+const isReady = computed(() => status.value === 'ready')
+</script>
+
 <template>
   <div class="playground-header" :data-status="status">
-    <div class="playground-header-title">{{ title }}</div>
+    <div class="playground-header-title">
+      {{ title }}
+    </div>
     <div class="playground-header-actions">
       <button
         v-if="onToggleSidebar"
@@ -16,7 +38,7 @@
       </button>
 
       <button
-        :class="['playground-header-btn', showLineNumbers ? 'active' : '']"
+        class="playground-header-btn" :class="[showLineNumbers ? 'active' : '']"
         :disabled="!isReady"
         title="Toggle line numbers"
         aria-label="Toggle line numbers"
@@ -51,23 +73,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import { usePlaygroundContext } from '../context/PlaygroundContext'
-
-// Props are auto-available in <template> without binding to a variable
-withDefaults(defineProps<{
-  title?: string
-  onToggleSidebar?: (() => void) | undefined
-  showSidebar?: boolean
-}>(), {
-  title: 'Playground',
-  showSidebar: true,
-})
-
-const { status, toggleLineNumbers, formatCode, resetCode, openInStackBlitz, showLineNumbers } = usePlaygroundContext()
-
-// Computed values used in <template> are auto-unwrapped as plain values
-const isReady = computed(() => status.value === 'ready')
-</script>

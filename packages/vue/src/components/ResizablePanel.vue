@@ -1,34 +1,3 @@
-<template>
-  <div
-    ref="containerRef"
-    :class="['resizable-panel', className]"
-    :style="containerStyle"
-    :data-direction="effectiveDirection"
-    :data-dragging="isDragging"
-  >
-    <div :class="['resizable-panel-first', firstPanelClassName]" :style="firstPanelStyle">
-      <slot name="first" />
-    </div>
-    <div
-      :class="['resizable-panel-resizer', resizerClassName]"
-      :style="resizerStyle"
-      role="separator"
-      :aria-orientation="isHorizontal ? 'vertical' : 'horizontal'"
-      :aria-valuenow="Math.round(size)"
-      :aria-valuemin="minSize"
-      :aria-valuemax="maxSize"
-      tabindex="0"
-      @mousedown="handleMouseDown"
-      @touchstart="handleTouchStart"
-    >
-      <div class="resizable-panel-resizer-line" />
-    </div>
-    <div :class="['resizable-panel-second', secondPanelClassName]" :style="secondPanelStyle">
-      <slot name="second" />
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import { computed, onUnmounted, ref, watch } from 'vue'
@@ -61,9 +30,9 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'resize-start'): void
+  (e: 'resizeStart'): void
   (e: 'resize', size: number): void
-  (e: 'resize-end', size: number): void
+  (e: 'resizeEnd', size: number): void
 }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -85,12 +54,14 @@ const effectiveStorageKey = computed(() =>
 )
 
 function readStored(key: string | undefined, fallback: number): number {
-  if (!key || typeof window === 'undefined') return fallback
+  if (!key || typeof window === 'undefined')
+    return fallback
   try {
     const v = localStorage.getItem(key)
     if (v) {
       const n = Number.parseFloat(v)
-      if (!Number.isNaN(n) && n >= props.minSize && n <= props.maxSize) return n
+      if (!Number.isNaN(n) && n >= props.minSize && n <= props.maxSize)
+        return n
     }
   }
   catch { /* sandboxed */ }
@@ -117,17 +88,20 @@ if (typeof window !== 'undefined') {
     isMobile.value = window.innerWidth <= props.responsiveBreakpoint
   }
   window.addEventListener('resize', resizeHandler)
-  onUnmounted(() => { if (resizeHandler) window.removeEventListener('resize', resizeHandler) })
+  onUnmounted(() => {
+    if (resizeHandler)
+      window.removeEventListener('resize', resizeHandler)
+  })
 }
 
 // Drag state
-let dragStart: { position: number; size: number } | null = null
+let dragStart: { position: number, size: number } | null = null
 
 function handleMouseDown(e: MouseEvent) {
   e.preventDefault()
   isDragging.value = true
   dragStart = { position: isHorizontal.value ? e.clientX : e.clientY, size: size.value }
-  emit('resize-start')
+  emit('resizeStart')
   document.addEventListener('mousemove', onMouseMove)
   document.addEventListener('mouseup', onEnd)
 }
@@ -136,13 +110,14 @@ function handleTouchStart(e: TouchEvent) {
   const touch = e.touches[0]
   isDragging.value = true
   dragStart = { position: isHorizontal.value ? touch.clientX : touch.clientY, size: size.value }
-  emit('resize-start')
+  emit('resizeStart')
   document.addEventListener('touchmove', onTouchMove)
   document.addEventListener('touchend', onEnd)
 }
 
 function onMouseMove(e: MouseEvent) {
-  if (!containerRef.value || !dragStart) return
+  if (!containerRef.value || !dragStart)
+    return
   const rect = containerRef.value.getBoundingClientRect()
   const containerSize = isHorizontal.value ? rect.width : rect.height
   const delta = (isHorizontal.value ? e.clientX : e.clientY) - dragStart.position
@@ -152,7 +127,8 @@ function onMouseMove(e: MouseEvent) {
 }
 
 function onTouchMove(e: TouchEvent) {
-  if (!containerRef.value || !dragStart) return
+  if (!containerRef.value || !dragStart)
+    return
   const touch = e.touches[0]
   const rect = containerRef.value.getBoundingClientRect()
   const containerSize = isHorizontal.value ? rect.width : rect.height
@@ -167,10 +143,12 @@ function onEnd() {
   dragStart = null
   const finalSize = size.value
   if (effectiveStorageKey.value) {
-    try { localStorage.setItem(effectiveStorageKey.value, finalSize.toString()) }
+    try {
+      localStorage.setItem(effectiveStorageKey.value, finalSize.toString())
+    }
     catch { /* sandboxed */ }
   }
-  emit('resize-end', finalSize)
+  emit('resizeEnd', finalSize)
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', onEnd)
   document.removeEventListener('touchmove', onTouchMove)
@@ -212,3 +190,34 @@ const resizerStyle = computed<CSSProperties>(() => ({
   zIndex: 10,
 }))
 </script>
+
+<template>
+  <div
+    ref="containerRef"
+    class="resizable-panel" :class="[className]"
+    :style="containerStyle"
+    :data-direction="effectiveDirection"
+    :data-dragging="isDragging"
+  >
+    <div class="resizable-panel-first" :class="[firstPanelClassName]" :style="firstPanelStyle">
+      <slot name="first" />
+    </div>
+    <div
+      class="resizable-panel-resizer" :class="[resizerClassName]"
+      :style="resizerStyle"
+      role="separator"
+      :aria-orientation="isHorizontal ? 'vertical' : 'horizontal'"
+      :aria-valuenow="Math.round(size)"
+      :aria-valuemin="minSize"
+      :aria-valuemax="maxSize"
+      tabindex="0"
+      @mousedown="handleMouseDown"
+      @touchstart="handleTouchStart"
+    >
+      <div class="resizable-panel-resizer-line" />
+    </div>
+    <div class="resizable-panel-second" :class="[secondPanelClassName]" :style="secondPanelStyle">
+      <slot name="second" />
+    </div>
+  </div>
+</template>

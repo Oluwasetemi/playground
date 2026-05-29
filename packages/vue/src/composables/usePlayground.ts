@@ -1,6 +1,6 @@
 import type { PlaygroundOptions, ProcessOutput, Template } from '@setemiojo/playground-core'
-import type { ConsoleMessage, TerminalMessage } from '../context/PlaygroundContext'
 import type { Ref } from 'vue'
+import type { ConsoleMessage, TerminalMessage } from '../context/PlaygroundContext'
 import { useStore } from '@nanostores/vue'
 import {
   $files,
@@ -23,7 +23,9 @@ export function usePlayground(templateRef: Ref<Template>, optionsRef?: Ref<Playg
   const previewUrl = useStore($previewUrl)
 
   const currentTemplate = ref<Template>(templateRef.value)
-  watch(templateRef, (t) => { currentTemplate.value = t })
+  watch(templateRef, (t) => {
+    currentTemplate.value = t
+  })
 
   let unsubError: (() => void) | null = null
   let unsubConsole: (() => void) | null = null
@@ -31,7 +33,8 @@ export function usePlayground(templateRef: Ref<Template>, optionsRef?: Ref<Playg
 
   function subscribeEvents() {
     const eng = engine.value
-    if (!eng) return
+    if (!eng)
+      return
 
     unsubError = eng.on('error', (error: Error) => {
       const next = [...consoleMessages.value, { type: 'error' as const, text: error.message, timestamp: Date.now() }]
@@ -39,7 +42,10 @@ export function usePlayground(templateRef: Ref<Template>, optionsRef?: Ref<Playg
     })
 
     unsubConsole = eng.on('console:message', (msg: { type: string, args: unknown[] }) => {
-      if (msg.type === 'clear') { consoleMessages.value = []; return }
+      if (msg.type === 'clear') {
+        consoleMessages.value = []
+        return
+      }
       const text = msg.args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')
       const next = [...consoleMessages.value, { type: msg.type as ConsoleMessage['type'], text, timestamp: Date.now() }]
       consoleMessages.value = next.length > 500 ? next.slice(-500) : next
@@ -52,8 +58,12 @@ export function usePlayground(templateRef: Ref<Template>, optionsRef?: Ref<Playg
   }
 
   function unsubscribeEvents() {
-    unsubError?.(); unsubConsole?.(); unsubTerminal?.()
-    unsubError = null; unsubConsole = null; unsubTerminal = null
+    unsubError?.()
+    unsubConsole?.()
+    unsubTerminal?.()
+    unsubError = null
+    unsubConsole = null
+    unsubTerminal = null
   }
 
   watch(
@@ -116,36 +126,75 @@ export function usePlayground(templateRef: Ref<Template>, optionsRef?: Ref<Playg
   onUnmounted(async () => {
     unsubscribeEvents()
     const eng = engine.value
-    if (!eng || initializing.value) return
-    await eng.saveSnapshot().catch((err: Error) => { console.warn('Failed to save snapshot:', err) })
+    if (!eng || initializing.value)
+      return
+    await eng.saveSnapshot().catch((err: Error) => {
+      console.warn('Failed to save snapshot:', err)
+    })
     eng.cleanup()
     engine.value = null
   })
 
   const hiddenFiles = computed(() => templateRef.value.hiddenFiles ?? [])
 
-  async function updateFile(path: string, content: string) { await engine.value?.updateFile(path, content) }
-  async function openFile(path: string) { await engine.value?.openFile(path).catch((e: Error) => console.error(e)) }
-  async function saveSnapshot() { await engine.value?.saveSnapshot() }
-  function toggleLineNumbers() { showLineNumbers.value = !showLineNumbers.value; engine.value?.setLineNumbers(showLineNumbers.value) }
-  async function formatCode() { await engine.value?.formatCode() }
+  async function updateFile(path: string, content: string) {
+    await engine.value?.updateFile(path, content)
+  }
+
+  async function openFile(path: string) {
+    await engine.value?.openFile(path).catch((e: Error) => console.error(e))
+  }
+
+  async function saveSnapshot() {
+    await engine.value?.saveSnapshot()
+  }
+
+  function toggleLineNumbers() {
+    showLineNumbers.value = !showLineNumbers.value
+    engine.value?.setLineNumbers(showLineNumbers.value)
+  }
+
+  async function formatCode() {
+    await engine.value?.formatCode()
+  }
   async function resetCode() {
-    if (!engine.value || !currentTemplate.value) return
+    if (!engine.value || !currentTemplate.value)
+      return
     await engine.value.resetToTemplate(currentTemplate.value)
     consoleMessages.value = []
     terminalMessages.value = []
   }
   async function openInStackBlitz() {
-    if (!engine.value || !currentTemplate.value) return
+    if (!engine.value || !currentTemplate.value)
+      return
     await engine.value.openInStackBlitz(currentTemplate.value)
   }
-  function clearConsole() { consoleMessages.value = [] }
-  function clearTerminal() { terminalMessages.value = [] }
+  function clearConsole() {
+    consoleMessages.value = []
+  }
+
+  function clearTerminal() {
+    terminalMessages.value = []
+  }
 
   return {
-    updateFile, openFile, saveSnapshot, toggleLineNumbers, formatCode,
-    resetCode, openInStackBlitz, clearConsole, clearTerminal, hiddenFiles,
-    engine, status, files, previewUrl, showLineNumbers,
-    consoleMessages, terminalMessages, template: currentTemplate,
+    updateFile,
+    openFile,
+    saveSnapshot,
+    toggleLineNumbers,
+    formatCode,
+    resetCode,
+    openInStackBlitz,
+    clearConsole,
+    clearTerminal,
+    hiddenFiles,
+    engine,
+    status,
+    files,
+    previewUrl,
+    showLineNumbers,
+    consoleMessages,
+    terminalMessages,
+    template: currentTemplate,
   }
 }

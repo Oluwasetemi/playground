@@ -136,5 +136,4 @@ export class PreviewServer {
       window.addEventListener('message', this.messageHandler)
     }
   }
-
 }

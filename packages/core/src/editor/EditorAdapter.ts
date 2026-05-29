@@ -6,62 +6,62 @@ export interface EditorAdapter {
   /**
    * Initialize the editor in a container element
    */
-  initialize(container: HTMLElement, options?: EditorOptions): Promise<void>
+  initialize: (container: HTMLElement, options?: EditorOptions) => Promise<void>
 
   /**
    * Open a file in the editor
    */
-  openFile(path: string, content: string): Promise<void>
+  openFile: (path: string, content: string) => Promise<void>
 
   /**
    * Get the current editor content
    */
-  getContent(): string
+  getContent: () => string
 
   /**
    * Set the editor content
    */
-  setContent(content: string): void
+  setContent: (content: string) => void
 
   /**
    * Get the currently active file path
    */
-  getActiveFile(): string
+  getActiveFile: () => string
 
   /**
    * Get all open tabs
    */
-  getOpenTabs(): string[]
+  getOpenTabs: () => string[]
 
   /**
    * Close a tab
    */
-  closeTab(path: string): void
+  closeTab: (path: string) => void
 
   /**
    * Toggle line numbers visibility
    */
-  setLineNumbers(show: boolean): void
+  setLineNumbers: (show: boolean) => void
 
   /**
    * Get current line numbers visibility state
    */
-  getLineNumbers(): boolean
+  getLineNumbers: () => boolean
 
   /**
    * Set the editor theme
    */
-  setTheme?(theme: 'light' | 'dark'): void
+  setTheme?: (theme: 'light' | 'dark') => void
 
   /**
    * Focus the editor
    */
-  focus?(): void
+  focus?: () => void
 
   /**
    * Destroy the editor instance and cleanup resources
    */
-  destroy(): void
+  destroy: () => void
 }
 
 export interface EditorOptions {
@@ -89,5 +89,5 @@ export type EditorType = 'codemirror' | 'monaco'
  * Factory function type for creating editor instances
  */
 export type EditorFactory = (
-  events: import('../engine/EventEmitter').EventEmitter<import('../engine/types').PlaygroundEvents>
+  events: import('../engine/EventEmitter').EventEmitter<import('../engine/types').PlaygroundEvents>,
 ) => EditorAdapter

@@ -1,5 +1,6 @@
 'use client'
 
+import type { Template } from '@setemiojo/playground-templates'
 import {
   Playground,
   PlaygroundEditor,
@@ -8,62 +9,61 @@ import {
   PlaygroundPanel,
   ResizablePanel,
 } from '@setemiojo/playground-react'
-import type { Template } from '@setemiojo/playground-templates'
 import {
   astroTemplate,
   honoTemplate,
   nextjsTemplate,
   nodeTemplate,
-  reactTemplate,
   reactEslintTemplate,
+  reactTemplate,
   solidTemplate,
   svelteTemplate,
   vanillaTemplate,
-  vueTemplate,
   vueEslintTemplate,
+  vueTemplate,
 } from '@setemiojo/playground-templates'
 import { useState } from 'react'
 
 const templates: Record<string, Template> = {
-  vanilla: vanillaTemplate,
-  react: reactTemplate,
+  'vanilla': vanillaTemplate,
+  'react': reactTemplate,
   'react-eslint': reactEslintTemplate,
-  vue: vueTemplate,
+  'vue': vueTemplate,
   'vue-eslint': vueEslintTemplate,
-  solid: solidTemplate,
-  svelte: svelteTemplate,
-  astro: astroTemplate,
-  nextjs: nextjsTemplate,
-  node: nodeTemplate,
-  hono: honoTemplate,
+  'solid': solidTemplate,
+  'svelte': svelteTemplate,
+  'astro': astroTemplate,
+  'nextjs': nextjsTemplate,
+  'node': nodeTemplate,
+  'hono': honoTemplate,
 }
 
 const templateOptions = [
-  { value: 'vanilla',      label: 'Vanilla' },
-  { value: 'react',        label: 'React' },
+  { value: 'vanilla', label: 'Vanilla' },
+  { value: 'react', label: 'React' },
   { value: 'react-eslint', label: 'React+ESLint' },
-  { value: 'vue',          label: 'Vue' },
-  { value: 'vue-eslint',   label: 'Vue+ESLint' },
-  { value: 'solid',        label: 'Solid' },
-  { value: 'svelte',       label: 'Svelte' },
-  { value: 'astro',        label: 'Astro' },
-  { value: 'nextjs',       label: 'Next.js' },
-  { value: 'node',         label: 'Node' },
-  { value: 'hono',         label: 'Hono' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'vue-eslint', label: 'Vue+ESLint' },
+  { value: 'solid', label: 'Solid' },
+  { value: 'svelte', label: 'Svelte' },
+  { value: 'astro', label: 'Astro' },
+  { value: 'nextjs', label: 'Next.js' },
+  { value: 'node', label: 'Node' },
+  { value: 'hono', label: 'Hono' },
 ]
 
 const titles: Record<string, string> = {
-  vanilla: 'Vanilla Playground',
-  react: 'React Playground',
+  'vanilla': 'Vanilla Playground',
+  'react': 'React Playground',
   'react-eslint': 'React + ESLint Playground',
-  vue: 'Vue Playground',
+  'vue': 'Vue Playground',
   'vue-eslint': 'Vue + ESLint Playground',
-  solid: 'SolidJS Playground',
-  svelte: 'Svelte Playground',
-  astro: 'Astro Playground',
-  nextjs: 'Next.js Playground',
-  node: 'Node.js Playground',
-  hono: 'Hono Playground',
+  'solid': 'SolidJS Playground',
+  'svelte': 'Svelte Playground',
+  'astro': 'Astro Playground',
+  'nextjs': 'Next.js Playground',
+  'node': 'Node.js Playground',
+  'hono': 'Hono Playground',
 }
 
 function MonacoIcon() {
@@ -175,16 +175,16 @@ export default function PlaygroundClient() {
                 </aside>
               )}
               <ResizablePanel
-                firstPanel={
+                firstPanel={(
                   <div className="playground-editor-section">
                     <PlaygroundEditor />
                   </div>
-                }
-                secondPanel={
+                )}
+                secondPanel={(
                   <div className="playground-preview-section">
                     <PlaygroundPanel />
                   </div>
-                }
+                )}
                 direction={direction}
                 responsive
                 responsiveBreakpoint={768}

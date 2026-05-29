@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2020",
+    "jsx": "react-jsx",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "jsx": "react-jsx",
-    "types": ["vitest/globals"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "types": ["vitest/globals"],
     "allowImportingTsExtensions": true,
 
     /* Linting */

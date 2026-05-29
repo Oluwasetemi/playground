@@ -53,7 +53,9 @@ export function PlaygroundEditor() {
             <span className="editor-switching-icon"><SwitchingIcon /></span>
             <span className="editor-switching-label">{switchingLabel}</span>
             <span className="editor-switching-dots">
-              <span /><span /><span />
+              <span />
+              <span />
+              <span />
             </span>
           </div>
         </div>

@@ -244,8 +244,9 @@
   Replace lines 592–594:
 
   ```ts
-  const sortedKeys = (obj: Record<string, string>) =>
-    JSON.stringify(obj, Object.keys(obj).sort())
+  function sortedKeys(obj: Record<string, string>) {
+    return JSON.stringify(obj, Object.keys(obj).sort())
+  }
   const combinedHash = sortedKeys(this.currentTemplate.dependencies)
     + sortedKeys(this.currentTemplate.devDependencies)
   ```
@@ -312,7 +313,7 @@
   Replace the `getLanguageExtension` inner function in `createBasicEditor()`:
 
   ```ts
-  const getLanguageExtension = (filePath: string = this.activeFile) => {
+  function getLanguageExtension(filePath: string = this.activeFile) {
     const ext = filePath.split('.').pop()?.toLowerCase() ?? ''
     switch (ext) {
       case 'css':
@@ -532,10 +533,10 @@
 
     useEffect(() => {
       if (
-        containerRef.current &&
-        engine &&
-        status === 'ready' &&
-        mountedEngineRef.current !== engine
+        containerRef.current
+        && engine
+        && status === 'ready'
+        && mountedEngineRef.current !== engine
       ) {
         mountedEngineRef.current = engine
         engine.mountTerminal(containerRef.current)
@@ -643,7 +644,7 @@
   In the `useEffect`, replace `handleEnd`:
 
   ```ts
-  const handleEnd = () => {
+  function handleEnd() {
     setIsDragging(false)
     dragStartRef.current = null
     const finalSize = currentSizeRef.current

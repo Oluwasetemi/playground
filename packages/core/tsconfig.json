@@ -2,10 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "./src",
+    "types": ["vitest/globals", "node", "vite/client"],
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist",
-    "types": ["vitest/globals", "node", "vite/client"]
+    "outDir": "./dist"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]

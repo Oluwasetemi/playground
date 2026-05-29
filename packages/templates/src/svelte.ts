@@ -17,7 +17,7 @@ export const svelteTemplate: Template = {
               build: 'vite build',
             },
             dependencies: {
-              'svelte': '^5.55.9',
+              svelte: '^5.55.9',
             },
             devDependencies: {
               '@sveltejs/vite-plugin-svelte': '^7.1.2',
@@ -120,7 +120,7 @@ mount(App, { target: document.getElementById('app') });`,
     },
   },
   dependencies: {
-    'svelte': '^5.55.9',
+    svelte: '^5.55.9',
   },
   devDependencies: {
     '@sveltejs/vite-plugin-svelte': '^7.1.2',

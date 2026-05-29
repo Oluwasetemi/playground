@@ -1,28 +1,30 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { Terminal as XTerm } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
+import { Terminal as XTerm } from '@xterm/xterm'
+import { useCallback, useEffect, useRef } from 'react'
 import '@xterm/xterm/css/xterm.css'
 
 // Strip ANSI cursor-movement and screen-clearing sequences that cause blank
 // gaps in a scrollable xterm buffer. Vite uses these to update its status
 // line in place (cursor-up + clear-line), but in xterm's scrollback model
 // they leave empty rows instead of overwriting. SGR color codes are kept.
+/* eslint-disable no-control-regex */
 function stripCursorControls(data: string): string {
   return data
     // Cursor movement: up/down/forward/back  \x1b[nA-D
-    .replace(/\x1b\[\d*[ABCD]/g, '')
+    .replace(/\x1B\[\d*[A-D]/g, '')
     // Cursor position: \x1b[row;colH  \x1b[H  \x1b[row;colf
-    .replace(/\x1b\[\d*;?\d*[Hf]/g, '')
+    .replace(/\x1B\[\d*(?:;\d*)?[Hf]/g, '')
     // Erase in display / erase in line: \x1b[nJ  \x1b[nK
-    .replace(/\x1b\[\d*[JK]/g, '')
+    .replace(/\x1B\[\d*[JK]/g, '')
     // Scroll up/down: \x1b[nS  \x1b[nT
-    .replace(/\x1b\[\d*[ST]/g, '')
+    .replace(/\x1B\[\d*[ST]/g, '')
     // Private mode set/reset (hide cursor, alt screen, etc.): \x1b[?nh
-    .replace(/\x1b\[\?\d+[hl]/g, '')
+    .replace(/\x1B\[\?\d+[hl]/g, '')
     // Save / restore cursor position
-    .replace(/\x1b[78]/g, '')
-    .replace(/\x1b\[[su]/g, '')
+    .replace(/\x1B[78]/g, '')
+    .replace(/\x1B\[[su]/g, '')
 }
+/* eslint-enable no-control-regex */
 
 export interface TerminalProps {
   /** Terminal messages to display */
@@ -88,7 +90,8 @@ export function Terminal({
 
   // Initialize terminal
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current)
+      return
 
     const terminal = new XTerm({
       theme: { ...DEFAULT_THEME, ...theme },
@@ -109,7 +112,7 @@ export function Terminal({
     terminal.open(containerRef.current)
 
     // Defer initial fit — cancel if component unmounts before frame fires.
-    let rafId = requestAnimationFrame(() => {
+    const rafId = requestAnimationFrame(() => {
       try {
         fitAddon.fit()
       }
@@ -162,7 +165,8 @@ export function Terminal({
 
   // Write new messages to terminal
   useEffect(() => {
-    if (!terminalRef.current) return
+    if (!terminalRef.current)
+      return
 
     // Only write new messages
     const newMessages = messages.slice(lastMessageIndexRef.current)

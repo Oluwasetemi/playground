@@ -286,7 +286,8 @@ export class PlaygroundEngine {
   }
 
   async switchEditorType(type: 'codemirror' | 'monaco'): Promise<void> {
-    if (!this.editorContainer) return
+    if (!this.editorContainer)
+      return
 
     const activeFile = this.editor.getActiveFile()
     const content = this.editor.getContent()
@@ -370,7 +371,8 @@ export class PlaygroundEngine {
 
     await Promise.all(
       Object.entries(snapshot.files).map(([path, content]) => {
-        if (expectedPaths && !expectedPaths.has(path)) return Promise.resolve()
+        if (expectedPaths && !expectedPaths.has(path))
+          return Promise.resolve()
         return this.filesystemManager!.writeFile(path, content, { silent: true })
       }),
     )
@@ -422,13 +424,21 @@ export class PlaygroundEngine {
     const content = this.editor.getContent()
     const ext = activeFile.split('.').pop()?.toLowerCase()
 
-    type ParserEntry = { parser: string, plugins: any[] }
+    interface ParserEntry { parser: string, plugins: any[] }
 
     const extToParser: Record<string, string> = {
-      js: 'babel', jsx: 'babel', mjs: 'babel', cjs: 'babel',
-      ts: 'typescript', tsx: 'typescript',
-      html: 'html', htm: 'html', vue: 'vue',
-      css: 'css', scss: 'scss', less: 'less',
+      js: 'babel',
+      jsx: 'babel',
+      mjs: 'babel',
+      cjs: 'babel',
+      ts: 'typescript',
+      tsx: 'typescript',
+      html: 'html',
+      htm: 'html',
+      vue: 'vue',
+      css: 'css',
+      scss: 'scss',
+      less: 'less',
     }
 
     const parser = ext ? extToParser[ext] : undefined
@@ -438,8 +448,8 @@ export class PlaygroundEngine {
     }
 
     try {
-      const [prettier, babelPlugin, estreePlugin, htmlPlugin, postcssPlugin, tsPlugin] =
-        await Promise.all([
+      const [prettier, babelPlugin, estreePlugin, htmlPlugin, postcssPlugin, tsPlugin]
+        = await Promise.all([
           import('prettier'),
           import('prettier/plugins/babel'),
           import('prettier/plugins/estree'),
@@ -449,13 +459,13 @@ export class PlaygroundEngine {
         ])
 
       const parserMap: Record<string, ParserEntry> = {
-        babel:      { parser: 'babel',      plugins: [babelPlugin.default, estreePlugin.default] },
+        babel: { parser: 'babel', plugins: [babelPlugin.default, estreePlugin.default] },
         typescript: { parser: 'typescript', plugins: [tsPlugin.default, estreePlugin.default] },
-        html:       { parser: 'html',       plugins: [htmlPlugin.default] },
-        vue:        { parser: 'vue',        plugins: [htmlPlugin.default] },
-        css:        { parser: 'css',        plugins: [postcssPlugin.default] },
-        scss:       { parser: 'scss',       plugins: [postcssPlugin.default] },
-        less:       { parser: 'less',       plugins: [postcssPlugin.default] },
+        html: { parser: 'html', plugins: [htmlPlugin.default] },
+        vue: { parser: 'vue', plugins: [htmlPlugin.default] },
+        css: { parser: 'css', plugins: [postcssPlugin.default] },
+        scss: { parser: 'scss', plugins: [postcssPlugin.default] },
+        less: { parser: 'less', plugins: [postcssPlugin.default] },
       }
 
       const entry = parserMap[parser]
@@ -826,4 +836,4 @@ export class PlaygroundEngine {
    * Flatten file tree to array of paths
    * Used for validation after template switching
    */
-  }
+}

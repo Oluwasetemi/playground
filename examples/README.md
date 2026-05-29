@@ -61,7 +61,7 @@ A simple interactive example showing:
 
 ```javascript
 import { PlaygroundEngine } from '@setemiojo/playground-core'
-import { vanillaTemplate, reactTemplate } from '@setemiojo/playground-templates'
+import { reactTemplate, vanillaTemplate } from '@setemiojo/playground-templates'
 
 // Create engine instance
 const engine = new PlaygroundEngine({
@@ -95,10 +95,10 @@ await engine.cleanup()
 
 ```javascript
 import {
-  vanillaTemplate,  // Vanilla JS + Vite
-  reactTemplate,    // React 19 + Vite
-  vueTemplate,      // Vue 3 + Vite
-  nodeTemplate,     // Node.js
+  nodeTemplate, // Node.js
+  reactTemplate, // React 19 + Vite
+  vanillaTemplate, // Vanilla JS + Vite
+  vueTemplate, // Vue 3 + Vite
 } from '@setemiojo/playground-templates'
 ```
 
