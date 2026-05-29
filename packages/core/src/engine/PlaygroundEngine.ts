@@ -215,6 +215,17 @@ export class PlaygroundEngine {
       playgroundActions.setFiles(fileTree)
       playgroundActions.setTemplate(newTemplate)
 
+      // Step 7: Open the new template's entry file in the editor
+      if (newTemplate.entryFile) {
+        try {
+          const entryContent = await this.filesystemManager.readFile(newTemplate.entryFile)
+          await this.editor.openFile(newTemplate.entryFile, entryContent)
+        }
+        catch (error) {
+          console.error(`Failed to open entry file ${newTemplate.entryFile}:`, error)
+        }
+      }
+
       this.setStatus('ready')
       playgroundActions.setStatus('ready')
 

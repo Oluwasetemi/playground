@@ -168,6 +168,13 @@ export function Terminal({
     if (!terminalRef.current)
       return
 
+    // Reset (template switch or manual clear): wipe xterm buffer
+    if (messages.length === 0) {
+      terminalRef.current.clear()
+      lastMessageIndexRef.current = 0
+      return
+    }
+
     // Only write new messages
     const newMessages = messages.slice(lastMessageIndexRef.current)
 
