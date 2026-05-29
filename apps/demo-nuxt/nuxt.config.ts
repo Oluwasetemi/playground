@@ -4,10 +4,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
 
   // Include the playground stylesheet globally via Nuxt's CSS pipeline.
-  // This avoids CSS @import inside a <style> block, which goes through
-  // PostCSS (not Vite's module resolver) and mishandles package aliases.
   css: [
-    path.resolve(__dirname, '../../packages/react/src/styles/playground.css'),
+    path.resolve(__dirname, '../../packages/vue/src/styles/playground.css'),
   ],
 
   // WebContainers require cross-origin isolation on the host page
@@ -34,16 +32,16 @@ export default defineNuxtConfig({
       // '@setemiojo/playground-react' would swallow '@setemiojo/playground-react/styles'.
       alias: [
         {
-          find: '@setemiojo/playground-react/styles',
-          replacement: path.resolve(__dirname, '../../packages/react/src/styles/playground.css'),
+          find: '@setemiojo/playground-vue/styles',
+          replacement: path.resolve(__dirname, '../../packages/vue/src/styles/playground.css'),
         },
         {
           find: '@setemiojo/playground-core',
           replacement: path.resolve(__dirname, '../../packages/core/src/index.ts'),
         },
         {
-          find: '@setemiojo/playground-react',
-          replacement: path.resolve(__dirname, '../../packages/react/src/index.ts'),
+          find: '@setemiojo/playground-vue',
+          replacement: path.resolve(__dirname, '../../packages/vue/src/index.ts'),
         },
         {
           find: '@setemiojo/playground-templates',
@@ -54,8 +52,9 @@ export default defineNuxtConfig({
     optimizeDeps: {
       exclude: [
         '@setemiojo/playground-core',
-        '@setemiojo/playground-react',
+        '@setemiojo/playground-vue',
         '@setemiojo/playground-templates',
+        'monaco-editor',
       ],
     },
   },

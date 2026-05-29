@@ -11,6 +11,7 @@ export class PreviewServer {
   private serverReadyUnsubscribe: (() => void) | null = null
   private allowedOrigins: Set<string> = new Set()
   private serverProcess: import('@webcontainer/api').WebContainerProcess | null = null
+  private messageHandler: ((event: MessageEvent) => void) | null = null
 
   constructor(webcontainer: WebContainer, events: EventEmitter<PlaygroundEvents>) {
     this.webcontainer = webcontainer
@@ -31,6 +32,14 @@ export class PreviewServer {
     this.serverReadyUnsubscribe?.()
     this.serverReadyUnsubscribe = null
     this.serverUrl = null
+    playgroundActions.setPreviewUrl(null)
+  }
+
+  destroy(): void {
+    if (this.messageHandler && typeof window !== 'undefined') {
+      window.removeEventListener('message', this.messageHandler)
+      this.messageHandler = null
+    }
   }
 
   async start(command: string): Promise<void> {
@@ -110,7 +119,7 @@ export class PreviewServer {
 
   private setupMessageListener(): void {
     if (typeof window !== 'undefined') {
-      window.addEventListener('message', (event) => {
+      this.messageHandler = (event: MessageEvent) => {
         // Only accept messages from known WebContainer server origins
         if (this.allowedOrigins.size > 0 && !this.allowedOrigins.has(event.origin)) {
           return
@@ -123,7 +132,8 @@ export class PreviewServer {
           }
           this.events.emit('console:message', message)
         }
-      })
+      }
+      window.addEventListener('message', this.messageHandler)
     }
   }
 

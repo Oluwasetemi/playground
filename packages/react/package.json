@@ -1,7 +1,7 @@
 {
   "name": "@setemiojo/playground-react",
   "type": "module",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "React components for code playground",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles": "./dist/style.css"
+    "./styles": "./src/styles/playground.css"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -129,15 +129,30 @@ export function usePlayground(template: Template, options?: PlaygroundOptions) {
   }, [])
 
   // ── Effect 3: hot-swap editor adapter when options.editor changes ─────────
-  // Only runs after the engine exists and status is 'ready' so we never
-  // interrupt an in-progress install.
+  // Watches both editorType and status so that if the user switches editor
+  // type while the engine is still loading, the switch is applied as soon as
+  // the engine becomes ready (status === 'ready').
   const editorType = options?.editor ?? 'codemirror'
   const prevEditorTypeRef = useRef(editorType)
+  const pendingEditorTypeRef = useRef<typeof editorType | null>(null)
   useEffect(() => {
-    if (prevEditorTypeRef.current === editorType) return
-    prevEditorTypeRef.current = editorType
-    if (!engineRef.current || status !== 'ready') return
-    engineRef.current.switchEditorType(editorType).catch((err: Error) => {
+    const typeChanged = prevEditorTypeRef.current !== editorType
+    if (typeChanged) {
+      prevEditorTypeRef.current = editorType
+    }
+
+    if (!typeChanged && pendingEditorTypeRef.current === null) return
+    if (!engineRef.current || status !== 'ready') {
+      // Park the requested type; it will be applied once status is 'ready'.
+      if (typeChanged)
+        pendingEditorTypeRef.current = editorType
+      return
+    }
+
+    // Apply either the freshly-changed type or the previously-parked request.
+    const typeToApply = pendingEditorTypeRef.current ?? editorType
+    pendingEditorTypeRef.current = null
+    engineRef.current.switchEditorType(typeToApply).catch((err: Error) => {
       console.error('Failed to switch editor type:', err)
     })
   }, [editorType, status])

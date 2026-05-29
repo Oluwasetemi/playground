@@ -1,4 +1,5 @@
-import type { Template } from '@setemiojo/playground-templates'
+'use client'
+
 import {
   Playground,
   PlaygroundEditor,
@@ -6,9 +7,8 @@ import {
   PlaygroundHeader,
   PlaygroundPanel,
   ResizablePanel,
-} from "@setemiojo/playground-react";
-import { useState } from "react";
-// import { reactTemplate as newTemp } from "./react.ts";
+} from '@setemiojo/playground-react'
+import type { Template } from '@setemiojo/playground-templates'
 import {
   astroTemplate,
   honoTemplate,
@@ -22,8 +22,7 @@ import {
   vueTemplate,
   vueEslintTemplate,
 } from '@setemiojo/playground-templates'
-import "./playground.css";
-import "./App.css";
+import { useState } from 'react'
 
 const templates: Record<string, Template> = {
   vanilla: vanillaTemplate,
@@ -53,21 +52,33 @@ const templateOptions = [
   { value: 'hono',         label: 'Hono' },
 ]
 
-function CodeMirrorIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <polyline points="4 5 1 8 4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <polyline points="12 5 15 8 12 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="9" y1="3" x2="7" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
+const titles: Record<string, string> = {
+  vanilla: 'Vanilla Playground',
+  react: 'React Playground',
+  'react-eslint': 'React + ESLint Playground',
+  vue: 'Vue Playground',
+  'vue-eslint': 'Vue + ESLint Playground',
+  solid: 'SolidJS Playground',
+  svelte: 'Svelte Playground',
+  astro: 'Astro Playground',
+  nextjs: 'Next.js Playground',
+  node: 'Node.js Playground',
+  hono: 'Hono Playground',
 }
 
 function MonacoIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5 5l2 3-2 3M9 11h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4 6l3 3-3 3M8 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function CodeMirrorIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M3 4h10M3 8h7M3 12h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }
@@ -90,34 +101,17 @@ function VerticalIcon() {
   )
 }
 
-export default function App() {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("react");
-  const [showSidebar, setShowSidebar] = useState(false);
+export default function PlaygroundClient() {
+  const [selectedTemplate, setSelectedTemplate] = useState('react')
+  const [showSidebar, setShowSidebar] = useState(false)
   const [direction, setDirection] = useState<'horizontal' | 'vertical'>('horizontal')
   const [editorType, setEditorType] = useState<'codemirror' | 'monaco'>('codemirror')
-  const template = templates[selectedTemplate]
 
-  const getTitle = () => {
-    const titles: Record<string, string> = {
-      react: 'React Playground',
-      'react-eslint': 'React + ESLint Playground',
-      vue: 'Vue Playground',
-      'vue-eslint': 'Vue + ESLint Playground',
-      solid: 'SolidJS Playground',
-      svelte: 'Svelte Playground',
-      astro: 'Astro Playground',
-      nextjs: 'Next.js Playground',
-      node: 'Node.js Playground',
-      hono: 'Hono Playground',
-    }
-    return titles[selectedTemplate] ?? 'JavaScript Playground'
-  };
+  const template = templates[selectedTemplate]
 
   return (
     <div className="app">
-      {/* ── Top bar ── */}
       <div className="template-bar">
-        {/* Brand */}
         <div className="app-brand">
           <div className="app-brand-mark" aria-hidden="true">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -126,6 +120,7 @@ export default function App() {
             </svg>
           </div>
           <span className="app-brand-name">playground</span>
+          <span className="app-badge">Next.js</span>
         </div>
 
         <div className="toolbar-actions">
@@ -146,7 +141,7 @@ export default function App() {
           </div>
 
           <button
-            className={`layout-toggle-btn ${editorType === 'monaco' ? 'active' : ''}`}
+            className={`layout-toggle-btn${editorType === 'monaco' ? ' active' : ''}`}
             onClick={() => setEditorType(e => e === 'codemirror' ? 'monaco' : 'codemirror')}
             title={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
             aria-label={editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'}
@@ -155,7 +150,7 @@ export default function App() {
           </button>
 
           <button
-            className={`layout-toggle-btn ${direction === 'vertical' ? 'active' : ''}`}
+            className={`layout-toggle-btn${direction === 'vertical' ? ' active' : ''}`}
             onClick={() => setDirection(d => d === 'horizontal' ? 'vertical' : 'horizontal')}
             title={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
             aria-label={direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'}
@@ -165,16 +160,12 @@ export default function App() {
         </div>
       </div>
 
-      {/* ── Main content ── */}
       <main className="app-main">
-        <Playground
-          template={template}
-          options={{ autoSave: true, editor: editorType }}
-        >
+        <Playground template={template} options={{ autoSave: true, editor: editorType }}>
           <div className="playground">
             <PlaygroundHeader
-              title={getTitle()}
-              onToggleSidebar={() => setShowSidebar(!showSidebar)}
+              title={titles[selectedTemplate] ?? 'Playground'}
+              onToggleSidebar={() => setShowSidebar(s => !s)}
               showSidebar={showSidebar}
             />
             <div className="playground-content">
@@ -201,7 +192,7 @@ export default function App() {
                 mobileInitialSize={45}
                 minSize={20}
                 maxSize={80}
-                storageKey="playground-panel-size"
+                storageKey="nextjs-demo-panel-size"
                 className="playground-main"
               />
             </div>
@@ -209,5 +200,5 @@ export default function App() {
         </Playground>
       </main>
     </div>
-  );
+  )
 }

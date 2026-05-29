@@ -1,125 +1,105 @@
 <template>
-  <div ref="mountEl" class="playground-mount" />
+  <Playground :template="template" :options="options" class="playground-mount">
+    <div class="playground">
+      <PlaygroundHeader
+        :title="title"
+        :on-toggle-sidebar="toggleSidebar"
+        :show-sidebar="showSidebar"
+      />
+      <div class="playground-content">
+        <aside v-if="showSidebar" class="playground-sidebar">
+          <PlaygroundFileTree />
+        </aside>
+        <ResizablePanel
+          :direction="direction"
+          :responsive="true"
+          :responsive-breakpoint="768"
+          :initial-size="50"
+          :mobile-initial-size="45"
+          :min-size="20"
+          :max-size="80"
+          storage-key="nuxt-demo-panel-size"
+          class="playground-main"
+        >
+          <template #first>
+            <div class="playground-editor-section">
+              <PlaygroundEditor />
+            </div>
+          </template>
+          <template #second>
+            <div class="playground-preview-section">
+              <PlaygroundPanel />
+            </div>
+          </template>
+        </ResizablePanel>
+      </div>
+    </div>
+  </Playground>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import {
+  astroTemplate,
+  honoTemplate,
+  nextjsTemplate,
+  nodeTemplate,
+  reactTemplate,
+  reactEslintTemplate,
+  solidTemplate,
+  svelteTemplate,
+  vanillaTemplate,
+  vueTemplate,
+  vueEslintTemplate,
+} from '@setemiojo/playground-templates'
+import type { Template } from '@setemiojo/playground-templates'
+import {
+  Playground,
+  PlaygroundEditor,
+  PlaygroundFileTree,
+  PlaygroundHeader,
+  PlaygroundPanel,
+  ResizablePanel,
+} from '@setemiojo/playground-vue'
+import { computed, ref } from 'vue'
 
-const props = defineProps<{
-  templateKey: string
-  direction: 'horizontal' | 'vertical'
-}>()
+const props = defineProps<{ templateKey: string; direction: 'horizontal' | 'vertical'; editorType: 'codemirror' | 'monaco' }>()
 
-const mountEl = ref<HTMLElement | null>(null)
-
-// React root kept outside of Vue reactivity to avoid proxy wrapping
-let reactRoot: { unmount(): void } | null = null
+const templateMap: Record<string, Template> = {
+  vanilla: vanillaTemplate,
+  react: reactTemplate,
+  'react-eslint': reactEslintTemplate,
+  vue: vueTemplate,
+  'vue-eslint': vueEslintTemplate,
+  solid: solidTemplate,
+  svelte: svelteTemplate,
+  astro: astroTemplate,
+  nextjs: nextjsTemplate,
+  node: nodeTemplate,
+  hono: honoTemplate,
+}
 
 const titles: Record<string, string> = {
+  vanilla: 'Vanilla Playground',
   react: 'React Playground',
   'react-eslint': 'React + ESLint Playground',
   vue: 'Vue Playground',
+  'vue-eslint': 'Vue + ESLint Playground',
   solid: 'SolidJS Playground',
   svelte: 'Svelte Playground',
+  astro: 'Astro Playground',
+  nextjs: 'Next.js Playground',
   node: 'Node.js Playground',
   hono: 'Hono Playground',
 }
 
-async function mountPlayground(templateKey: string, direction: 'horizontal' | 'vertical') {
-  if (!mountEl.value) return
+const template = computed(() => templateMap[props.templateKey] ?? reactTemplate)
+const title = computed(() => titles[props.templateKey] ?? 'Playground')
+const options = computed(() => ({ autoSave: true, editor: props.editorType }))
 
-  // Dynamically import React and playground packages — these are browser-only
-  const [
-    React,
-    { createRoot },
-    { createElement: h },
-    {
-      Playground,
-      PlaygroundEditor,
-      PlaygroundFileTree,
-      PlaygroundHeader,
-      PlaygroundPanel,
-      ResizablePanel,
-    },
-    templates,
-  ] = await Promise.all([
-    import('react').then(m => m.default ?? m),
-    import('react-dom/client'),
-    import('react'),
-    import('@setemiojo/playground-react'),
-    import('@setemiojo/playground-templates'),
-  ])
-
-  const templateMap: Record<string, unknown> = {
-    vanilla:      templates.vanillaTemplate,
-    react:        templates.reactTemplate,
-    'react-eslint': templates.reactEslintTemplate,
-    vue:          templates.vueTemplate,
-    solid:        templates.solidTemplate,
-    svelte:       templates.svelteTemplate,
-    node:         templates.nodeTemplate,
-    hono:         templates.honoTemplate,
-  }
-
-  const template = templateMap[templateKey] ?? templates.reactTemplate
-
-  // Unmount any existing React tree before creating a new one
-  reactRoot?.unmount()
-
-  reactRoot = createRoot(mountEl.value)
-
-  // Build the playground tree using createElement to avoid JSX in a .vue file
-  const tree = h(Playground, { template, options: { autoSave: true } },
-    h('div', { className: 'playground' },
-      h(PlaygroundHeader, {
-        title: titles[templateKey] ?? 'Playground',
-        onToggleSidebar: () => {
-          // Sidebar toggle state is local to the React tree
-          const el = mountEl.value?.querySelector('.playground-sidebar')
-          if (el) (el as HTMLElement).style.display = (el as HTMLElement).style.display === 'none' ? '' : 'none'
-        },
-      }),
-      h('div', { className: 'playground-content' },
-        h(ResizablePanel, {
-          firstPanel:  h('div', { className: 'playground-editor-section' }, h(PlaygroundEditor)),
-          secondPanel: h('div', { className: 'playground-preview-section' }, h(PlaygroundPanel)),
-          direction,
-          responsive: true,
-          responsiveBreakpoint: 768,
-          initialSize: 50,
-          mobileInitialSize: 45,
-          minSize: 20,
-          maxSize: 80,
-          storageKey: 'nuxt-demo-panel-size',
-          className: 'playground-main',
-        }),
-      ),
-    ),
-  )
-
-  reactRoot.render(tree)
-}
-
-onMounted(() => {
-  mountPlayground(props.templateKey, props.direction)
-})
-
-// Re-render when template or direction changes.
-// Template switching is handled by the Playground component internally
-// (diff-based, no WebContainer restart), so we just re-render the React tree.
-watch(() => [props.templateKey, props.direction] as const, ([key, dir]) => {
-  mountPlayground(key, dir)
-})
-
-onBeforeUnmount(() => {
-  reactRoot?.unmount()
-  reactRoot = null
-})
+const showSidebar = ref(false)
+function toggleSidebar() { showSidebar.value = !showSidebar.value }
 </script>
 
 <style scoped>
-.playground-mount {
-  width: 100%;
-  height: 100%;
-}
+.playground-mount { width: 100%; height: 100%; }
 </style>

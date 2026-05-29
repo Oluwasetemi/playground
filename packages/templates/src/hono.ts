@@ -11,7 +11,7 @@ export const honoTemplate: Template = {
           name: 'hono-playground',
           type: 'module',
           scripts: { dev: 'node --watch server.js' },
-          dependencies: { hono: '^4.12.21', '@hono/node-server': '^2.0.3' },
+          dependencies: { 'hono': '^4.12.21', '@hono/node-server': '^2.0.3' },
         }, null, 2),
       },
     },
@@ -56,7 +56,7 @@ serve({ fetch: app.fetch, port: 3000 }, (info) => {
     },
   },
   dependencies: {
-    hono: '^4.12.21',
+    'hono': '^4.12.21',
     '@hono/node-server': '^2.0.3',
   },
   devDependencies: {},

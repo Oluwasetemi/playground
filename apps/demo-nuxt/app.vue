@@ -13,20 +13,37 @@
         <span class="app-badge">Nuxt</span>
       </div>
 
-      <div class="template-picker" role="group" aria-label="Select template">
-        <div v-for="opt in templateOptions" :key="opt.value" class="template-option">
-          <input
-            :id="`tpl-${opt.value}`"
-            v-model="selectedTemplate"
-            type="radio"
-            name="template"
-            :value="opt.value"
-          />
-          <label :for="`tpl-${opt.value}`">{{ opt.label }}</label>
-        </div>
-      </div>
-
       <div class="toolbar-actions">
+        <div class="template-picker" role="group" aria-label="Select template">
+          <div v-for="opt in templateOptions" :key="opt.value" class="template-option">
+            <input
+              :id="`tpl-${opt.value}`"
+              v-model="selectedTemplate"
+              type="radio"
+              name="template"
+              :value="opt.value"
+            />
+            <label :for="`tpl-${opt.value}`">{{ opt.label }}</label>
+          </div>
+        </div>
+
+        <button
+          :class="['layout-toggle-btn', editorType === 'monaco' ? 'active' : '']"
+          :title="editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'"
+          :aria-label="editorType === 'codemirror' ? 'Switch to Monaco editor' : 'Switch to CodeMirror editor'"
+          @click="editorType = editorType === 'codemirror' ? 'monaco' : 'codemirror'"
+        >
+          <!-- Monaco icon when on CodeMirror (shows what you'll switch TO) -->
+          <svg v-if="editorType === 'codemirror'" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
+            <path d="M4 6l3 3-3 3M8 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <!-- CodeMirror icon when on Monaco -->
+          <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 4h10M3 8h7M3 12h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+
         <button
           :class="['layout-toggle-btn', direction === 'vertical' ? 'active' : '']"
           :title="direction === 'horizontal' ? 'Switch to vertical layout' : 'Switch to horizontal layout'"
@@ -54,6 +71,7 @@
       <PlaygroundMount
         :template-key="selectedTemplate"
         :direction="direction"
+        :editor-type="editorType"
       />
     </main>
   </div>
@@ -64,14 +82,18 @@ import { ref } from 'vue'
 
 const selectedTemplate = ref('react')
 const direction = ref<'horizontal' | 'vertical'>('horizontal')
+const editorType = ref<'codemirror' | 'monaco'>('codemirror')
 
 const templateOptions = [
   { value: 'vanilla',      label: 'Vanilla' },
   { value: 'react',        label: 'React' },
   { value: 'react-eslint', label: 'React+ESLint' },
   { value: 'vue',          label: 'Vue' },
+  { value: 'vue-eslint',   label: 'Vue+ESLint' },
   { value: 'solid',        label: 'Solid' },
   { value: 'svelte',       label: 'Svelte' },
+  { value: 'astro',        label: 'Astro' },
+  { value: 'nextjs',       label: 'Next.js' },
   { value: 'node',         label: 'Node' },
   { value: 'hono',         label: 'Hono' },
 ]
@@ -195,7 +217,7 @@ body {
 .layout-toggle-btn:hover { color: #e2e8f0; border-color: #313540; background: #1d2129; }
 .layout-toggle-btn.active { color: #00dc82; border-color: rgba(0, 220, 130, 0.35); background: rgba(0, 220, 130, 0.08); }
 
-.app-main { flex: 1; overflow: hidden; padding: 12px 16px 16px; }
+.app-main { flex: 1; overflow: hidden; padding: 12px 16px 16px; display: flex; flex-direction: column; }
 
 .playground-content {
   display: flex;

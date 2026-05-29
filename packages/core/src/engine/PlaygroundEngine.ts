@@ -619,6 +619,7 @@ export class PlaygroundEngine {
     this.editorInitialized = false
     this.terminal.destroy()
     await this.preview?.stop()
+    this.preview?.destroy()
     await this.webcontainerManager.teardown()
 
     if (this.filesystemManager) {
@@ -730,16 +731,24 @@ export class PlaygroundEngine {
       // Use direct spawn without output piping for better error visibility
       const installProcess = await webcontainer.spawn('npm', ['install'])
 
-      // Capture output for error reporting
+      // Capture output for error reporting and emit to terminal
       let output = ''
+      // eslint-disable-next-line ts/no-this-alias
+      const self = this
       installProcess.output.pipeTo(
         new WritableStream({
           write(data) {
             output += data
-            // Log in real-time for debugging
             if (data.trim()) {
               console.warn('[npm]', data.trim())
             }
+            self.events.emit('process:output', {
+              processId: 'npm-install',
+              command: 'npm install',
+              type: 'stdout',
+              data,
+              timestamp: Date.now(),
+            })
           },
         }),
       )

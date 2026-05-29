@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import './globals.css'
 import '@setemiojo/playground-react/styles'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Playground — Next.js Demo',

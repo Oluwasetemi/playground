@@ -36,7 +36,7 @@ export const vueTemplate: Template = {
         },
         'App.vue': {
           file: {
-            contents: `<template>\n  <div class="app">\n    <h1>Vue Playground</h1>\n    <p>Count: {{ count }}</p>\n    <button @click="count++">Increment</button>\n  </div>\n</template>\n\n<script setup>\nimport { ref } from 'vue';\nconst count = ref(0);\n</script>\n\n<style scoped>\n.app { text-align: center; padding: 40px; }\nbutton { background: #42b983; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }\n</style>`,
+            contents: `<template>\n  <div class="app">\n    <h1>Vue Playground</h1>\n    <p>Count: {{ count }}</p>\n    <button @click="handleClick">Increment</button>\n  </div>\n</template>\n\n<script setup>\nimport { ref, onMounted } from 'vue';\nconst count = ref(0);\nonMounted(() => { console.log('Vue Playground ready!'); });\nfunction handleClick() {\n  count.value++;\n  console.log('Count updated:', count.value);\n}\n</script>\n\n<style scoped>\n.app { text-align: center; padding: 40px; }\nbutton { background: #42b983; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }\n</style>`,
           },
         },
       },

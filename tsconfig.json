@@ -21,5 +21,9 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["packages/**/*", "apps/**/*", "vitest.d.ts", "vitest.setup.ts"]
+  "include": ["packages/**/*", "apps/**/*", "vitest.d.ts", "vitest.setup.ts"],
+  "exclude": [
+    "packages/vue",
+    "apps/demo-nuxt"
+  ]
 }

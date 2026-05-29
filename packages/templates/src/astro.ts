@@ -33,7 +33,7 @@ export default defineConfig({});
     },
     'src': {
       directory: {
-        'components': {
+        components: {
           directory: {
             'Counter.astro': {
               file: {
@@ -80,7 +80,7 @@ const { label = 'Count' } = Astro.props;
             },
           },
         },
-        'pages': {
+        pages: {
           directory: {
             'index.astro': {
               file: {
@@ -172,7 +172,7 @@ const features = [
     },
   },
   dependencies: {
-    'astro': '^6.3.7',
+    astro: '^6.3.7',
   },
   devDependencies: {},
   commands: { dev: 'npm run dev' },

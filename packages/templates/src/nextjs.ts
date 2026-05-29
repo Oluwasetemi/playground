@@ -36,7 +36,7 @@ export default nextConfig;
     },
     'src': {
       directory: {
-        'app': {
+        app: {
           directory: {
             'globals.css': {
               file: {

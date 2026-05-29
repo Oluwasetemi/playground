@@ -1,18 +1,20 @@
-import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Compile workspace packages from TypeScript source
+  // Compile workspace packages from TypeScript source rather than dist/.
+  // Module aliases are in tsconfig.json `paths` (read by Turbopack automatically).
   transpilePackages: [
     '@setemiojo/playground-core',
     '@setemiojo/playground-react',
     '@setemiojo/playground-templates',
   ],
 
-  // WebContainers require cross-origin isolation on the host page
+  // WebContainers require cross-origin isolation on the host page.
+  // require-corp matches the working Vite/Nuxt demo setup.
   async headers() {
     return [
       {
@@ -25,18 +27,10 @@ const nextConfig = {
     ]
   },
 
-  webpack(config) {
-    // Resolve workspace packages from their TypeScript source so webpack
-    // compiles them directly — avoids stale dist/ artifacts during development.
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@setemiojo/playground-core': path.resolve(__dirname, '../../packages/core/src/index.ts'),
-      '@setemiojo/playground-react': path.resolve(__dirname, '../../packages/react/src/index.ts'),
-      '@setemiojo/playground-templates': path.resolve(__dirname, '../../packages/templates/src/index.ts'),
-      // Sub-path export for the playground stylesheet
-      '@setemiojo/playground-react/styles': path.resolve(__dirname, '../../packages/react/src/styles/playground.css'),
-    }
-    return config
+  // Explicitly set the monorepo root so Turbopack doesn't pick up the wrong
+  // pnpm-lock.yaml from a parent directory, which breaks tsconfig path resolution.
+  turbopack: {
+    root: path.resolve(__dirname, '../..'),
   },
 }
 

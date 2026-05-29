@@ -1,7 +1,7 @@
 {
   "name": "@setemiojo/playground-core",
   "type": "module",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Framework-agnostic code playground engine using WebContainers API",
   "repository": {
     "type": "git",
