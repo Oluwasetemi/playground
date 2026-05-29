@@ -11,7 +11,7 @@ export const nextjsTemplate: Template = {
           {
             name: 'nextjs-playground',
             scripts: {
-              dev: 'next dev',
+              dev: 'next dev --webpack',
               build: 'next build',
             },
             dependencies: {
@@ -182,7 +182,7 @@ export default function HomePage() {
     'react-dom': '^19.2.6',
   },
   devDependencies: {},
-  commands: { dev: 'npm run dev' },
+  commands: { dev: 'npm run dev' }, // npm run dev → next dev --webpack (Turbopack needs native binaries unavailable in WebContainer)
   entryFile: '/src/app/page.jsx',
   hiddenFiles: ['/next.config.mjs', '/package.json'],
 }

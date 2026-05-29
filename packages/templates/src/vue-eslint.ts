@@ -23,7 +23,7 @@ export const vueEslintTemplate: Template = {
             devDependencies: {
               '@setemiojo/eslint-config': '^9.0.0',
               '@vitejs/plugin-vue': '^6.0.7',
-              'eslint': '^10.4.0',
+              'eslint': '^9.0.0',
               'eslint-plugin-vue': '^9.33.0',
               'vite': '^8.0.13',
               'vue-eslint-parser': '^9.4.3',
@@ -143,7 +143,7 @@ button:hover { opacity: 0.85; }
   devDependencies: {
     '@setemiojo/eslint-config': '^9.0.0',
     '@vitejs/plugin-vue': '^6.0.7',
-    'eslint': '^10.4.0',
+    'eslint': '^9.0.0',
     'eslint-plugin-vue': '^9.33.0',
     'vite': '^8.0.13',
     'vue-eslint-parser': '^9.4.3',
