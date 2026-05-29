@@ -3,6 +3,9 @@ import path from 'node:path'
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
 
+  // WebContainers only work in the browser — disable SSR entirely.
+  ssr: false,
+
   // Include the playground stylesheet globally via Nuxt's CSS pipeline.
   css: [
     path.resolve(__dirname, '../../packages/vue/src/styles/playground.css'),
